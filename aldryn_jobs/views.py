@@ -16,9 +16,6 @@ class JobOfferList(JobOfferMixin, ListView):
 
     template_name = 'aldryn_jobs/job_offer_list.html'
 
-    def get(self, *args, **kwargs):
-        return super(JobOfferList, self).get(*args, **kwargs)
-
 
 class CategoryJobOfferList(JobOfferList):
 
