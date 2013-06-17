@@ -1,0 +1,7 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load placeholder_tags %}
+
+{% block jobs_content %}
+	<h2>{{ object.title }}</h2>
+	{% render_placeholder object.content %}
+{% endblock %}
