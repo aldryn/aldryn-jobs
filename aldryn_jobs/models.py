@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import datetime
-
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
 
 from cms.models.fields import PlaceholderField
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
@@ -38,9 +37,8 @@ class ActiveJobOffersManager(TranslationManager):
     def using_translations(self):
         qs = super(ActiveJobOffersManager, self).using_translations()
         qs = qs.filter(is_active=True)
-        now = datetime.datetime.now()
-        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(publication_start__lte=now))
-        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(publication_end__gt=now))
+        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(publication_start__lte=now()))
+        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(publication_end__gt=now()))
         return qs
 
 
@@ -80,9 +78,8 @@ class JobOffer(TranslatableModel):
     def get_active(self):
         if not self.is_active:
             return False
-        now = datetime.datetime.now()
-        if self.publication_start and self.publication_start > now:
+        if self.publication_start and self.publication_start > now():
             return False
-        if self.publication_end and self.publication_end <= now:
+        if self.publication_end and self.publication_end <= now():
             return False
         return True
