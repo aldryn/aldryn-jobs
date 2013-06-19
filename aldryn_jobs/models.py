@@ -39,6 +39,8 @@ class ActiveJobOffersManager(TranslationManager):
         qs = qs.filter(is_active=True)
         qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(publication_start__lte=now()))
         qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(publication_end__gt=now()))
+        # bug in hvad - Meta ordering isn't preserved
+        qs = qs.order_by('category__ordering', 'category', '-created')
         return qs
 
 
@@ -63,7 +65,7 @@ class JobOffer(TranslatableModel):
     class Meta:
         verbose_name = _('Job offer')
         verbose_name_plural = _('Job offers')
-        ordering = ['category', '-created']
+        ordering = ['category__ordering', 'category', '-created']
 
     def __unicode__(self):
         return self.lazy_translation_getter('title', str(self.pk))
