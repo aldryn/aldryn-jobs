@@ -12,7 +12,8 @@ class JobCategory(TranslatableModel):
 
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255)
+        slug=models.SlugField(_('Slug'), max_length=255,
+                              help_text=_('Used in the URL. If changed, the URL will change.'))
     )
 
     ordering = models.IntegerField(_('Ordering'), default=0)
