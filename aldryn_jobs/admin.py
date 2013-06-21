@@ -10,7 +10,8 @@ from hvad.admin import TranslatableAdmin
 
 class JobCategoryAdmin(TranslatableAdmin):
 
-    list_display = ['__unicode__', 'all_translations']
+    list_display = ['__unicode__', 'all_translations', 'ordering']
+    list_editable = ['ordering']
 
 admin.site.register(JobCategory, JobCategoryAdmin)
 
