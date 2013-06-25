@@ -8,6 +8,14 @@ from cms.models.fields import PlaceholderField
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 
 
+def fetch_translation(record, language):
+    """Fetch translation from DB if needed."""
+    if language and language != record.language_code:
+        return record.__class__.objects.language(language_code=language).get(pk=record.pk)
+    else:
+        return record
+
+
 class JobCategory(TranslatableModel):
 
     translations = TranslatedFields(
@@ -26,9 +34,10 @@ class JobCategory(TranslatableModel):
     def __unicode__(self):
         return self.lazy_translation_getter('name', str(self.pk))
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, language=None):
+        translation = fetch_translation(self, language)
         kwargs = {
-            'category_slug': self.lazy_translation_getter('slug')
+            'category_slug': translation.lazy_translation_getter('slug')
         }
         return reverse('category-job-offer-list', kwargs=kwargs)
 
@@ -71,10 +80,11 @@ class JobOffer(TranslatableModel):
     def __unicode__(self):
         return self.lazy_translation_getter('title', str(self.pk))
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, language=None):
+        translation = fetch_translation(self, language)
         kwargs = {
-            'category_slug': self.category.safe_translation_getter('slug'),
-            'job_offer_slug': self.lazy_translation_getter('slug'),
+            'category_slug': translation.category.lazy_translation_getter('slug'),
+            'job_offer_slug': translation.lazy_translation_getter('slug'),
         }
         return reverse('job-offer-detail', kwargs=kwargs)
 
