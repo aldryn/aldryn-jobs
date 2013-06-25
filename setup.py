@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
 REQUIREMENTS = [
-    'translitcodec',
     'django-hvad',
+    'unidecode',
 ]
 
 CLASSIFIERS = [

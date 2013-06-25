@@ -10,6 +10,7 @@ from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 
 def fetch_translation(record, language):
     """Fetch translation from DB if needed."""
+    # can not use hvad.utils.get_translation as it has a fallback for current language - here we don't want that
     if language and language != record.language_code:
         try:
             return record.__class__.objects.language(language_code=language).get(pk=record.pk)
@@ -23,8 +24,8 @@ class JobCategory(TranslatableModel):
 
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255,
-                              help_text=_('Used in the URL. If changed, the URL will change.'))
+        slug=models.SlugField(_('Slug'), max_length=255, blank=True, unique=True,
+                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.'))
     )
 
     ordering = models.IntegerField(_('Ordering'), default=0)
@@ -63,8 +64,8 @@ class JobOffer(TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255,
-                              help_text=_('Used in the URL. If changed, the URL will change.'))
+        slug=models.SlugField(_('Slug'), max_length=255, blank=True, unique=True,
+                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.'))
     )
 
     content = PlaceholderField('Job Offer Content')
@@ -96,10 +97,6 @@ class JobOffer(TranslatableModel):
         return reverse('job-offer-detail', kwargs=kwargs)
 
     def get_active(self):
-        if not self.is_active:
-            return False
-        if self.publication_start and self.publication_start > now():
-            return False
-        if self.publication_end and self.publication_end <= now():
-            return False
-        return True
+        return all([self.is_active,
+                    self.publication_start is None or self.publication_start <= now(),
+                    self.publication_end is None or self.publication_end > now()])
