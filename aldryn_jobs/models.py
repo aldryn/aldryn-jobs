@@ -11,7 +11,10 @@ from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 def fetch_translation(record, language):
     """Fetch translation from DB if needed."""
     if language and language != record.language_code:
-        return record.__class__.objects.language(language_code=language).get(pk=record.pk)
+        try:
+            return record.__class__.objects.language(language_code=language).get(pk=record.pk)
+        except models.ObjectDoesNotExist:
+            return None
     else:
         return record
 
@@ -36,6 +39,8 @@ class JobCategory(TranslatableModel):
 
     def get_absolute_url(self, language=None):
         translation = fetch_translation(self, language)
+        if not translation:
+            return reverse('job-offer-list')
         kwargs = {
             'category_slug': translation.lazy_translation_getter('slug')
         }
@@ -82,6 +87,8 @@ class JobOffer(TranslatableModel):
 
     def get_absolute_url(self, language=None):
         translation = fetch_translation(self, language)
+        if not translation:
+            return self.category.get_absolute_url(language=language)
         kwargs = {
             'category_slug': translation.category.lazy_translation_getter('slug'),
             'job_offer_slug': translation.lazy_translation_getter('slug'),
