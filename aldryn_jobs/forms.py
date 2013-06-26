@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext
+from django.utils.translation import ugettext, get_language
 
 from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
@@ -32,9 +32,16 @@ class AutoSlugForm(TranslatableModelForm):
 
     def get_slug_conflict(self, slug):
         translations_model = self.instance._meta.translations_model
-        qs = translations_model.objects.filter(slug=slug, language_code=self.instance.language_code)
+
+        try:
+            language_code = self.instance.language_code
+        except translations_model.DoesNotExist:
+            language_code = get_language()
+
+        qs = translations_model.objects.filter(slug=slug, language_code=language_code)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
+
         try:
             return qs.get()
         except translations_model.DoesNotExist:
