@@ -24,8 +24,10 @@ class JobCategory(TranslatableModel):
 
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255, blank=True, unique=True,
-                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.'))
+        slug=models.SlugField(_('Slug'), max_length=255, blank=True,
+                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
+                                          'Clean it to have it re-created.')),
+        meta={'unique_together': [['slug', 'language_code']]}
     )
 
     ordering = models.IntegerField(_('Ordering'), default=0)
@@ -64,8 +66,10 @@ class JobOffer(TranslatableModel):
 
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255, blank=True, unique=True,
-                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.'))
+        slug=models.SlugField(_('Slug'), max_length=255, blank=True,
+                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
+                                          'Clean it to have it re-created.')),
+        meta={'unique_together': [['slug', 'language_code']]}
     )
 
     content = PlaceholderField('Job Offer Content')
