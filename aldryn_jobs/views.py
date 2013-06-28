@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from django.contrib import messages
 from django.http import Http404
+from django.shortcuts import redirect
+from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, ListView
 
+from aldryn_jobs.forms import JobApplicationForm
 from aldryn_jobs.models import JobCategory, JobOffer
 from menus.utils import set_language_changer
 
@@ -41,11 +45,11 @@ class JobOfferDetail(DetailView):
     def get_object(self):
         # django-hvad 0.3.0 doesn't support Q conditions in `get` method
         # https://github.com/KristianOellegaard/django-hvad/issues/119
-        obj = super(JobOfferDetail, self).get_object()
-        if not obj.get_active():
+        job_offer = super(JobOfferDetail, self).get_object()
+        if not job_offer.get_active():
             raise Http404('Offer is not longer valid.')
-        self.set_language_changer(job_offer=obj)
-        return obj
+        self.set_language_changer(job_offer=job_offer)
+        return job_offer
 
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
@@ -54,3 +58,30 @@ class JobOfferDetail(DetailView):
     def set_language_changer(self, job_offer):
         """Translate the slug while changing the language."""
         set_language_changer(self.request, job_offer.get_absolute_url)
+
+    def get(self, *args, **kwargs):
+        self.object = self.get_object()
+        self.form = JobApplicationForm(job_offer=self.object)
+        return super(JobOfferDetail, self).get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        """Handles application for the job."""
+        self.object = self.get_object()
+
+        if not self.object.can_apply:
+            messages.success(self.request, _('You can\'t apply for this job.'))
+            return redirect(self.object.get_absolute_url())
+
+        self.form = JobApplicationForm(self.request.POST, self.request.FILES, job_offer=self.object)
+        if self.form.is_valid():
+            self.form.save()
+            msg = _('You\'ve successfully applied for %(job_title)s.') % {'job_title': self.object.title}
+            messages.success(self.request, msg)
+            return redirect(self.object.get_absolute_url())
+        else:
+            return super(JobOfferDetail, self).get(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(JobOfferDetail, self).get_context_data(**kwargs)
+        context['form'] = self.form
+        return context

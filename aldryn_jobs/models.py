@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -76,8 +77,9 @@ class JobOffer(TranslatableModel):
     category = models.ForeignKey(JobCategory, verbose_name=_('Category'), related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(_('Active'), default=True)
-    publication_start = models.DateTimeField(_('Published Since'), null=True, blank=True)
-    publication_end = models.DateTimeField(_('Published Until'), null=True, blank=True)
+    publication_start = models.DateTimeField(_('Published since'), null=True, blank=True)
+    publication_end = models.DateTimeField(_('Published until'), null=True, blank=True)
+    can_apply = models.BooleanField(_('Viewer can apply for the job'), default=True)
 
     objects = TranslationManager()
     active = ActiveJobOffersManager()
@@ -104,3 +106,25 @@ class JobOffer(TranslatableModel):
         return all([self.is_active,
                     self.publication_start is None or self.publication_start <= now(),
                     self.publication_end is None or self.publication_end > now()])
+
+
+upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_UPLOAD_DIR', 'attachments/%Y/%m/')
+storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_STORAGE', None)
+
+
+class JobApplication(models.Model):
+
+    job_offer = models.ForeignKey(JobOffer)
+    first_name = models.CharField(_('First name'), max_length=20)
+    last_name = models.CharField(_('Last name'), max_length=20)
+    email = models.EmailField(_('E-mail'))
+    cover_letter = models.TextField(_('Cover letter'), blank=True)
+    attachment = models.FileField(verbose_name=_('Attachment'), blank=True, null=True,
+                                  upload_to=upload_to, storage=storage)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created']
+
+    def __unicode__(self):
+        return u'%(first_name)s %(last_name)s' % self.__dict__

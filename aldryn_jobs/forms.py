@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+from django import forms
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, get_language
+
+from aldryn_jobs.models import JobApplication
 
 from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
@@ -14,13 +17,14 @@ class AutoSlugForm(TranslatableModelForm):
 
     def clean(self):
         super(AutoSlugForm, self).clean()
-        if not self.data.get(self.slug_field):
+        if self.slug_field not in self.data:
             slug = self.generate_slug()
             # add to self.data in order to show generated slug in the form in case of an error
             self.data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
         else:
             slug = self.cleaned_data[self.slug_field]
 
+        # validate uniqueness
         conflict = self.get_slug_conflict(slug=slug)
         if conflict:
             self.report_error(conflict=conflict)
@@ -61,19 +65,43 @@ class AutoSlugForm(TranslatableModelForm):
             self._errors[field] = self.error_class([message])
 
 
-class JobCategoryForm(AutoSlugForm):
+class JobCategoryAdminForm(AutoSlugForm):
 
     slugified_field = 'name'
 
     class Meta:
-
         fields = ['name', 'slug']
 
 
-class JobOfferForm(AutoSlugForm):
+class JobOfferAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
 
-    class Meta:
 
-        fields = ['title', 'slug', 'category', 'is_active', 'content', 'publication_start', 'publication_end']
+class JobApplicationForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.job_offer = kwargs.pop('job_offer')
+        super(JobApplicationForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = JobApplication
+        fields = ['first_name', 'last_name', 'email', 'cover_letter', 'attachment']
+
+    def save(self, commit=True):
+        self.job_application = super(JobApplicationForm, self).save(commit=False)
+        self.job_application.job_offer = self.job_offer
+        if commit:
+            self.job_application.save()
+
+        # additional actions wile applying for the job
+        self.send_confirmation_email()
+        self.send_staff_notifications()
+
+        return self.job_application
+
+    def send_confirmation_email(self):
+        pass
+
+    def send_staff_notifications(self):
+        pass

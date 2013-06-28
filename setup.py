@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
 REQUIREMENTS = [
+    'django-emailit',
     'django-hvad',
     'unidecode',
 ]
