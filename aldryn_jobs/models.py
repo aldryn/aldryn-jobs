@@ -108,8 +108,8 @@ class JobOffer(TranslatableModel):
                     self.publication_end is None or self.publication_end > now()])
 
 
-upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_UPLOAD_DIR', 'attachments/%Y/%m/')
-storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_STORAGE', None)
+upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR', 'attachments/%Y/%m/')
+storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_STORAGE', None)
 
 
 class JobApplication(models.Model):
