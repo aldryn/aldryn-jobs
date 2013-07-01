@@ -40,7 +40,7 @@ class AutoSlugForm(TranslatableModelForm):
 
         qs = translations_model.objects.filter(slug=slug, language_code=language_code)
         if self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
+            qs = qs.exclude(master=self.instance)
 
         try:
             return qs.get()
