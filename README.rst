@@ -51,4 +51,6 @@ Default: ``attachments/%Y/%m/``.
 Sending Emails
 ==============
 
-Please refer to **django-emailit** documentation for info on installation.
+Please refer to django-emailit_ documentation for info on installation.
+
+.. _django-emailit : http://github.com/divio/django-emailit
