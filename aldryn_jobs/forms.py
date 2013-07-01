@@ -89,16 +89,16 @@ class JobApplicationForm(forms.ModelForm):
         fields = ['first_name', 'last_name', 'email', 'cover_letter', 'attachment']
 
     def save(self, commit=True):
-        self.job_application = super(JobApplicationForm, self).save(commit=False)
-        self.job_application.job_offer = self.job_offer
+        super(JobApplicationForm, self).save(commit=False)
+        self.instance.job_offer = self.job_offer
         if commit:
-            self.job_application.save()
+            self.instance.save()
 
         # additional actions wile applying for the job
         self.send_confirmation_email()
         self.send_staff_notifications()
 
-        return self.job_application
+        return self.instance
 
     def send_confirmation_email(self):
         pass
