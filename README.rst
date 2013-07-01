@@ -46,3 +46,9 @@ ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR
 The directory atachments are going to be uploaded into. 
 
 Default: ``attachments/%Y/%m/``.
+
+
+Sending Emails
+==============
+
+Please refer to **django-emailit** documentation for info on installation.

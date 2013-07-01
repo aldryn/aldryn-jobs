@@ -8,6 +8,13 @@ from django.utils.timezone import now
 from cms.models.fields import PlaceholderField
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:  # django < 1.5
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
+
 
 def fetch_translation(record, language):
     """Fetch translation from DB if needed."""
@@ -31,6 +38,10 @@ class JobCategory(TranslatableModel):
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
+    supervisors = models.ManyToManyField(User, verbose_name=_('Supervisors'), related_name='job_offer_categories',
+                                         help_text=_('Those people will be notified via e-mail when '
+                                                     'new application arrives.'),
+                                         blank=True)
     ordering = models.IntegerField(_('Ordering'), default=0)
 
     class Meta:
@@ -49,6 +60,9 @@ class JobCategory(TranslatableModel):
             'category_slug': translation.lazy_translation_getter('slug')
         }
         return reverse('category-job-offer-list', kwargs=kwargs)
+
+    def get_notification_emails(self):
+        return self.supervisors.values_list('email', flat=True)
 
 
 class ActiveJobOffersManager(TranslationManager):
@@ -106,6 +120,9 @@ class JobOffer(TranslatableModel):
         return all([self.is_active,
                     self.publication_start is None or self.publication_start <= now(),
                     self.publication_end is None or self.publication_end > now()])
+
+    def get_notification_emails(self):
+        return self.category.get_notification_emails()
 
 
 upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR', 'attachments/%Y/%m/')

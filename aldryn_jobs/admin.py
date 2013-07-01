@@ -39,6 +39,18 @@ class JobCategoryAdmin(TranslatableAdmin):
     form = JobCategoryAdminForm
     list_display = ['__unicode__', 'all_translations', 'ordering']
     list_editable = ['ordering']
+    filter_horizontal = ['supervisors']
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = [
+            (_('Translatable fields'), {
+                'fields': ['name', 'slug']
+            }),
+            (_('Supervisors'), {
+                'fields': ['supervisors']
+            })
+        ]
+        return fieldsets
 
 
 class JobOfferAdmin(TranslatableAdmin, PlaceholderAdmin):

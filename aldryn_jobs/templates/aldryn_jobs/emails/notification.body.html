@@ -1,0 +1,5 @@
+{% extends 'emailit/base_email.body.html' %}
+
+{% block content %}
+	<p>{{ job_application }} has just applied for {{ job_application.job_offer }}.</p>
+{% endblock %}

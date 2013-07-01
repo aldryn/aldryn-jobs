@@ -1,0 +1,6 @@
+{% extends 'emailit/base_email.body.html' %}
+
+{% block content %}
+	<p>You have successfully applied for {{ job_application.job_offer.title }}.</p>
+	<p>We will inform you about the progress.</p>
+{% endblock %}

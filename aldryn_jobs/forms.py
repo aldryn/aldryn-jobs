@@ -6,6 +6,7 @@ from django.utils.translation import ugettext, get_language
 
 from aldryn_jobs.models import JobApplication
 
+from emailit.api import send_mail
 from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
 
@@ -70,7 +71,7 @@ class JobCategoryAdminForm(AutoSlugForm):
     slugified_field = 'name'
 
     class Meta:
-        fields = ['name', 'slug']
+        fields = ['name', 'slug', 'supervisors']
 
 
 class JobOfferAdminForm(AutoSlugForm):
@@ -94,14 +95,17 @@ class JobApplicationForm(forms.ModelForm):
         if commit:
             self.instance.save()
 
-        # additional actions wile applying for the job
+        # additional actions while applying for the job
         self.send_confirmation_email()
         self.send_staff_notifications()
 
         return self.instance
 
     def send_confirmation_email(self):
-        pass
+        context = {'job_application': self.instance}
+        send_mail(recipients=[self.instance.email], context=context, template_base='aldryn_jobs/emails/confirmation')
 
     def send_staff_notifications(self):
-        pass
+        recipients = self.instance.job_offer.get_notification_emails()
+        context = {'job_application': self.instance}
+        send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification')

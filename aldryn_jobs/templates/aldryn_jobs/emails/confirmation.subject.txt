@@ -1,0 +1,1 @@
+You have successfully applied for {{ job_application.job_offer.title }}
