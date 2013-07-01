@@ -47,7 +47,7 @@ class JobOfferDetail(DetailView):
         # https://github.com/KristianOellegaard/django-hvad/issues/119
         job_offer = super(JobOfferDetail, self).get_object()
         if not job_offer.get_active():
-            raise Http404('Offer is not longer valid.')
+            raise Http404(_('Offer is not longer valid.'))
         self.set_language_changer(job_offer=job_offer)
         return job_offer
 
