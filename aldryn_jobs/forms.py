@@ -48,7 +48,7 @@ class AutoSlugForm(TranslatableModelForm):
             return None
 
     def report_error(self, conflict):
-        address = '<a href="%(url)s">%(label)s</a>' % {
+        address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
             'url': conflict.master.get_absolute_url(),
             'label': ugettext('the conflicting object')}
         error_message = ugettext('Conflicting slug. See %(address)s.') % {'address': address}
