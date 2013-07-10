@@ -38,12 +38,12 @@ class AutoSlugForm(TranslatableModelForm):
         except translations_model.DoesNotExist:
             language_code = get_language()
 
-        qs = translations_model.objects.filter(slug=slug, language_code=language_code)
-        if self.instance.pk:
-            qs = qs.exclude(master=self.instance)
+        conflicts = translations_model.objects.filter(slug=slug, language_code=language_code)
+        if self.is_edit_action():
+            conflicts = conflicts.exclude(master=self.instance)
 
         try:
-            return qs.get()
+            return conflicts.get()
         except translations_model.DoesNotExist:
             return None
 
@@ -59,6 +59,9 @@ class AutoSlugForm(TranslatableModelForm):
             self._errors[field].append(message)
         except KeyError:
             self._errors[field] = self.error_class([message])
+
+    def is_edit_action(self):
+        return self.instance.pk is not None
 
 
 class JobCategoryForm(AutoSlugForm):
