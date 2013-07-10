@@ -1,27 +1,14 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding unique constraint on 'JobCategoryTranslation', fields ['slug']
-        db.create_unique('aldryn_jobs_jobcategory_translation', ['slug'])
-
-        # Adding unique constraint on 'JobOfferTranslation', fields ['slug']
-        db.create_unique('aldryn_jobs_joboffer_translation', ['slug'])
-
+        pass
 
     def backwards(self, orm):
-        # Removing unique constraint on 'JobOfferTranslation', fields ['slug']
-        db.delete_unique('aldryn_jobs_joboffer_translation', ['slug'])
-
-        # Removing unique constraint on 'JobCategoryTranslation', fields ['slug']
-        db.delete_unique('aldryn_jobs_jobcategory_translation', ['slug'])
-
+        pass
 
     models = {
         'aldryn_jobs.jobcategory': {
@@ -35,7 +22,7 @@ class Migration(SchemaMigration):
             'language_code': ('django.db.models.fields.CharField', [], {'max_length': '15', 'db_index': 'True'}),
             'master': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'translations'", 'null': 'True', 'to': "orm['aldryn_jobs.JobCategory']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '255', 'blank': 'True'})
+            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'blank': 'True'})
         },
         'aldryn_jobs.joboffer': {
             'Meta': {'ordering': "['category__ordering', 'category', '-created']", 'object_name': 'JobOffer'},
@@ -52,7 +39,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'language_code': ('django.db.models.fields.CharField', [], {'max_length': '15', 'db_index': 'True'}),
             'master': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'translations'", 'null': 'True', 'to': "orm['aldryn_jobs.JobOffer']"}),
-            'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '255', 'blank': 'True'}),
+            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'cms.placeholder': {
