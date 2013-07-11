@@ -1,25 +1,16 @@
 # -*- coding: utf-8 -*-
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Removing unique constraint on 'JobOfferTranslation', fields ['slug']
-        db.delete_unique('aldryn_jobs_joboffer_translation', ['slug'])
-
-        # Removing unique constraint on 'JobCategoryTranslation', fields ['slug']
-        db.delete_unique('aldryn_jobs_jobcategory_translation', ['slug'])
-
         # Adding unique constraint on 'JobCategoryTranslation', fields ['slug', 'language_code']
         db.create_unique('aldryn_jobs_jobcategory_translation', ['slug', 'language_code'])
 
         # Adding unique constraint on 'JobOfferTranslation', fields ['slug', 'language_code']
         db.create_unique('aldryn_jobs_joboffer_translation', ['slug', 'language_code'])
-
 
     def backwards(self, orm):
         # Removing unique constraint on 'JobOfferTranslation', fields ['slug', 'language_code']
@@ -27,13 +18,6 @@ class Migration(SchemaMigration):
 
         # Removing unique constraint on 'JobCategoryTranslation', fields ['slug', 'language_code']
         db.delete_unique('aldryn_jobs_jobcategory_translation', ['slug', 'language_code'])
-
-        # Adding unique constraint on 'JobCategoryTranslation', fields ['slug']
-        db.create_unique('aldryn_jobs_jobcategory_translation', ['slug'])
-
-        # Adding unique constraint on 'JobOfferTranslation', fields ['slug']
-        db.create_unique('aldryn_jobs_joboffer_translation', ['slug'])
-
 
     models = {
         'aldryn_jobs.jobcategory': {
