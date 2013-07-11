@@ -1,7 +1,14 @@
 {% extends "aldryn_jobs/base.html" %}
-{% load placeholder_tags %}
+{% load placeholder_tags i18n %}
 
 {% block jobs_content %}
 	<h2>{{ object.title }}</h2>
 	{% render_placeholder object.content %}
+	{% if object.can_apply %}
+		<form method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="{% trans 'Submit' %}"/>
+		</form>
+	{% endif %}
 {% endblock %}

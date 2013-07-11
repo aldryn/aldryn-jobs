@@ -1,0 +1,1 @@
+New application for {{ job_application.job_offer }} by {{ job_application }}
