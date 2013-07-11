@@ -18,7 +18,8 @@ class AutoSlugForm(TranslatableModelForm):
 
     def clean(self):
         super(AutoSlugForm, self).clean()
-        if self.slug_field not in self.data:
+
+        if not self.data.get(self.slug_field):
             slug = self.generate_slug()
             # add to self.data in order to show generated slug in the form in case of an error
             self.data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
@@ -33,7 +34,8 @@ class AutoSlugForm(TranslatableModelForm):
         return self.cleaned_data
 
     def generate_slug(self):
-        return slugify(unidecode(self.cleaned_data[self.slugified_field]))
+        content_to_slugify = self.cleaned_data.get(self.slugified_field, '')
+        return slugify(unidecode(content_to_slugify))
 
     def get_slug_conflict(self, slug):
         translations_model = self.instance._meta.translations_model
