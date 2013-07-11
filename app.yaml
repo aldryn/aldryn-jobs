@@ -5,8 +5,9 @@ author:
   name: Divio AG
   url: https://www.divio.ch
 installed-apps:
+  - hvad
   - aldryn_jobs
-version: 0.0.1
+version: 0.0.3
 description: Publish job offers on your site
 license:
   name: BSD
