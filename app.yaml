@@ -7,7 +7,7 @@ author:
 installed-apps:
   - hvad
   - aldryn_jobs
-version: 0.0.3
+version: 0.0.4
 description: Publish job offers on your site
 license:
   name: BSD
