@@ -69,10 +69,10 @@ class JobOfferAdmin(TranslatableAdmin, PlaceholderAdmin):
             (_('Publication period'), {
                 'fields': ['publication_start', 'publication_end']
             }),
-            (_('Content'), {
-                'classes': ['plugin-holder', 'plugin-holder-nopage'],
-                'fields': ['content']
-            })
+            # (_('Content'), {
+            #     'classes': ['plugin-holder', 'plugin-holder-nopage'],
+            #     'fields': ['content']
+            # })
         ]
         return fieldsets
 
