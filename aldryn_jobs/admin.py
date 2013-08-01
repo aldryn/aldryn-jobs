@@ -6,8 +6,10 @@ from django.utils.safestring import mark_safe
 from aldryn_jobs.forms import JobCategoryAdminForm, JobOfferAdminForm
 from aldryn_jobs.models import JobApplication, JobCategory, JobOffer
 
+import cms
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from hvad.admin import TranslatableAdmin
+from distutils.version import LooseVersion
 
 
 class JobApplicationAdmin(admin.ModelAdmin):
@@ -68,12 +70,15 @@ class JobOfferAdmin(TranslatableAdmin, PlaceholderAdmin):
             }),
             (_('Publication period'), {
                 'fields': ['publication_start', 'publication_end']
-            }),
-            # (_('Content'), {
-            #     'classes': ['plugin-holder', 'plugin-holder-nopage'],
-            #     'fields': ['content']
-            # })
+            })
         ]
+
+        if LooseVersion(cms.__version__) < LooseVersion('3.0'):
+            content_fieldset = {
+                'classes': ['plugin-holder', 'plugin-holder-nopage'],
+                'fields': ['content']
+            }
+            fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
 
 admin.site.register(JobApplication, JobApplicationAdmin)
