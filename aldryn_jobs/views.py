@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, ListView
 
+from aldryn_jobs import request_job_offer_identifier
 from aldryn_jobs.forms import JobApplicationForm
 from aldryn_jobs.models import JobCategory, JobOffer
 from menus.utils import set_language_changer
@@ -48,6 +49,7 @@ class JobOfferDetail(DetailView):
         job_offer = super(JobOfferDetail, self).get_object()
         if not job_offer.get_active():
             raise Http404(_('Offer is not longer valid.'))
+        setattr(self.request, request_job_offer_identifier, job_offer)
         self.set_language_changer(job_offer=job_offer)
         return job_offer
 
