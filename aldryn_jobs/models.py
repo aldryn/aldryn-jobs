@@ -5,8 +5,10 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
+from cms.utils.i18n import force_language, get_current_language
 from cms.models.fields import PlaceholderField
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
+from hvad.utils import get_translation
 
 try:
     from django.contrib.auth import get_user_model
@@ -16,16 +18,18 @@ else:
     User = get_user_model()
 
 
-def fetch_translation(record, language):
-    """Fetch translation from DB if needed."""
-    # can not use hvad.utils.get_translation as it has a fallback for current language - here we don't want that
-    if language and language != record.language_code:
+def get_slug_in_language(record, language):
+    if not record:
+        return None
+    if language == record.language_code:  # possibly no need to hit db, try cache
+        return record.lazy_translation_getter('slug')
+    else:  # hit db
         try:
-            return record.__class__.objects.language(language_code=language).get(pk=record.pk)
+            translation = get_translation(record, language_code=language)
         except models.ObjectDoesNotExist:
             return None
-    else:
-        return record
+        else:
+            return translation.slug
 
 
 class JobCategory(TranslatableModel):
@@ -53,13 +57,13 @@ class JobCategory(TranslatableModel):
         return self.lazy_translation_getter('name', str(self.pk))
 
     def get_absolute_url(self, language=None):
-        translation = fetch_translation(self, language)
-        if not translation:
-            return reverse('job-offer-list')
-        kwargs = {
-            'category_slug': translation.lazy_translation_getter('slug')
-        }
-        return reverse('category-job-offer-list', kwargs=kwargs)
+        language = language or get_current_language()
+        slug = get_slug_in_language(self, language)
+        with force_language(language):
+            if not slug:
+                return reverse('job-offer-list')
+            kwargs = {'category_slug': slug}
+            return reverse('category-job-offer-list', kwargs=kwargs)
 
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
@@ -107,14 +111,16 @@ class JobOffer(TranslatableModel):
         return self.lazy_translation_getter('title', str(self.pk))
 
     def get_absolute_url(self, language=None):
-        translation = fetch_translation(self, language)
-        if not translation:
-            return self.category.get_absolute_url(language=language)
-        kwargs = {
-            'category_slug': translation.category.lazy_translation_getter('slug'),
-            'job_offer_slug': translation.lazy_translation_getter('slug'),
-        }
-        return reverse('job-offer-detail', kwargs=kwargs)
+        language = language or get_current_language()
+        slug = get_slug_in_language(self, language)
+        with force_language(language):
+            if not slug:
+                return self.category.get_absolute_url(language=language)
+            kwargs = {
+                'category_slug': get_slug_in_language(self.category, language),
+                'job_offer_slug': slug,
+            }
+            return reverse('job-offer-detail', kwargs=kwargs)
 
     def get_active(self):
         return all([self.is_active,
