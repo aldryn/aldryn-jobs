@@ -5,8 +5,11 @@ author:
   name: Divio AG
   url: https://www.divio.ch
 installed-apps:
-  - hvad
+  - absolute
   - aldryn_jobs
+  - emailit
+  - hvad
+  - standard_form
 version: 0.0.4
 description: Publish job offers on your site
 license:

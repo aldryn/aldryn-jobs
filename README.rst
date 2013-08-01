@@ -11,9 +11,32 @@ This add-on lets you:
 Installation
 ============
 
+Aldryn Platrofm Users
+---------------------
+
 Choose a site you want to install the add-on to from the dashboard. Then go to ``Apps -> Install app`` and click ``Install`` next to ``Jobs`` app.
 
 Redeploy the site.
+
+Manuall Installation
+--------------------
+
+Run ``pip install aldryn-blog``.
+
+Add below apps to ``INSTALLED_APPS``: ::
+
+    INSTALLED_APPS = [
+        …
+        'absolute',
+        'aldryn_jobs',
+        'emailit',
+        'hvad',
+        'standard_form',
+        …
+    ]
+
+Adding a job offer
+==================
 
 You can define categories and job offers now in the admin panel.
 

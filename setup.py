@@ -5,6 +5,7 @@ from aldryn_jobs import __version__
 REQUIREMENTS = [
     'django-emailit',
     'django-hvad',
+    'django-standard-form',
     'unidecode',
 ]
 
