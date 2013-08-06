@@ -1,0 +1,9 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n %}
+
+{% block content_jobs %}
+<div class="jobs-list">
+	{% block jobs_title %}<h2>{% trans "Jobs" %}</h2>{% endblock %}
+    {% include "aldryn_jobs/includes/jobs_items.html" %}
+</div>
+{% endblock %}

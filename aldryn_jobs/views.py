@@ -13,7 +13,7 @@ from menus.utils import set_language_changer
 
 class JobOfferList(ListView):
 
-    template_name = 'aldryn_jobs/job_offer_list.html'
+    template_name = 'aldryn_jobs/jobs_list.html'
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
@@ -40,7 +40,7 @@ class CategoryJobOfferList(JobOfferList):
 
 class JobOfferDetail(DetailView):
 
-    template_name = 'aldryn_jobs/job_offer_detail.html'
+    template_name = 'aldryn_jobs/jobs_detail.html'
     slug_url_kwarg = 'job_offer_slug'
 
     def get_object(self):
