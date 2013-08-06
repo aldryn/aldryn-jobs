@@ -84,7 +84,7 @@ class JobOfferAdminForm(AutoSlugForm):
     slugified_field = 'title'
 
     class Meta:
-        fields = ['title', 'slug', 'category', 'is_active', 'can_apply', 'publication_start', 'publication_end']
+        fields = ['title', 'slug', 'category', 'is_active', 'can_apply', 'publication_start', 'publication_end', 'content']
 
 
 class JobApplicationForm(forms.ModelForm):
