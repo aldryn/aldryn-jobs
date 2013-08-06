@@ -6,9 +6,12 @@ from django.utils.translation import ugettext, get_language
 
 from aldryn_jobs.models import JobApplication
 
+from distutils.version import LooseVersion
 from emailit.api import send_mail
 from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
+
+import cms
 
 
 class AutoSlugForm(TranslatableModelForm):
@@ -85,6 +88,9 @@ class JobOfferAdminForm(AutoSlugForm):
 
     class Meta:
         fields = ['title', 'slug', 'category', 'is_active', 'can_apply', 'publication_start', 'publication_end']
+
+        if LooseVersion(cms.__version__) < LooseVersion('3.0'):
+            fields.append('content')
 
 
 class JobApplicationForm(forms.ModelForm):
