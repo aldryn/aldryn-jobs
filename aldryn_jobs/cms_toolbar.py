@@ -16,7 +16,7 @@ class JobsToolbar(CMSToolbar):
             perm = 'aldryn_jobs.%(action)s_%(model)s' % {'action': action, 'model': model}
             return self.request.user.has_perm(perm)
 
-        if can('add', 'joboffer') or can('change', 'joboffer'):
+        if self.is_current_app and (can('add', 'joboffer') or can('change', 'joboffer')):
             menu = self.toolbar.get_or_create_menu('jobs-app', _('Jobs'))
             if can('add', 'joboffer'):
                 menu.add_modal_item(_('Add Job Offer'), reverse('admin:aldryn_jobs_joboffer_add') + '?_popup')
