@@ -19,7 +19,7 @@ class JobApplicationAdmin(admin.ModelAdmin):
     readonly_fields = ['job_offer', 'get_attachment_address']
     fieldsets = [
         (_('Personal information'), {
-            'fields': ['first_name', 'last_name', 'email']
+            'fields': ['salutation', 'first_name', 'last_name', 'email']
         }),
         (_('Cover letter & attachments'), {
             'fields': ['cover_letter', 'get_attachment_address']

@@ -102,6 +102,7 @@ class JobApplicationForm(forms.ModelForm):
     class Meta:
         model = JobApplication
         fields = [
+            'salutation',
             'first_name',
             'last_name',
             'email',

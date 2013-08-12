@@ -160,8 +160,16 @@ class JobOffer(TranslatableModel):
 
 
 class JobApplication(models.Model):
+    MALE = 'male'
+    FEMALE = 'female'
+
+    SALUTATION_CHOICES = (
+        (MALE, _('Mr.')),
+        (FEMALE, _('Mrs.')),
+    )
 
     job_offer = models.ForeignKey(JobOffer)
+    salutation = models.CharField(max_length=20, blank=True, default=MALE)
     first_name = models.CharField(_('First name'), max_length=20)
     last_name = models.CharField(_('Last name'), max_length=20)
     email = models.EmailField(_('E-mail'))
