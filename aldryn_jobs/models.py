@@ -186,10 +186,14 @@ class JobApplication(models.Model):
     def __unicode__(self):
         return u'%(first_name)s %(last_name)s' % self.__dict__
 
+    def get_attachments(self):
+        #TODO: Place these fields somewhere, we repeat this list too much.
+        attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
+        return [getattr(self, field) for field in attachment_fields if getattr(self, field)]
+
 
 @receiver(pre_delete, sender=JobApplication)
 def cleanup_attachments(sender, instance, **kwargs):
-    #TODO: Place these fields somewhere, we repeat this list too much.
     attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
 
     for field in attachment_fields:

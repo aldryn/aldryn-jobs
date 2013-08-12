@@ -39,9 +39,14 @@ class CategoryJobOfferList(JobOfferList):
 
 
 class JobOfferDetail(DetailView):
-
+    form_class = JobApplicationForm
     template_name = 'aldryn_jobs/jobs_detail.html'
     slug_url_kwarg = 'job_offer_slug'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.request = request
+        self.object = self.get_object()
+        return super(JobOfferDetail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self):
         # django-hvad 0.3.0 doesn't support Q conditions in `get` method
@@ -53,6 +58,28 @@ class JobOfferDetail(DetailView):
         self.set_language_changer(job_offer=job_offer)
         return job_offer
 
+    def get_form_class(self):
+        return self.form_class
+
+    def get_form_kwargs(self):
+        """
+        Returns the keyword arguments for instantiating the form.
+        """
+        kwargs = {'job_offer': self.object}
+
+        if self.request.method in ('POST', 'PUT'):
+            kwargs.update({
+                'data': self.request.POST,
+                'files': self.request.FILES,
+            })
+        return kwargs
+
+    def get_form(self, form_class):
+        """
+        Returns an instance of the form to be used in this view.
+        """
+        return form_class(**self.get_form_kwargs())
+
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
         return JobOffer.objects.language().select_related('category')
@@ -62,19 +89,20 @@ class JobOfferDetail(DetailView):
         set_language_changer(self.request, job_offer.get_absolute_url)
 
     def get(self, *args, **kwargs):
-        self.object = self.get_object()
-        self.form = JobApplicationForm(job_offer=self.object)
+        form_class = self.get_form_class()
+        self.form = self.get_form(form_class)
         return super(JobOfferDetail, self).get(*args, **kwargs)
 
     def post(self, *args, **kwargs):
         """Handles application for the job."""
-        self.object = self.get_object()
 
         if not self.object.can_apply:
             messages.success(self.request, _('You can\'t apply for this job.'))
             return redirect(self.object.get_absolute_url())
 
-        self.form = JobApplicationForm(self.request.POST, self.request.FILES, job_offer=self.object)
+        form_class = self.get_form_class()
+        self.form = self.get_form(form_class)
+
         if self.form.is_valid():
             self.form.save()
             msg = _('You\'ve successfully applied for %(job_title)s.') % {'job_title': self.object.title}
