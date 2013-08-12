@@ -101,7 +101,16 @@ class JobApplicationForm(forms.ModelForm):
 
     class Meta:
         model = JobApplication
-        fields = ['first_name', 'last_name', 'email', 'cover_letter', 'attachment']
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'cover_letter',
+            'attachment',
+            'attachment_2',
+            'attachment_3',
+            'attachment_4',
+        ]
 
     def save(self, commit=True):
         super(JobApplicationForm, self).save(commit=False)

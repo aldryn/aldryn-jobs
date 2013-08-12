@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
+from os.path import join as join_path
+from uuid import uuid4
+from functools import partial
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch.dispatcher import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
 from cms.utils.i18n import force_language, get_current_language
 from cms.models.fields import PlaceholderField
+
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 from hvad.utils import get_translation
 
@@ -16,6 +23,27 @@ except ImportError:  # django < 1.5
     from django.contrib.auth.models import User
 else:
     User = get_user_model()
+
+from .utils import get_valid_filename
+
+
+def default_jobs_attachment_upload_to(instance, filename):
+    date = now().strftime('%Y/%m')
+    return join_path('attachments', date, str(uuid4()), get_valid_filename(filename))
+
+
+jobs_attachment_upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR', default_jobs_attachment_upload_to)
+
+jobs_attachment_storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_STORAGE', None)
+
+JobApplicationFileField = partial(
+    models.FileField,
+    max_length=200,
+    blank=True,
+    null=True,
+    upload_to=jobs_attachment_upload_to,
+    storage=jobs_attachment_storage
+)
 
 
 def get_slug_in_language(record, language):
@@ -131,10 +159,6 @@ class JobOffer(TranslatableModel):
         return self.category.get_notification_emails()
 
 
-upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR', 'attachments/%Y/%m/')
-storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_STORAGE', None)
-
-
 class JobApplication(models.Model):
 
     job_offer = models.ForeignKey(JobOffer)
@@ -142,8 +166,10 @@ class JobApplication(models.Model):
     last_name = models.CharField(_('Last name'), max_length=20)
     email = models.EmailField(_('E-mail'))
     cover_letter = models.TextField(_('Cover letter'), blank=True)
-    attachment = models.FileField(verbose_name=_('Attachment'), blank=True, null=True,
-                                  upload_to=upload_to, storage=storage)
+    attachment = JobApplicationFileField(verbose_name=_('Attachment'))
+    attachment_2 = JobApplicationFileField(verbose_name=_('Attachment 2'))
+    attachment_3 = JobApplicationFileField(verbose_name=_('Attachment 3'))
+    attachment_4 = JobApplicationFileField(verbose_name=_('Attachment 4'))
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -151,3 +177,14 @@ class JobApplication(models.Model):
 
     def __unicode__(self):
         return u'%(first_name)s %(last_name)s' % self.__dict__
+
+
+@receiver(pre_delete, sender=JobApplication)
+def cleanup_attachments(sender, instance, **kwargs):
+    #TODO: Place these fields somewhere, we repeat this list too much.
+    attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
+
+    for field in attachment_fields:
+        attachment = getattr(instance, field)
+        if attachment:
+            attachment.delete(False)

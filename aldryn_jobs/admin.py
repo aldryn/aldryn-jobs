@@ -18,22 +18,27 @@ class JobApplicationAdmin(admin.ModelAdmin):
     list_filter = ['job_offer']
     readonly_fields = ['job_offer', 'get_attachment_address']
     fieldsets = [
-        (_('Personal infomarion'), {
+        (_('Personal information'), {
             'fields': ['first_name', 'last_name', 'email']
         }),
-        (_('Cover letter & attachment'), {
+        (_('Cover letter & attachments'), {
             'fields': ['cover_letter', 'get_attachment_address']
         }),
     ]
 
     def get_attachment_address(self, instance):
-        if instance.attachment:
-            return mark_safe(u'<a href="%(address)s">%(address)s</a>' % {'address': instance.attachment.url})
-        else:
-            return u'—'
+        attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
+        attachment_link = u'<a href="%(address)s">%(address)s</a>'
+        attachments = []
+
+        for field in attachment_fields:
+            attachment = getattr(instance, field, None)
+            if attachment:
+                attachments.append(attachment_link % dict(address=attachment.url))
+        return mark_safe('<br>'.join(attachments)) if attachments else u'-'
 
     get_attachment_address.alow_tags = True
-    get_attachment_address.short_description = _('Attachment')
+    get_attachment_address.short_description = _('Attachments')
 
 
 class JobCategoryAdmin(TranslatableAdmin):
