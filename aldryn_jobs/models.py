@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from djangocms_text_ckeditor.fields import HTMLField
 from os.path import join as join_path
 from uuid import uuid4
 from functools import partial
@@ -116,6 +117,7 @@ class JobOffer(TranslatableModel):
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
                               help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
                                           'Clean it to have it re-created.')),
+        lead_in = HTMLField(_('Lead-in'), blank=True, help_text=_('Will be displayed in lists')),
         meta={'unique_together': [['slug', 'language_code']]}
     )
 

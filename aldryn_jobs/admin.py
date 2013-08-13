@@ -68,7 +68,7 @@ class JobOfferAdmin(TranslatableAdmin, PlaceholderAdmin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
             (_('Translatable fields'), {
-                'fields': ['title', 'slug']
+                'fields': ['title', 'slug', 'lead_in']
             }),
             (_('Options'), {
                 'fields': ['category', 'is_active', 'can_apply']

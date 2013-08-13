@@ -6,7 +6,8 @@
 	<h2><a href="{{ category.grouper.get_absolute_url }}">{{ category.grouper }}</a></h2>
 	<ul>
 		{% for job_offer in category.list %}
-		<li><a href="{{ job_offer.get_absolute_url }}">{{ job_offer }}</a></li>
+		    <li><a href="{{ job_offer.get_absolute_url }}">{{ job_offer }}</a></li>
+            {{ job_offer.lead_in|safe }}
 		{% endfor %}
 	</ul>
 	{% endfor %}
