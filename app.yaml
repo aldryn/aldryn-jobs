@@ -10,7 +10,7 @@ installed-apps:
   - emailit
   - hvad
   - standard_form
-version: 0.0.4
+version: 0.0.9
 description: Publish job offers on your site
 license:
   name: BSD
