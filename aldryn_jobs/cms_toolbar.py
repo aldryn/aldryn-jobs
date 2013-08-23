@@ -19,9 +19,9 @@ class JobsToolbar(CMSToolbar):
         if self.is_current_app and (can('add', 'joboffer') or can('change', 'joboffer')):
             menu = self.toolbar.get_or_create_menu('jobs-app', _('Jobs'))
             if can('add', 'joboffer'):
-                menu.add_modal_item(_('Add Job Offer'), reverse('admin:aldryn_jobs_joboffer_add') + '?_popup')
+                menu.add_modal_item(_('Add Job Offer'), reverse('admin:aldryn_jobs_joboffer_add'))
 
             job_offer = getattr(self.request, request_job_offer_identifier, None)
             if job_offer and can('change', 'joboffer'):
-                url = reverse('admin:aldryn_jobs_joboffer_change', args=(job_offer.pk,)) + '?_popup'
+                url = reverse('admin:aldryn_jobs_joboffer_change', args=(job_offer.pk,))
                 menu.add_modal_item(_('Edit Job Offer'), url, active=True)
