@@ -10,5 +10,7 @@
             {{ job_offer.lead_in|safe }}
 		{% endfor %}
 	</ul>
+	{% empty %}
+		<p>{% trans "There are currently no job openings." %}</p>
 	{% endfor %}
 </div>
