@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from cms.models import CMSPlugin
 from djangocms_text_ckeditor.fields import HTMLField
 from os.path import join as join_path
 from uuid import uuid4
@@ -202,3 +203,9 @@ def cleanup_attachments(sender, instance, **kwargs):
         attachment = getattr(instance, field)
         if attachment:
             attachment.delete(False)
+
+
+class JobListPlugin(CMSPlugin):
+
+    def job_offers(self):
+        return JobOffer.active.all()
