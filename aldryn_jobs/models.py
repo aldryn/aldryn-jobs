@@ -101,14 +101,24 @@ class JobCategory(TranslatableModel):
 
 class ActiveJobOffersManager(TranslationManager):
 
-    def using_translations(self):
-        qs = super(ActiveJobOffersManager, self).using_translations()
+    def apply_custom_filters(self, qs):
+        """
+        This is provided as a separate method because hvad's using_translations does not call get_query_set.
+        """
         qs = qs.filter(is_active=True)
         qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(publication_start__lte=now()))
         qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(publication_end__gt=now()))
         # bug in hvad - Meta ordering isn't preserved
         qs = qs.order_by('category__ordering', 'category', '-created')
         return qs
+
+    def get_query_set(self):
+        qs = super(ActiveJobOffersManager, self).get_query_set()
+        return self.apply_custom_filters(qs)
+
+    def using_translations(self):
+        qs = super(ActiveJobOffersManager, self).using_translations()
+        return self.apply_custom_filters(qs)
 
 
 class JobOffer(TranslatableModel):
