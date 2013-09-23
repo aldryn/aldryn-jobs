@@ -24,130 +24,130 @@ msgstr ""
 
 #: admin.py:24
 msgid "Cover letter & attachments"
-msgstr ""
+msgstr "Begleitschreiben und Anhänge"
 
 #: admin.py:41
 msgid "Attachments"
-msgstr ""
+msgstr "Anhänge"
 
 #: admin.py:53 admin.py:70
 msgid "Translatable fields"
-msgstr ""
+msgstr "Übersetzbare Felder"
 
 #: admin.py:56 models.py:75
 msgid "Supervisors"
-msgstr ""
+msgstr "Vorgesetzte"
 
 #: admin.py:73
 msgid "Options"
-msgstr ""
+msgstr "Optionen"
 
 #: admin.py:76
 msgid "Publication period"
-msgstr ""
+msgstr "Veröffentlichungszeitraum"
 
 #: admin.py:86
 msgid "Content"
-msgstr ""
+msgstr "Inhalt"
 
 #: cms_app.py:12 cms_toolbar.py:20 templates/aldryn_jobs/jobs_list.html:6
 msgid "Jobs"
-msgstr ""
+msgstr "Stellen"
 
 #: cms_plugins.py:13
 msgid "Job List"
-msgstr ""
+msgstr "Stellenliste"
 
 #: cms_toolbar.py:22
 msgid "Add Job Offer"
-msgstr ""
+msgstr "Stelle hinzufügen"
 
 #: cms_toolbar.py:27
 msgid "Edit Job Offer"
-msgstr ""
+msgstr "Stelle bearbeiten"
 
 #: forms.py:63
 msgid "the conflicting object"
-msgstr ""
+msgstr "Widersprüchliches Objekt"
 
 #: forms.py:64
 #, python-format
 msgid "Conflicting slug. See %(address)s."
-msgstr ""
+msgstr "Widersprüchlicher Slug. Siehe %(address)s."
 
 #: menu.py:13
 msgid "Job Categories"
-msgstr ""
+msgstr "Stellenkategorien"
 
 #: models.py:68
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: models.py:69 models.py:128
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
 #: models.py:70 models.py:129
 msgid ""
 "Auto-generated. Used in the URL. If changed, the URL will change. Clean it "
 "to have it re-created."
-msgstr ""
+msgstr "Automatisch generiert. Wird in der URL verwendet. Falls geändert, ändert sich auch die URL. Entfernen um Slug neu zu generieren."
 
 #: models.py:76
 msgid "Those people will be notified via e-mail when new application arrives."
-msgstr ""
+msgstr "Diese Personen werden via E-Mail benachrichtig wenn neue Bewerbungen eintreffen."
 
 #: models.py:79
 msgid "Ordering"
-msgstr ""
+msgstr "Reihenfolge"
 
 #: models.py:82
 msgid "Job category"
-msgstr ""
+msgstr "Stellenkategorie"
 
 #: models.py:83
 msgid "Job categories"
-msgstr ""
+msgstr "Stellenkategorien"
 
 #: models.py:127
 msgid "Title"
-msgstr ""
+msgstr "Titel"
 
 #: models.py:131
 msgid "Lead in"
-msgstr ""
+msgstr "Anriss"
 
 #: models.py:131
 msgid "Will be displayed in lists"
-msgstr ""
+msgstr "Wird in Listen angezeigt"
 
 #: models.py:136
 msgid "Category"
-msgstr ""
+msgstr "Kategorie"
 
 #: models.py:138
 msgid "Active"
-msgstr ""
+msgstr "Aktiv"
 
 #: models.py:139
 msgid "Published since"
-msgstr ""
+msgstr "Veröffentlicht seit"
 
 #: models.py:140
 msgid "Published until"
-msgstr ""
+msgstr "Veröffentlicht bis"
 
 #: models.py:141
 msgid "Viewer can apply for the job"
-msgstr ""
+msgstr "Besucher können sich für die Stelle bewerben"
 
 #: models.py:147
 msgid "Job offer"
-msgstr ""
+msgstr "Stellenangebot"
 
 #: models.py:148
 msgid "Job offers"
-msgstr ""
+msgstr "Stellenangebote"
 
 #: models.py:180
 msgid "Mr."
@@ -159,43 +159,43 @@ msgstr "Frau"
 
 #: models.py:186
 msgid "First name"
-msgstr ""
+msgstr "Vorname"
 
 #: models.py:187
 msgid "Last name"
-msgstr ""
+msgstr "Nachname"
 
 #: models.py:188
 msgid "E-mail"
-msgstr ""
+msgstr "E-Mail"
 
 #: models.py:189
 msgid "Cover letter"
-msgstr ""
+msgstr "Anschreiben"
 
 #: models.py:190
 msgid "Attachment"
-msgstr ""
+msgstr "Anhang"
 
 #: models.py:191
 msgid "Attachment 2"
-msgstr ""
+msgstr "Anhang 2"
 
 #: models.py:192
 msgid "Attachment 3"
-msgstr ""
+msgstr "Anhang 3"
 
 #: models.py:193
 msgid "Attachment 4"
-msgstr ""
+msgstr "Anhang 4"
 
 #: views.py:56
 msgid "Offer is not longer valid."
-msgstr ""
+msgstr "Stelle nicht mehr verfügbar."
 
 #: views.py:100
 msgid "You can't apply for this job."
-msgstr ""
+msgstr "Sie können sich für die Stelle nicht bewerben."
 
 #: views.py:108
 #, python-format
