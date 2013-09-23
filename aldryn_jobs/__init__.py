@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
-__version__ = '0.0.13'
+__version__ = '0.0.14'
 request_job_offer_identifier = 'current_aldryn_jobs_job_offer'
