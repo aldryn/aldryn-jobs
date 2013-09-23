@@ -20,7 +20,7 @@ msgstr ""
 
 #: admin.py:21
 msgid "Personal information"
-msgstr ""
+msgstr "Persönliche Informationen"
 
 #: admin.py:24
 msgid "Cover letter & attachments"
