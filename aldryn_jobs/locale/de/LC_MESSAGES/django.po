@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-09-23 09:52+0200\n"
+"POT-Creation-Date: 2013-09-23 22:40-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,11 +91,15 @@ msgstr "Slug"
 msgid ""
 "Auto-generated. Used in the URL. If changed, the URL will change. Clean it "
 "to have it re-created."
-msgstr "Automatisch generiert. Wird in der URL verwendet. Falls geändert, ändert sich auch die URL. Entfernen um Slug neu zu generieren."
+msgstr ""
+"Automatisch generiert. Wird in der URL verwendet. Falls geändert, ändert "
+"sich auch die URL. Entfernen um Slug neu zu generieren."
 
 #: models.py:76
 msgid "Those people will be notified via e-mail when new application arrives."
-msgstr "Diese Personen werden via E-Mail benachrichtig wenn neue Bewerbungen eintreffen."
+msgstr ""
+"Diese Personen werden via E-Mail benachrichtig wenn neue Bewerbungen "
+"eintreffen."
 
 #: models.py:79
 msgid "Ordering"
@@ -158,34 +162,38 @@ msgid "Mrs."
 msgstr "Frau"
 
 #: models.py:186
+msgid "Salutation"
+msgstr "Anrede"
+
+#: models.py:192
 msgid "First name"
 msgstr "Vorname"
 
-#: models.py:187
+#: models.py:193
 msgid "Last name"
 msgstr "Nachname"
 
-#: models.py:188
+#: models.py:194
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: models.py:189
+#: models.py:195
 msgid "Cover letter"
 msgstr "Anschreiben"
 
-#: models.py:190
+#: models.py:196
 msgid "Attachment"
 msgstr "Anhang"
 
-#: models.py:191
+#: models.py:197
 msgid "Attachment 2"
 msgstr "Anhang 2"
 
-#: models.py:192
+#: models.py:198
 msgid "Attachment 3"
 msgstr "Anhang 3"
 
-#: models.py:193
+#: models.py:199
 msgid "Attachment 4"
 msgstr "Anhang 4"
 

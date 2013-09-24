@@ -7,7 +7,7 @@
 	<div class="jobs-content">{% render_placeholder object.content %}</div>
 
 	{% if object.can_apply %}
-	<form action="." method="POST" enctype="multipart/form-data" class="frm frm-jobs">
+	<form action="" method="POST" enctype="multipart/form-data" class="frm frm-jobs">
 		{% csrf_token %}
 		{% standard_form form %}
 		{% standard_submit %}

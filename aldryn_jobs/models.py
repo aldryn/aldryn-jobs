@@ -182,11 +182,17 @@ class JobApplication(models.Model):
     )
 
     job_offer = models.ForeignKey(JobOffer)
-    salutation = models.CharField(max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
-    first_name = models.CharField(_('First name'), max_length=20)
-    last_name = models.CharField(_('Last name'), max_length=20)
-    email = models.EmailField(_('E-mail'))
-    cover_letter = models.TextField(_('Cover letter'), blank=True)
+    salutation = models.CharField(
+        verbose_name=_('Salutation'),
+        max_length=20,
+        blank=True,
+        choices=SALUTATION_CHOICES,
+        default=MALE
+    )
+    first_name = models.CharField(verbose_name=_('First name'), max_length=20)
+    last_name = models.CharField(verbose_name=_('Last name'), max_length=20)
+    email = models.EmailField(verbose_name=_('E-mail'))
+    cover_letter = models.TextField(verbose_name=_('Cover letter'), blank=True)
     attachment = JobApplicationFileField(verbose_name=_('Attachment'))
     attachment_2 = JobApplicationFileField(verbose_name=_('Attachment 2'))
     attachment_3 = JobApplicationFileField(verbose_name=_('Attachment 3'))
