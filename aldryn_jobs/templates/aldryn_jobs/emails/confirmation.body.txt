@@ -1,7 +1,7 @@
 {% extends 'emailit/base_email.body.txt' %}
 
 {% block content %}
-	You have successfully applied for {{ job_application.job_offer.title }}.
+You have successfully applied for {{ job_application.job_offer.title }}.
 
-	We will inform you about the progress.
+We will inform you about the progress.
 {% endblock %}
