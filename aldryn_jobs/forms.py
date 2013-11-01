@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
 from django import forms
+from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, get_language
@@ -12,6 +14,9 @@ from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
 
 import cms
+
+
+SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
 
 
 class AutoSlugForm(TranslatableModelForm):
@@ -141,4 +146,12 @@ class JobApplicationForm(forms.ModelForm):
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
         context = {'job_application': self.instance}
-        send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification')
+        kwargs = {}
+        if SEND_ATTACHMENTS_WITH_EMAIL:
+            attachments = self.instance.get_attachments()
+            if attachments:
+                kwargs['attachments'] = []
+                for attachment in attachments:
+                    attachment.seek(0)
+                    kwargs['attachments'].append((os.path.split(attachment.name)[1], attachment.read(),))
+        send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification', **kwargs)
