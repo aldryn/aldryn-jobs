@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-09-23 22:40-0400\n"
+"POT-Creation-Date: 2013-11-06 12:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,11 +66,11 @@ msgstr "Stelle hinzufügen"
 msgid "Edit Job Offer"
 msgstr "Stelle bearbeiten"
 
-#: forms.py:63
+#: forms.py:68
 msgid "the conflicting object"
 msgstr "Widersprüchliches Objekt"
 
-#: forms.py:64
+#: forms.py:69
 #, python-format
 msgid "Conflicting slug. See %(address)s."
 msgstr "Widersprüchlicher Slug. Siehe %(address)s."
@@ -198,17 +198,34 @@ msgid "Attachment 4"
 msgstr "Anhang 4"
 
 #: views.py:56
+msgctxt "aldryn-jobs"
 msgid "Offer is not longer valid."
 msgstr "Stelle nicht mehr verfügbar."
 
 #: views.py:100
+msgctxt "aldryn-jobs"
 msgid "You can't apply for this job."
-msgstr "Sie können sich für die Stelle nicht bewerben."
+msgstr "Sie können sich für diese Stelle nicht bewerben."
 
-#: views.py:108
+#: views.py:108 templates/aldryn_jobs/emails/confirmation.body.txt:4
+#: templates/aldryn_jobs/emails/confirmation.subject.txt:2
 #, python-format
-msgid "You've successfully applied for %(job_title)s."
-msgstr "Herzlichen Dank für ihre Bewerbung auf die Stelle %(job_title)s."
+msgctxt "aldryn-jobs"
+msgid "You have successfully applied for %(job)s."
+msgstr "Herzlichen Dank für ihre Bewerbung auf die Stelle %(job)s."
+
+#: templates/aldryn_jobs/emails/confirmation.body.html:4
+#: templates/aldryn_jobs/emails/confirmation.body.txt:6
+msgctxt "aldryn-jobs"
+msgid "We will inform you about the progress."
+msgstr "Wir halten sie auf dem Laufenden."
+
+#: templates/aldryn_jobs/emails/notification.body.txt:4
+#: templates/aldryn_jobs/emails/notification.subject.txt:2
+#, python-format
+msgctxt "aldryn-jobs"
+msgid "%(applicant)s has just applied for %(job)s."
+msgstr "%(applicant)s hat sich für die Stelle %(job)s beworben."
 
 #: templates/aldryn_jobs/includes/jobs_items.html:14
 #: templates/aldryn_jobs/plugins/job_list.html:11
