@@ -1,1 +1,2 @@
-You have successfully applied for {{ job_application.job_offer.title }}
+{% load i18n %}
+{% blocktrans with job=job_application.job_offer.title context "aldryn-jobs" %}You have successfully applied for {{ job }}.{% endblocktrans %}
