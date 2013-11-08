@@ -1,16 +1,17 @@
 {% load i18n %}
 
-<div class="jobs-items">
-	{% regroup object_list by category as categories %}
+{% regroup object_list by category as categories %}
+<ul class="jobs-items">
 	{% for category in categories %}
-	<h2><a href="{{ category.grouper.get_absolute_url }}">{{ category.grouper }}</a></h2>
-	<ul>
-		{% for job_offer in category.list %}
-		    <li><a href="{{ job_offer.get_absolute_url }}">{{ job_offer }}</a></li>
-            {{ job_offer.lead_in|safe }}
-		{% endfor %}
-	</ul>
-	{% empty %}
-		<p class="empty">{% trans "There are currently no job openings." %}</p>
+	{% for job_offer in category.list %}
+	<li>
+		<p class="jobs-category"><a href="{{ category.grouper.get_absolute_url }}">{{ category.grouper }}</a></p>
+		<h3 class="jobs-title"><a href="{{ job_offer.get_absolute_url }}">{{ job_offer }}</a></h3>
+		<div class="jobs-lead">{{ job_offer.lead_in|safe }}</div>
+		<p class="jobs-more"><a href="{{ job_offer.get_absolute_url }}">{% trans "read more" %}</a></p>
+	</li>
 	{% endfor %}
-</div>
+	{% empty %}
+	<li class="jobs-empty"><p>{% trans "There are currently no job openings." %}</p></li>
+	{% endfor %}
+</ul>
