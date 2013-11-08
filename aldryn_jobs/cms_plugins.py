@@ -9,7 +9,7 @@ from aldryn_jobs import models
 
 class JobList(CMSPluginBase):
     module = "Jobs"
-    render_template = 'aldryn_jobs/plugins/job_list.html'
+    render_template = 'aldryn_jobs/plugins/latest_entries.html'
     name = _('Job List')
     model = models.JobListPlugin
 
