@@ -10,6 +10,7 @@ REQUIREMENTS = [
     'djangocms-text-ckeditor==1.0.10',
     'djangocms-common',
     'unidecode',
+    'aldryn-search>=0.1.3'
 ]
 
 CLASSIFIERS = [
