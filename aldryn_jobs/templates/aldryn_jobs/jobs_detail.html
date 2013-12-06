@@ -4,7 +4,7 @@
 {% block content_jobs %}
 <div class="jobs-detail">
 	{% block jobs_title %}<h2>{{ object.title }}</h2>{% endblock %}
-	<div class="jobs-lead">{{ job_offer.lead_in|safe }}</div>
+	<div class="jobs-lead">{{ object.lead_in|safe }}</div>
 	<div class="jobs-content">{% render_placeholder object.content %}</div>
 
 	{% include "aldryn_jobs/includes/jobs_application.html" %}
