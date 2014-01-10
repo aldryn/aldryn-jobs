@@ -1,10 +1,10 @@
 {% extends "aldryn_jobs/base.html" %}
-{% load i18n placeholder_tags %}
+{% load i18n cms_tags %}
 
 {% block content_jobs %}
 <div class="jobs-detail">
-	{% block jobs_title %}<h2>{{ object.title }}</h2>{% endblock %}
-	<div class="jobs-lead">{{ object.lead_in|safe }}</div>
+	{% block jobs_title %}<h2>{% show_editable_model object "title" %}</h2>{% endblock %}
+	<div class="jobs-lead">{% show_editable_model object "lead_in" "lead_in" "" safe %}</div>
 	<div class="jobs-content">{% render_placeholder object.content %}</div>
 
 	{% include "aldryn_jobs/includes/jobs_application.html" %}

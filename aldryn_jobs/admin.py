@@ -8,6 +8,7 @@ from aldryn_jobs.models import JobApplication, JobCategory, JobOffer
 
 import cms
 from cms.admin.placeholderadmin import PlaceholderAdmin
+from cms.admin.placeholderadmin import FrontendEditableAdmin
 from hvad.admin import TranslatableAdmin
 from distutils.version import LooseVersion
 
@@ -60,10 +61,11 @@ class JobCategoryAdmin(TranslatableAdmin):
         return fieldsets
 
 
-class JobOfferAdmin(TranslatableAdmin, PlaceholderAdmin):
+class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
 
     form = JobOfferAdminForm
     list_display = ['__unicode__', 'all_translations']
+    frontend_editable_fields = ('title', 'lead_in')
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [

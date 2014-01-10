@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<div class="plugin-jobs">
+<div class="plugin plugin-jobs">
 	<ul class="jobs-latest-entries">
 	{% for job in instance.job_offers %}
 		<li><p><a href="{{ job.get_absolute_url }}">{{ job }}</a></p></li>
