@@ -6,7 +6,7 @@ from uuid import uuid4
 from functools import partial
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -90,10 +90,13 @@ class JobCategory(TranslatableModel):
         language = language or get_current_language()
         slug = get_slug_in_language(self, language)
         with force_language(language):
-            if not slug:
-                return reverse('job-offer-list')
-            kwargs = {'category_slug': slug}
-            return reverse('category-job-offer-list', kwargs=kwargs)
+            try:
+                if not slug:
+                    return reverse('job-offer-list')
+                kwargs = {'category_slug': slug}
+                return reverse('category-job-offer-list', kwargs=kwargs)
+            except NoReverseMatch:
+                return "/%s/" % language
 
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
@@ -155,13 +158,16 @@ class JobOffer(TranslatableModel):
         language = language or get_current_language()
         slug = get_slug_in_language(self, language)
         with force_language(language):
-            if not slug:
-                return self.category.get_absolute_url(language=language)
-            kwargs = {
-                'category_slug': get_slug_in_language(self.category, language),
-                'job_offer_slug': slug,
-            }
-            return reverse('job-offer-detail', kwargs=kwargs)
+            try:
+                if not slug:
+                    return self.category.get_absolute_url(language=language)
+                kwargs = {
+                    'category_slug': get_slug_in_language(self.category, language),
+                    'job_offer_slug': slug,
+                }
+                return reverse('job-offer-detail', kwargs=kwargs)
+            except NoReverseMatch:
+                return "/%s/" % language
 
     def get_active(self):
         return all([self.is_active,
