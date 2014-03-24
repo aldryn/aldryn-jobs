@@ -3,8 +3,8 @@
 
 {% block content_jobs %}
 <div class="jobs-detail">
-	{% block jobs_title %}<h2>{% show_editable_model object "title" %}</h2>{% endblock %}
-	<div class="jobs-lead">{% show_editable_model object "lead_in" "lead_in" "" safe %}</div>
+	{% block jobs_title %}<h2>{% render_model object "title" %}</h2>{% endblock %}
+	<div class="jobs-lead">{% render_model object "lead_in" "lead_in" "" safe %}</div>
 	<div class="jobs-content">{% render_placeholder object.content %}</div>
 
 	{% include "aldryn_jobs/includes/jobs_application.html" %}
