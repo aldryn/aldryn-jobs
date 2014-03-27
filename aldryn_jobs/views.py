@@ -17,7 +17,8 @@ class JobOfferList(ListView):
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
-        return JobOffer.active.language().select_related('category')
+        return (JobOffer.active.language().select_related('category')
+                .order_by('category__id'))
 
 
 class CategoryJobOfferList(JobOfferList):
