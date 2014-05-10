@@ -29,8 +29,12 @@ class AutoSlugForm(TranslatableModelForm):
 
         if not self.data.get(self.slug_field):
             slug = self.generate_slug()
+            raw_data = self.data.copy()
             # add to self.data in order to show generated slug in the form in case of an error
-            self.data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
+            raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
+
+            # We cannot modify self.data directly because it can be Immutable QueryDict
+            self.data = raw_data
         else:
             slug = self.cleaned_data[self.slug_field]
 
