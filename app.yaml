@@ -11,7 +11,7 @@ installed-apps:
   - hvad
   - standard_form
   - aldryn_search
-version: 0.1.4
+version: 0.1.5
 description: Publish job offers on your site
 license:
   name: BSD
