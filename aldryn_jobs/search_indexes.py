@@ -2,13 +2,12 @@
 from django.conf import settings
 from django.template import RequestContext
 
-from aldryn_search.base import AldrynIndexBase
-from aldryn_search.utils import strip_tags
+from aldryn_search.utils import get_index_base, strip_tags
 
 from aldryn_jobs.models import JobOffer
 
 
-class JobOffersIndex(AldrynIndexBase):
+class JobOffersIndex(get_index_base()):
     haystack_use_for_indexing = getattr(settings, "ALDRYN_JOBS_SEARCH", True)
 
     INDEX_TITLE = True
@@ -29,13 +28,12 @@ class JobOffersIndex(AldrynIndexBase):
         return JobOffer
 
     def get_search_data(self, obj, language, request):
-        text = strip_tags(obj.lead_in)
+        text_bits = [strip_tags(obj.lead_in)]
         plugins = obj.content.cmsplugin_set.filter(language=language)
         for base_plugin in plugins:
             instance, plugin_type = base_plugin.get_plugin_instance()
-            if instance is None:
-                # this is an empty plugin
-                continue
-            else:
-                text += strip_tags(instance.render_plugin(context=RequestContext(request))) + u' '
-        return text
+            if not instance is None:
+                plugin_content = strip_tags(instance.render_plugin(context=RequestContext(request)))
+                text_bits.append(plugin_content)
+
+        return ' '.join(text_bits)
