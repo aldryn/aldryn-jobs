@@ -3,14 +3,14 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 
-from aldryn_jobs.forms import JobCategoryAdminForm, JobOfferAdminForm
-from aldryn_jobs.models import JobApplication, JobCategory, JobOffer
-
 import cms
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
 from hvad.admin import TranslatableAdmin
 from distutils.version import LooseVersion
+
+from .forms import JobCategoryAdminForm, JobOfferAdminForm
+from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment
 
 
 class JobApplicationAdmin(admin.ModelAdmin):
@@ -28,14 +28,12 @@ class JobApplicationAdmin(admin.ModelAdmin):
     ]
 
     def get_attachment_address(self, instance):
-        attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
         attachment_link = u'<a href="%(address)s">%(address)s</a>'
         attachments = []
 
-        for field in attachment_fields:
-            attachment = getattr(instance, field, None)
+        for attachment in instance.attachments.all():
             if attachment:
-                attachments.append(attachment_link % dict(address=attachment.url))
+                attachments.append(attachment_link % dict(address=attachment.file.url))
         return mark_safe('<br>'.join(attachments)) if attachments else u'-'
 
     get_attachment_address.alow_tags = True

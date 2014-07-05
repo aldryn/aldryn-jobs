@@ -6,14 +6,14 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, get_language
 
-from aldryn_jobs.models import JobApplication
-
+from multiupload.fields import MultiFileField
 from distutils.version import LooseVersion
 from emailit.api import send_mail
 from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
-
 import cms
+
+from .models import JobApplication, JobApplicationAttachment
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
@@ -112,6 +112,7 @@ class JobOfferAdminForm(AutoSlugForm):
 
 
 class JobApplicationForm(forms.ModelForm):
+    attachments = MultiFileField(max_num=10, min_num=1, max_file_size=1024*1024*5, required=False)
 
     def __init__(self, *args, **kwargs):
         self.job_offer = kwargs.pop('job_offer')
@@ -125,10 +126,6 @@ class JobApplicationForm(forms.ModelForm):
             'last_name',
             'email',
             'cover_letter',
-            'attachment',
-            'attachment_2',
-            'attachment_3',
-            'attachment_4',
         ]
 
     def save(self, commit=True):
@@ -136,6 +133,10 @@ class JobApplicationForm(forms.ModelForm):
         self.instance.job_offer = self.job_offer
         if commit:
             self.instance.save()
+
+        for each in self.cleaned_data['attachments']:
+            att = JobApplicationAttachment(application=self.instance, file=each)
+            att.save()
 
         # additional actions while applying for the job
         self.send_confirmation_email()
@@ -152,10 +153,10 @@ class JobApplicationForm(forms.ModelForm):
         context = {'job_application': self.instance}
         kwargs = {}
         if SEND_ATTACHMENTS_WITH_EMAIL:
-            attachments = self.instance.get_attachments()
+            attachments = self.instance.attachments.all()
             if attachments:
                 kwargs['attachments'] = []
                 for attachment in attachments:
-                    attachment.seek(0)
-                    kwargs['attachments'].append((os.path.split(attachment.name)[1], attachment.read(),))
+                    attachment.file.seek(0)
+                    kwargs['attachments'].append((os.path.split(attachment.file.name)[1], attachment.file.read(),))
         send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification', **kwargs)

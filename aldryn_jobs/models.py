@@ -199,10 +199,6 @@ class JobApplication(models.Model):
     last_name = models.CharField(verbose_name=_('Last name'), max_length=20)
     email = models.EmailField(verbose_name=_('E-mail'))
     cover_letter = models.TextField(verbose_name=_('Cover letter'), blank=True)
-    attachment = JobApplicationFileField(verbose_name=_('Attachment'))
-    attachment_2 = JobApplicationFileField(verbose_name=_('Attachment 2'))
-    attachment_3 = JobApplicationFileField(verbose_name=_('Attachment 3'))
-    attachment_4 = JobApplicationFileField(verbose_name=_('Attachment 4'))
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -211,20 +207,18 @@ class JobApplication(models.Model):
     def __unicode__(self):
         return u'%(first_name)s %(last_name)s' % self.__dict__
 
-    def get_attachments(self):
-        #TODO: Place these fields somewhere, we repeat this list too much.
-        attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
-        return [getattr(self, field) for field in attachment_fields if getattr(self, field)]
-
 
 @receiver(pre_delete, sender=JobApplication)
 def cleanup_attachments(sender, instance, **kwargs):
-    attachment_fields = ['attachment', 'attachment_2', 'attachment_3', 'attachment_4']
-
-    for field in attachment_fields:
-        attachment = getattr(instance, field)
+    for attachment in instance.attachments.all():
         if attachment:
-            attachment.delete(False)
+            attachment.file.delete(False)
+
+
+class JobApplicationAttachment(models.Model):
+
+    application = models.ForeignKey(JobApplication, related_name='attachments')
+    file = JobApplicationFileField()
 
 
 class JobListPlugin(CMSPlugin):
