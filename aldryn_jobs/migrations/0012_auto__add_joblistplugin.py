@@ -7,6 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ("cms", "0039_auto__del_field_page_moderator_state"),
+    )
+
     def forwards(self, orm):
         # Adding model 'JobListPlugin'
         db.create_table(u'cmsplugin_joblistplugin', (
