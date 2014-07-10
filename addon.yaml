@@ -10,6 +10,7 @@ installed-apps:
   - emailit
   - hvad
   - standard_form
+  - aldryn_common
 version: 0.1.7
 description: Publish job offers on your site
 license:
