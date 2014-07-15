@@ -112,7 +112,12 @@ class JobOfferAdminForm(AutoSlugForm):
 
 
 class JobApplicationForm(forms.ModelForm):
-    attachments = MultiFileField(max_num=10, min_num=1, max_file_size=1024*1024*5, required=False)
+    attachments  = MultiFileField(
+        max_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT', 5),
+        min_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT', 0),
+        max_file_size=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024*1024*5),
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
         self.job_offer = kwargs.pop('job_offer')

@@ -71,6 +71,14 @@ The directory atachments are going to be uploaded into.
 Default: ``attachments/%Y/%m/``.
 
 
+File Count & Size
+-----------------
+
+* ``ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT``: Max amount of files to be uploadable (default: 5)
+* ``ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT``: Min amount of files to be uploadable (default: 0)
+* ``ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE``: Max file size (each) (default: 5MB)
+
+
 Sending Emails
 ==============
 
