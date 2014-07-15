@@ -53,7 +53,7 @@ class JobOfferDetail(DetailView):
         # django-hvad 0.3.0 doesn't support Q conditions in `get` method
         # https://github.com/KristianOellegaard/django-hvad/issues/119
         job_offer = super(JobOfferDetail, self).get_object()
-        if not job_offer.get_active():
+        if not job_offer.get_active() and not self.request.user.is_staff:
             raise Http404(pgettext('aldryn-jobs', 'Offer is not longer valid.'))
         setattr(self.request, request_job_offer_identifier, job_offer)
         self.set_language_changer(job_offer=job_offer)
