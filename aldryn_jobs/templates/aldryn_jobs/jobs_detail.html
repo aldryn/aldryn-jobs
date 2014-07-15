@@ -7,7 +7,7 @@
         <h2>
             {% render_model object "title" %}
             {% if user.is_staff and not object.get_active %}
-                <small class="text-warning"> (not active!)</small>
+            <span class="small text-warning"> (inactive)</span>
             {% endif %}
         </h2>
     {% endblock %}
