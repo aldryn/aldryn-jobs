@@ -7,7 +7,7 @@ REQUIREMENTS = [
     'django-hvad',
     'django-standard-form',
     # This might cause issues because the 2.x release of djangocms-text-ckeditor is not cms 2.x compatible.
-    'djangocms-text-ckeditor==1.0.10',
+    'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',
