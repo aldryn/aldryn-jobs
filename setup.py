@@ -10,7 +10,7 @@ REQUIREMENTS = [
     'djangocms-text-ckeditor==1.0.10',
     'aldryn-common>=0.0.4',
     'unidecode',
-    'django-multiupload',
+    'django-multiupload>=0.3',
 ]
 
 CLASSIFIERS = [
