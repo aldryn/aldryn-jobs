@@ -2,8 +2,8 @@
 Aldryn Jobs Add-On
 ==================
 
-.. image:: https://travis-ci.org/aldryn/aldryn-jobs.svg?branch=master
-    :target: https://travis-ci.org/aldryn/aldryn-jobs
+.. image:: https://magnum.travis-ci.com/aldryn/aldryn-jobs.svg?token=2aLiyxMhwop2hnmajHuq&branch=master
+    :target: https://magnum.travis-ci.com/aldryn/aldryn-jobs
 
 .. image:: https://img.shields.io/coveralls/aldryn/aldryn-jobs.svg
   :target: https://coveralls.io/r/aldryn/aldryn-jobs
