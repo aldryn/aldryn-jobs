@@ -2,6 +2,12 @@
 Aldryn Jobs Add-On
 ==================
 
+.. image:: https://travis-ci.org/aldryn/aldryn-jobs.svg?branch=master
+    :target: https://travis-ci.org/aldryn/aldryn-jobs
+
+.. image:: https://img.shields.io/coveralls/aldryn/aldryn-jobs.svg
+  :target: https://coveralls.io/r/aldryn/aldryn-jobs
+
 This add-on lets you:
 
 - define translatable categories, which will appear in the menu
@@ -50,14 +56,14 @@ The above CMS site has become a job offer listing.
 Attachment Storage
 ==================
 
-While applying for job offer viewers can attach files. Those files are saved and stored using Django's file storage API. It is your responsibility to specify appropriate (secure) storage, in order to make the files unavailable for not authorized access. 
+While applying for job offer viewers can attach files. Those files are saved and stored using Django's file storage API. It is your responsibility to specify appropriate (secure) storage, in order to make the files unavailable for not authorized access.
 
 This can be achieved by configuring the storage via below options:
 
 ALDRYN_JOBS_ATTACHMENT_STORAGE
 ------------------------------
 
-The storage object that is going to be passed directly to ``FileField`` constructor. 
+The storage object that is going to be passed directly to ``FileField`` constructor.
 
 Please reference Django's file storage API documentation for more info.
 
@@ -66,7 +72,7 @@ Default: ``None`` (which means ``django.core.files.storage.default_storage`` is 
 ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR
 ---------------------------------
 
-The directory atachments are going to be uploaded into. 
+The directory atachments are going to be uploaded into.
 
 Default: ``attachments/%Y/%m/``.
 
