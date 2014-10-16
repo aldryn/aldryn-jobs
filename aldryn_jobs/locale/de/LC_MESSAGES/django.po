@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-06 12:50+0100\n"
+"POT-Creation-Date: 2014-10-16 12:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,23 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:21
+#: admin.py:22
 msgid "Personal information"
 msgstr "Persönliche Informationen"
 
-#: admin.py:24
+#: admin.py:25
 msgid "Cover letter & attachments"
 msgstr "Begleitschreiben und Anhänge"
 
-#: admin.py:41
+#: admin.py:40
 msgid "Attachments"
 msgstr "Anhänge"
 
-#: admin.py:53 admin.py:70
+#: admin.py:52 admin.py:70
 msgid "Translatable fields"
 msgstr "Übersetzbare Felder"
 
-#: admin.py:56 models.py:75
+#: admin.py:55 models.py:75
 msgid "Supervisors"
 msgstr "Vorgesetzte"
 
@@ -66,28 +66,33 @@ msgstr "Stelle hinzufügen"
 msgid "Edit Job Offer"
 msgstr "Stelle bearbeiten"
 
-#: forms.py:68
+#: forms.py:72
 msgid "the conflicting object"
 msgstr "Widersprüchliches Objekt"
 
-#: forms.py:69
+#: forms.py:73
 #, python-format
 msgid "Conflicting slug. See %(address)s."
 msgstr "Widersprüchlicher Slug. Siehe %(address)s."
 
-#: menu.py:13
+#: menu.py:17
 msgid "Job Categories"
 msgstr "Stellenkategorien"
+
+#: menu.py:37
+#, fuzzy
+msgid "Job Offers Menu"
+msgstr "Stellenangebote"
 
 #: models.py:68
 msgid "Name"
 msgstr "Name"
 
-#: models.py:69 models.py:128
+#: models.py:69 models.py:131
 msgid "Slug"
 msgstr "Slug"
 
-#: models.py:70 models.py:129
+#: models.py:70 models.py:132
 msgid ""
 "Auto-generated. Used in the URL. If changed, the URL will change. Clean it "
 "to have it re-created."
@@ -113,106 +118,94 @@ msgstr "Stellenkategorie"
 msgid "Job categories"
 msgstr "Stellenkategorien"
 
-#: models.py:127
+#: models.py:130
 msgid "Title"
 msgstr "Titel"
 
-#: models.py:131
+#: models.py:134
 msgid "Lead in"
 msgstr "Anriss"
 
-#: models.py:131
+#: models.py:134
 msgid "Will be displayed in lists"
 msgstr "Wird in Listen angezeigt"
 
-#: models.py:136
+#: models.py:139
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:138
+#: models.py:141
 msgid "Active"
 msgstr "Aktiv"
 
-#: models.py:139
+#: models.py:142
 msgid "Published since"
 msgstr "Veröffentlicht seit"
 
-#: models.py:140
+#: models.py:143
 msgid "Published until"
 msgstr "Veröffentlicht bis"
 
-#: models.py:141
+#: models.py:144
 msgid "Viewer can apply for the job"
 msgstr "Besucher können sich für die Stelle bewerben"
 
-#: models.py:147
+#: models.py:150
 msgid "Job offer"
 msgstr "Stellenangebot"
 
-#: models.py:148
+#: models.py:151
 msgid "Job offers"
 msgstr "Stellenangebote"
 
-#: models.py:180
+#: models.py:186
 msgid "Mr."
 msgstr "Herr"
 
-#: models.py:181
+#: models.py:187
 msgid "Mrs."
 msgstr "Frau"
 
-#: models.py:186
+#: models.py:192
 msgid "Salutation"
 msgstr "Anrede"
 
-#: models.py:192
+#: models.py:198
 msgid "First name"
 msgstr "Vorname"
 
-#: models.py:193
+#: models.py:199
 msgid "Last name"
 msgstr "Nachname"
 
-#: models.py:194
+#: models.py:200
 msgid "E-mail"
 msgstr "E-Mail"
 
-#: models.py:195
+#: models.py:201
 msgid "Cover letter"
 msgstr "Anschreiben"
 
-#: models.py:196
-msgid "Attachment"
-msgstr "Anhang"
-
-#: models.py:197
-msgid "Attachment 2"
-msgstr "Anhang 2"
-
-#: models.py:198
-msgid "Attachment 3"
-msgstr "Anhang 3"
-
-#: models.py:199
-msgid "Attachment 4"
-msgstr "Anhang 4"
-
-#: views.py:56
+#: views.py:57
 msgctxt "aldryn-jobs"
 msgid "Offer is not longer valid."
 msgstr "Stelle nicht mehr verfügbar."
 
-#: views.py:100
+#: views.py:101
 msgctxt "aldryn-jobs"
 msgid "You can't apply for this job."
 msgstr "Sie können sich für diese Stelle nicht bewerben."
 
-#: views.py:108 templates/aldryn_jobs/emails/confirmation.body.txt:4
+#: views.py:109 templates/aldryn_jobs/emails/confirmation.body.txt:4
 #: templates/aldryn_jobs/emails/confirmation.subject.txt:2
 #, python-format
 msgctxt "aldryn-jobs"
 msgid "You have successfully applied for %(job)s."
 msgstr "Herzlichen Dank für ihre Bewerbung auf die Stelle %(job)s."
+
+#: templates/aldryn_jobs/jobs_detail.html:19
+msgid "Back"
+msgstr "Zurück"
 
 #: templates/aldryn_jobs/emails/confirmation.body.html:4
 #: templates/aldryn_jobs/emails/confirmation.body.txt:6
@@ -227,7 +220,15 @@ msgctxt "aldryn-jobs"
 msgid "%(applicant)s has just applied for %(job)s."
 msgstr "%(applicant)s hat sich für die Stelle %(job)s beworben."
 
-#: templates/aldryn_jobs/includes/jobs_items.html:14
-#: templates/aldryn_jobs/plugins/job_list.html:11
+#: templates/aldryn_jobs/includes/jobs_application.html:5
+msgid "Apply for this job"
+msgstr ""
+
+#: templates/aldryn_jobs/includes/jobs_items.html:11
+msgid "read more"
+msgstr ""
+
+#: templates/aldryn_jobs/includes/jobs_items.html:15
+#: templates/aldryn_jobs/plugins/latest_entries.html:8
 msgid "There are currently no job openings."
 msgstr "Es gibt zurzeit keine offenen Stellen"

@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: admin.py:22
 msgid "Personal information"
@@ -166,11 +167,11 @@ msgstr ""
 
 #: models.py:198
 msgid "First name"
-msgstr ""
+msgstr "Prénom"
 
 #: models.py:199
 msgid "Last name"
-msgstr ""
+msgstr "Nom"
 
 #: models.py:200
 msgid "E-mail"
