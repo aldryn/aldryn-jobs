@@ -49,9 +49,10 @@ JobApplicationFileField = partial(
 
 
 def get_slug_in_language(record, language):
-    if not record:
-        return None
-    if language == record.language_code:  # possibly no need to hit db, try cache
+    cached_translation_language = record.safe_translation_getter('language_code')
+
+    if language == cached_translation_language:
+        # no need to hit db, use cache
         return record.lazy_translation_getter('slug')
     else:  # hit db
         try:
