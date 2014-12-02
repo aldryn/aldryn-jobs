@@ -201,6 +201,8 @@ class JobApplication(models.Model):
     email = models.EmailField(verbose_name=_('E-mail'))
     cover_letter = models.TextField(verbose_name=_('Cover letter'), blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    is_rejected = models.BooleanField(_('Rejected'), default=False)
+    rejection_date = models.DateTimeField(_('Rejection date'), null=True, blank=True)
 
     class Meta:
         ordering = ['-created']

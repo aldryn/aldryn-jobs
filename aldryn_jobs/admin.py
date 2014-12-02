@@ -2,22 +2,62 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 
 import cms
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
-from hvad.admin import TranslatableAdmin
 from distutils.version import LooseVersion
+from emailit.api import send_mail
+from hvad.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
 from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment
 
 
-class JobApplicationAdmin(admin.ModelAdmin):
+def _send_rejection_email(modeladmin, request, queryset, delete_application=False):
+    # 1. send rejection email - this should be refactored to use djangos "bulk" mail
+    #
+    # Info: Using mass rejection on many JobApplications can lead to a timeout, since SMTPs are not known to be fast
 
-    list_display = ['__unicode__', 'created', 'job_offer']
-    list_filter = ['job_offer']
+    for application in queryset:
+        context = {'job_application': application, }
+        send_mail(recipients=[application.email], context=context, template_base='aldryn_jobs/emails/rejection_letter')
+
+    # 2. update status or delete objects
+    if not delete_application:
+        queryset.update(is_rejected=True, rejection_date=now())
+        success_msg = _("Successfully sent %(count)s rejection email(s).") % {'count': queryset.count(), }
+    else:
+        queryset.delete()
+        success_msg = _(request, "Successfully deleted %(count)s application(s) and sent rejection email.") % {
+            'count': queryset.count(), }
+
+    # 3. inform user with success message
+    modeladmin.message_user(request, success_msg)
+    return
+
+
+def send_rejection_email(modeladmin, request, queryset):
+    _send_rejection_email(modeladmin, request, queryset)
+
+
+send_rejection_email.short_description = _("Send rejection e-mail")
+
+
+def send_rejection_and_delete(modeladmin, request, queryset):
+    _send_rejection_email(modeladmin, request, queryset, delete_application=True)
+
+
+send_rejection_and_delete.short_description = _("Send rejection e-mail and delete application")
+
+
+class JobApplicationAdmin(admin.ModelAdmin):
+    list_display = ['__unicode__', 'job_offer', 'created', 'is_rejected', 'rejection_date']
+    list_filter = ['job_offer', 'is_rejected']
     readonly_fields = ['job_offer', 'get_attachment_address']
+    actions = [send_rejection_email, send_rejection_and_delete]
+
     fieldsets = [
         (_('Personal information'), {
             'fields': ['salutation', 'first_name', 'last_name', 'email']
@@ -26,6 +66,10 @@ class JobApplicationAdmin(admin.ModelAdmin):
             'fields': ['cover_letter', 'get_attachment_address']
         }),
     ]
+
+    def has_add_permission(self, request):
+        # Don't allow creation of "new" applications via admin-backend until it's properly implemented
+        return False
 
     def get_attachment_address(self, instance):
         attachment_link = u'<a href="%(address)s">%(address)s</a>'
@@ -40,8 +84,11 @@ class JobApplicationAdmin(admin.ModelAdmin):
     get_attachment_address.short_description = _('Attachments')
 
 
-class JobCategoryAdmin(TranslatableAdmin):
+# Send application decline to applicant (new)
+# Send application decline to applicant and delete application (new)
 
+
+class JobCategoryAdmin(TranslatableAdmin):
     form = JobCategoryAdminForm
     list_display = ['__unicode__', 'all_translations', 'ordering']
     list_editable = ['ordering']
@@ -60,7 +107,6 @@ class JobCategoryAdmin(TranslatableAdmin):
 
 
 class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
-
     form = JobOfferAdminForm
     list_display = ['__unicode__', 'all_translations']
     frontend_editable_fields = ('title', 'lead_in')
@@ -85,6 +131,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
             }
             fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
+
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
