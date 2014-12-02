@@ -122,6 +122,14 @@ class ActiveJobOffersManager(TranslationManager):
         qs = super(ActiveJobOffersManager, self).using_translations()
         return self.apply_custom_filters(qs)
 
+    def _make_queryset(self, klass, core_filters):
+        # Added for >=hvad 0.6.0 compatibility
+        qs = super(ActiveJobOffersManager, self)._make_queryset(klass, core_filters)
+        import hvad
+        if hvad.VERSION >= (0, 6, 0):
+            return self.apply_custom_filters(qs)
+        return qs
+
 
 class JobOffer(TranslatableModel):
     translations = TranslatedFields(
