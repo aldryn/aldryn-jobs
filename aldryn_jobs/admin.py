@@ -25,13 +25,13 @@ def _send_rejection_email(modeladmin, request, queryset, delete_application=Fals
         send_mail(recipients=[application.email], context=context, template_base='aldryn_jobs/emails/rejection_letter')
 
     # 2. update status or delete objects
+    qs_count = queryset.count()
     if not delete_application:
         queryset.update(is_rejected=True, rejection_date=now())
-        success_msg = _("Successfully sent %(count)s rejection email(s).") % {'count': queryset.count(), }
+        success_msg = _("Successfully sent %(count)s rejection email(s).") % {'count': qs_count, }
     else:
         queryset.delete()
-        success_msg = _(request, "Successfully deleted %(count)s application(s) and sent rejection email.") % {
-            'count': queryset.count(), }
+        success_msg = _("Successfully deleted %(count)s application(s) and sent rejection email.") % { 'count': qs_count, }
 
     # 3. inform user with success message
     modeladmin.message_user(request, success_msg)
@@ -82,7 +82,6 @@ class JobApplicationAdmin(admin.ModelAdmin):
 
     get_attachment_address.alow_tags = True
     get_attachment_address.short_description = _('Attachments')
-
 
 
 class JobCategoryAdmin(TranslatableAdmin):
