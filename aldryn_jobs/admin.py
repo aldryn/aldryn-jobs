@@ -84,9 +84,6 @@ class JobApplicationAdmin(admin.ModelAdmin):
     get_attachment_address.short_description = _('Attachments')
 
 
-# Send application decline to applicant (new)
-# Send application decline to applicant and delete application (new)
-
 
 class JobCategoryAdmin(TranslatableAdmin):
     form = JobCategoryAdminForm

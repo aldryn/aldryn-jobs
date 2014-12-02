@@ -64,7 +64,6 @@ def get_slug_in_language(record, language):
 
 
 class JobCategory(TranslatableModel):
-
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
@@ -104,7 +103,6 @@ class JobCategory(TranslatableModel):
 
 
 class ActiveJobOffersManager(TranslationManager):
-
     def apply_custom_filters(self, qs):
         """
         This is provided as a separate method because hvad's using_translations does not call get_query_set.
@@ -126,13 +124,12 @@ class ActiveJobOffersManager(TranslationManager):
 
 
 class JobOffer(TranslatableModel):
-
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
                               help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
                                           'Clean it to have it re-created.')),
-        lead_in = HTMLField(_('Lead in'), blank=True, help_text=_('Will be displayed in lists')),
+        lead_in=HTMLField(_('Lead in'), blank=True, help_text=_('Will be displayed in lists')),
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
@@ -219,12 +216,10 @@ def cleanup_attachments(sender, instance, **kwargs):
 
 
 class JobApplicationAttachment(models.Model):
-
     application = models.ForeignKey(JobApplication, related_name='attachments')
     file = JobApplicationFileField()
 
 
 class JobListPlugin(CMSPlugin):
-
     def job_offers(self):
         return JobOffer.active.all()
