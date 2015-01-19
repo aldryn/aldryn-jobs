@@ -4,15 +4,14 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import pgettext
 from django.views.generic import DetailView, ListView
-
-from aldryn_jobs import request_job_offer_identifier
-from aldryn_jobs.forms import JobApplicationForm
-from aldryn_jobs.models import JobCategory, JobOffer
 from menus.utils import set_language_changer
+
+from . import request_job_offer_identifier
+from .forms import JobApplicationForm
+from .models import JobCategory, JobOffer
 
 
 class JobOfferList(ListView):
-
     template_name = 'aldryn_jobs/jobs_list.html'
 
     def get_queryset(self):
@@ -22,12 +21,12 @@ class JobOfferList(ListView):
 
 
 class CategoryJobOfferList(JobOfferList):
-
     def get_queryset(self):
         qs = super(CategoryJobOfferList, self).get_queryset()
 
         try:
-            category = JobCategory.objects.language().get(slug=self.kwargs['category_slug'])
+            category = JobCategory.objects.language().get(
+                slug=self.kwargs['category_slug'])
         except JobCategory.DoesNotExist:
             raise Http404
 
@@ -54,7 +53,8 @@ class JobOfferDetail(DetailView):
         # https://github.com/KristianOellegaard/django-hvad/issues/119
         job_offer = super(JobOfferDetail, self).get_object()
         if not job_offer.get_active() and not self.request.user.is_staff:
-            raise Http404(pgettext('aldryn-jobs', 'Offer is not longer valid.'))
+            raise Http404(
+                pgettext('aldryn-jobs', 'Offer is not longer valid.'))
         setattr(self.request, request_job_offer_identifier, job_offer)
         self.set_language_changer(job_offer=job_offer)
         return job_offer
@@ -98,7 +98,8 @@ class JobOfferDetail(DetailView):
         """Handles application for the job."""
 
         if not self.object.can_apply:
-            messages.success(self.request, pgettext('aldryn-jobs', 'You can\'t apply for this job.'))
+            messages.success(self.request, pgettext('aldryn-jobs',
+                                                    'You can\'t apply for this job.'))
             return redirect(self.object.get_absolute_url())
 
         form_class = self.get_form_class()
@@ -106,7 +107,9 @@ class JobOfferDetail(DetailView):
 
         if self.form.is_valid():
             self.form.save()
-            msg = pgettext('aldryn-jobs', 'You have successfully applied for %(job)s.') % {'job': self.object.title}
+            msg = pgettext('aldryn-jobs',
+                           'You have successfully applied for %(job)s.') % {
+                      'job': self.object.title}
             messages.success(self.request, msg)
             return redirect(self.object.get_absolute_url())
         else:
