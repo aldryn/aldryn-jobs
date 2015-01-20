@@ -1,0 +1,8 @@
+{% extends 'emailit/base_email.body.txt' %}
+{% load i18n %}
+
+{% block content %}
+{% blocktrans with job=job_application.job_offer.title context 'aldryn-jobs' %}You have successfully applied for {{ job }}.{% endblocktrans %}
+
+{% trans 'We will inform you about the progress.' context 'aldryn-jobs' %}
+{% endblock %}

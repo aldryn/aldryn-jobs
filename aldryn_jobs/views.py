@@ -3,12 +3,14 @@ from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import pgettext
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, View
+from django.views.generic.base import TemplateResponseMixin
+from django.utils.translation import ugettext_lazy as _
 from menus.utils import set_language_changer
 
 from . import request_job_offer_identifier
 from .forms import JobApplicationForm
-from .models import JobCategory, JobOffer
+from .models import JobCategory, JobOffer, NewsletterSignup
 
 
 class JobOfferList(ListView):
@@ -119,3 +121,73 @@ class JobOfferDetail(DetailView):
         context = super(JobOfferDetail, self).get_context_data(**kwargs)
         context['form'] = self.form
         return context
+
+
+class ConfirmNewsletterSignup(TemplateResponseMixin, View):
+    http_method_names = ["get", "post"]
+    messages = {
+        "key_confirmed": {
+            "level": messages.SUCCESS,
+            "text": _("You have confirmed {email}.")
+        }
+    }
+
+    def get_template_names(self):
+        return {
+            "GET": ["aldryn_jobs/newsletter_confirm.html"],
+            "POST": ["aldryn_jobs/newsletter_confirmed.html"],
+        }[self.request.method]
+
+    def get(self, *args, **kwargs):
+        self.object = self.get_object()
+        ctx = self.get_context_data()
+        return self.render_to_response(ctx)
+
+    def post(self, *args, **kwargs):
+        self.object = self.get_object()
+
+        self.object.confirm()
+        # self.after_confirmation(self.object)
+
+        redirect_url = self.get_redirect_url()
+        if not redirect_url:
+            ctx = self.get_context_data()
+            return self.render_to_response(ctx)
+
+        if self.messages.get("key_confirmed"):
+            messages.add_message(
+                self.request,
+                self.messages["key_confirmed"]["level"],
+                self.messages["key_confirmed"]["text"].format(**{
+                    "email": self.object.recipient
+                })
+            )
+        return redirect(redirect_url)
+
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        try:
+            return queryset.filter(
+                confirmation_key=self.kwargs["key"])[:1].get()
+            # Until the model-field is not set to unique=True,
+            # we'll use the trick above
+        except NewsletterSignup.DoesNotExist:
+            raise Http404()
+
+    def get_queryset(self):
+        qs = NewsletterSignup.objects.all()
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = kwargs
+        ctx["confirmation"] = self.object
+        return ctx
+
+    def get_redirect_url(self):
+        """ Implement this for custom redirects """
+        return None
+
+    def after_confirmation(self, signup):
+        """ Implement this for custom post-save operations """
+        raise NotImplementedError()

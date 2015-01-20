@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from cms.models import CMSPlugin
-from djangocms_text_ckeditor.fields import HTMLField
+
+from functools import partial
 from os.path import join as join_path
 from uuid import uuid4
-from functools import partial
 
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -12,12 +11,16 @@ from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
-
+from cms.models import CMSPlugin
 from cms.utils.i18n import force_language, get_current_language
 from cms.models.fields import PlaceholderField
-
+from djangocms_text_ckeditor.fields import HTMLField
+from emailit.api import send_mail
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 from hvad.utils import get_translation
+
+from .managers import NewsletterSignupManager
+
 
 try:
     from django.contrib.auth import get_user_model
@@ -256,3 +259,35 @@ class JobApplicationAttachment(models.Model):
 class JobListPlugin(CMSPlugin):
     def job_offers(self):
         return JobOffer.active.all()
+
+
+class NewsletterSignup(models.Model):
+    recipient = models.EmailField(_('Recipient'))
+    default_language = models.CharField(_('Language'), blank=True,
+                                        default='', max_length=32,
+                                        choices=settings.LANGUAGES)
+    signup_date = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    is_disabled = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=40)  # unique=True
+
+    objects = NewsletterSignupManager()
+
+    def reset_confirmation(self):
+        """ Reset the confirmation key.
+
+        Note that the old key won't work anymore
+        """
+        self.confirmation_key = self.objects.generate_random_key()
+        self.save(update_fields=['confirmation_key', ])
+        self.send_confirmation_email()
+
+    def send_confirmation_email(self):
+        context = {'data': self.instance}
+        send_mail(recipients=[self.instance.recipient],
+                  context=context,
+                  template_base='aldryn_jobs/emails/newsletter_confirmation')
+
+
+
+
