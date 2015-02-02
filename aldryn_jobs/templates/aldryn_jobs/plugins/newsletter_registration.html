@@ -1,0 +1,14 @@
+{% load i18n %}
+<!-- CHK-JB -->
+<div class="plugin plugin-job-newsletter-registration">
+	<div class="jobs-newsletter-registration-form">
+        <form action="{% url 'confirm_newsletter_email' key= %}" method="post">
+            {% csrf_token %}
+            {% with instance.get_form as form %}
+            {{ form.as_p }}
+            {% endwith %}
+            <input type="submit" />
+        </form>
+
+	</div>
+</div>

@@ -13,7 +13,7 @@ from hvad.forms import TranslatableModelForm
 from unidecode import unidecode
 import cms
 
-from .models import JobApplication, JobApplicationAttachment
+from .models import JobApplication, JobApplicationAttachment, NewsletterSignup
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
@@ -165,3 +165,17 @@ class JobApplicationForm(forms.ModelForm):
                     attachment.file.seek(0)
                     kwargs['attachments'].append((os.path.split(attachment.file.name)[1], attachment.file.read(),))
         send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification', **kwargs)
+
+
+class NewsletterSignupForm(forms.ModelForm):
+
+    class Meta:
+        model = NewsletterSignup
+        fields = ['recipient', ]
+        labels = {
+            'recipient': ugettext('Email'),
+        }
+
+class NewsletterConfirmationForm(forms.ModelForm):
+
+    confirmation_key = forms.HiddenInput()

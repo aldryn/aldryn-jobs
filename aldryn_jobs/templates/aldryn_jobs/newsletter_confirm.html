@@ -1,0 +1,10 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n %}
+
+{% block content_jobs %}
+<form action="." method="POST">
+    {% csrf_token %}
+    <input type="hidden" value="{{ confirmation.confirmation_key }}"/>
+    <input type="submit"/>
+</form>
+{% endblock %}

@@ -261,6 +261,11 @@ class JobListPlugin(CMSPlugin):
         return JobOffer.active.all()
 
 
+class JobNewsletterRegistrationPlugin(CMSPlugin):
+    def get_form(self):
+        from .forms import NewsletterSignupForm
+        return NewsletterSignupForm()
+
 class NewsletterSignup(models.Model):
     recipient = models.EmailField(_('Recipient'))
     default_language = models.CharField(_('Language'), blank=True,
@@ -272,6 +277,14 @@ class NewsletterSignup(models.Model):
     confirmation_key = models.CharField(max_length=40)  # unique=True
 
     objects = NewsletterSignupManager()
+
+    def get_absolute_url(self):
+        kwargs = {'key': self.confirmation_key, }
+        with force_language(self.default_language):
+            try:
+                return reverse('confirm_newsletter_email', kwargs)
+            except NoReverseMatch:
+                return reverse('confirm_newsletter_not_found')
 
     def reset_confirmation(self):
         """ Reset the confirmation key.
@@ -287,6 +300,12 @@ class NewsletterSignup(models.Model):
         send_mail(recipients=[self.instance.recipient],
                   context=context,
                   template_base='aldryn_jobs/emails/newsletter_confirmation')
+
+    def confirm(self):
+        """
+        Confirms NewsletterSignup, excepts that is_verified is checked before calling this method.
+        """
+        self.is_verified = True
 
 
 

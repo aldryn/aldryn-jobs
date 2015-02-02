@@ -18,4 +18,16 @@ class JobList(CMSPluginBase):
         return context
 
 
+class JobNewsletter(CMSPluginBase):
+    module = 'Jobs'
+    render_template = 'aldryn_jobs/plugins/newsletter_registration.html'
+    name = _('Form for Newsletter')
+    model = models.JobNewsletterRegistrationPlugin
+
+    def render(self, context, instance, placeholder):
+        context['instance'] = instance
+        return context
+
+
 plugin_pool.register_plugin(JobList)
+plugin_pool.register_plugin(JobNewsletter)

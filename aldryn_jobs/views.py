@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
+from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.utils.translation import pgettext
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
 from django.views.generic.base import TemplateResponseMixin
 from django.utils.translation import ugettext_lazy as _
 from menus.utils import set_language_changer
 
+from cms.utils.i18n import get_default_language
+
 from . import request_job_offer_identifier
-from .forms import JobApplicationForm
+from .forms import JobApplicationForm, NewsletterConfirmationForm, NewsletterSignupForm
 from .models import JobCategory, JobOffer, NewsletterSignup
 
 
@@ -144,10 +147,19 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         return self.render_to_response(ctx)
 
     def post(self, *args, **kwargs):
-        self.object = self.get_object()
-
-        self.object.confirm()
-        # self.after_confirmation(self.object)
+        form = NewsletterConfirmationForm(self.request.POST)
+        if form.is_valid():
+            # FIXME: Delete debugging print
+            print self.kwargs["key"]
+            self.kwargs["key"] = form.confirmation_key
+            try:
+                self.object = NewsletterSignup.objects.get(confirmation_key=form.confirmation_key)
+            except NewsletterSignup.DoesNotExist:
+                return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
+        # do not confirm second time
+        if not self.object.is_verified:
+            self.object.confirm()
+            # self.after_confirmation(self.object)
 
         redirect_url = self.get_redirect_url()
         if not redirect_url:
@@ -190,4 +202,40 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
     def after_confirmation(self, signup):
         """ Implement this for custom post-save operations """
+        # send emails to admins + rahn-hr@rahn-group.com
         raise NotImplementedError()
+
+
+class RegisterJobNewsletter(CreateView):
+    http_method_names = ["post", ]
+
+
+    def get_form_class(self):
+        return NewsletterSignupForm
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        # populate object with other data
+        if self.request.user.is_authenticated:
+            # in memory only property, will be used just for confirmation email
+            self.object.user = self.request.user
+
+        self.object.confirmation_key = self.object.generate_random_key()
+        # try to get language
+        if self.request.language:
+            self.object.default_language = self.request.language
+        else:
+            self.object.default_language = get_default_language()
+
+        self.object.save()
+        return super(RegisterJobNewsletter, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('newsletter_registration_notification')
+
+class ConfirmNewsletterNotFound(TemplateView):
+    template_name = 'aldryn_jobs/newsletter_confirm_not_found.html'
+
+
+class SuccessRegistrationMessage(TemplateView):
+    template_name = 'aldryn_jobs/registered_for_newsletter.html'
