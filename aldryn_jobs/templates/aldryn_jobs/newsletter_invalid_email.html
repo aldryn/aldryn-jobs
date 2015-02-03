@@ -1,0 +1,15 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n static sekizai_tags %}
+{% block content_job %}
+<div class="app app-jobs app-jobs-newsletter-confirmation">
+	<p>
+        {% blocktrans context='aldryn-jobs' %}
+        Sorry, seems that you've entered an invalid E-mail. Either it exists or
+        there are some mistakes.
+        {% endblocktrans %}
+	</p>
+    <p>
+        {% trans 'Please correct them or use different email.' %}
+    </p>
+</div>
+{% endblock %}

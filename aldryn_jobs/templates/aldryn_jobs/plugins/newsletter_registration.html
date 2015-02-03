@@ -2,7 +2,7 @@
 <!-- CHK-JB -->
 <div class="plugin plugin-job-newsletter-registration">
 	<div class="jobs-newsletter-registration-form">
-        <form action="{% url 'confirm_newsletter_email' key= %}" method="post">
+        <form action="{% url 'register_newsletter' %}" method="post">
             {% csrf_token %}
             {% with instance.get_form as form %}
             {{ form.as_p }}

@@ -12,7 +12,8 @@ from emailit.api import send_mail
 from hvad.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
-from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment
+from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment, \
+    NewsletterSignup
 
 
 def _send_rejection_email(modeladmin, request, queryset, delete_application=False):
@@ -129,6 +130,10 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
         return fieldsets
 
 
+class JobNewsletterSignupAdmin(admin.ModelAdmin):
+    list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
+
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
 admin.site.register(JobOffer, JobOfferAdmin)
+admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)

@@ -267,7 +267,7 @@ class JobNewsletterRegistrationPlugin(CMSPlugin):
         return NewsletterSignupForm()
 
 class NewsletterSignup(models.Model):
-    recipient = models.EmailField(_('Recipient'))
+    recipient = models.EmailField(_('Recipient'), unique=True)
     default_language = models.CharField(_('Language'), blank=True,
                                         default='', max_length=32,
                                         choices=settings.LANGUAGES)

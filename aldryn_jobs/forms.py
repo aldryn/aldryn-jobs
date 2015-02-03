@@ -176,6 +176,7 @@ class NewsletterSignupForm(forms.ModelForm):
             'recipient': ugettext('Email'),
         }
 
+
 class NewsletterConfirmationForm(forms.ModelForm):
 
     confirmation_key = forms.HiddenInput()

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.http import Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
 from django.views.generic.base import TemplateResponseMixin
@@ -207,8 +207,15 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
 
 class RegisterJobNewsletter(CreateView):
-    http_method_names = ["post", ]
+    # http_method_names = ["post", ]
 
+    def get(self, request, *args, **kwargs):
+        # TODO: add GET requests registration functionality
+        # don't serve get requests, only plugin registration so far
+        return HttpResponsePermanentRedirect(reverse('job-offer-list'))
+
+    def get_invalid_template_name(self):
+        return 'aldryn_jobs/newsletter_invalid_email.html'
 
     def get_form_class(self):
         return NewsletterSignupForm
@@ -220,21 +227,31 @@ class RegisterJobNewsletter(CreateView):
             # in memory only property, will be used just for confirmation email
             self.object.user = self.request.user
 
-        self.object.confirmation_key = self.object.generate_random_key()
+        self.object.confirmation_key = NewsletterSignup.objects.generate_random_key()
         # try to get language
-        if self.request.language:
-            self.object.default_language = self.request.language
+        if self.request.LANGUAGE_CODE:
+            self.object.default_language = self.request.LANGUAGE_CODE
         else:
             self.object.default_language = get_default_language()
 
         self.object.save()
         return super(RegisterJobNewsletter, self).form_valid(form)
 
+    def form_invalid(self, form):
+        template_name = self.template_invalid_name if hasattr(self, 'template_invalid_name') else (
+            self.get_invalid_template_name())
+        # context = self.get_context_data()
+        return render(self.request, template_name=template_name)
+
     def get_success_url(self):
+        print "## Success url", reverse('newsletter_registration_notification')
+        # import ipdb
+        # ipdb.set_trace()
         return reverse('newsletter_registration_notification')
 
 class ConfirmNewsletterNotFound(TemplateView):
     template_name = 'aldryn_jobs/newsletter_confirm_not_found.html'
+
 
 
 class SuccessRegistrationMessage(TemplateView):
