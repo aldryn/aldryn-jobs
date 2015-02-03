@@ -2,9 +2,11 @@
 import os
 from django import forms
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext, get_language
+from django.utils.translation import get_language
+from django.utils.translation import ugettext as _
 
 from multiupload.fields import MultiFileField
 from distutils.version import LooseVersion
@@ -69,8 +71,8 @@ class AutoSlugForm(TranslatableModelForm):
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
             'url': conflict.master.get_absolute_url(),
-            'label': ugettext('the conflicting object')}
-        error_message = ugettext('Conflicting slug. See %(address)s.') % {'address': address}
+            'label': _('the conflicting object')}
+        error_message = _('Conflicting slug. See %(address)s.') % {'address': address}
         self.append_to_errors(field='slug', message=mark_safe(error_message))
 
     def append_to_errors(self, field, message):
@@ -121,6 +123,7 @@ class JobApplicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.job_offer = kwargs.pop('job_offer')
+        self.request = kwargs.pop('request')
         super(JobApplicationForm, self).__init__(*args, **kwargs)
 
     class Meta:
@@ -155,7 +158,15 @@ class JobApplicationForm(forms.ModelForm):
 
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
-        context = {'job_application': self.instance}
+        admin_change_form = reverse(
+            'admin:%s_%s_change' % (self._meta.model._meta.app_label, self._meta.model._meta.module_name),
+            args=(self.instance.pk,)
+        )
+
+        context = {
+            'job_application': self.instance,
+            'admin_change_form_url': self.request.build_absolute_uri(admin_change_form),
+        }
         kwargs = {}
         if SEND_ATTACHMENTS_WITH_EMAIL:
             attachments = self.instance.attachments.all()
@@ -171,12 +182,17 @@ class NewsletterSignupForm(forms.ModelForm):
 
     class Meta:
         model = NewsletterSignup
-        fields = ['recipient', ]
+        fields = ['recipient']
         labels = {
-            'recipient': ugettext('Email'),
+            'recipient': _('Email'),
         }
 
 
 class NewsletterConfirmationForm(forms.ModelForm):
 
-    confirmation_key = forms.HiddenInput()
+    class Meta:
+        model = NewsletterSignup
+        fields = ['confirmation_key']
+        widgets = {
+            'confirmation_key': forms.HiddenInput(),
+        }

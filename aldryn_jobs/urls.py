@@ -8,18 +8,18 @@ from .views import CategoryJobOfferList, JobOfferDetail, JobOfferList, \
 urlpatterns = patterns(
     '',
 
-    url(r'^confirm_newsletter/key-not-found/$',
+    url(r'^confirm-newsletter/key-not-found/$',
         ConfirmNewsletterNotFound.as_view(),
         name="confirm_newsletter_not_found"),
-    url(r'^confirm_newsletter/$',
+    url(r'^confirm-newsletter/$',
         RegisterJobNewsletter.as_view(),
         name="register_newsletter"),
 
-    url(r'^confirm_newsletter/registration-notification/$',
+    url(r'^confirm-newsletter/registration-notification/$',
         SuccessRegistrationMessage.as_view(),
         name="newsletter_registration_notification"),
 
-    url(r'^confirm_newsletter/(?P<key>\w+)/$',
+    url(r'^confirm-newsletter/(?P<key>\w+)/$',
         ConfirmNewsletterSignup.as_view(),
         name="confirm_newsletter_email"),
 

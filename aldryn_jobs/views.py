@@ -144,19 +144,27 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
     def get(self, *args, **kwargs):
         self.object = self.get_object()
         ctx = self.get_context_data()
+        # populate form with key
+        ctx['form'] = NewsletterConfirmationForm(initial={'confirmation_key': self.kwargs['key']})
         return self.render_to_response(ctx)
 
     def post(self, *args, **kwargs):
         form = NewsletterConfirmationForm(self.request.POST)
         if form.is_valid():
-            # FIXME: Delete debugging print
-            print self.kwargs["key"]
-            self.kwargs["key"] = form.confirmation_key
+            # TODO: some security checks...
+            form_confirmation_key = form.cleaned_data['confirmation_key']
+            if self.kwargs["key"] != form_confirmation_key:
+                print 'Warning! Confirmation keys missmatch for {0} != {1}'.format(
+                    self.kwargs["key"], form_confirmation_key)
+
             try:
-                self.object = NewsletterSignup.objects.get(confirmation_key=form.confirmation_key)
+                self.object = NewsletterSignup.objects.get(confirmation_key=form_confirmation_key)
             except NewsletterSignup.DoesNotExist:
                 return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
+
         # do not confirm second time
+        import ipdb
+        ipdb.set_trace()
         if not self.object.is_verified:
             self.object.confirm()
             # self.after_confirmation(self.object)

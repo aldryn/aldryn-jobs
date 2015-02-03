@@ -2,9 +2,10 @@
 {% load i18n %}
 
 {% block content_jobs %}
+<p>{%trans 'After pushing confirm button you will receive jobs newsletter.' %}</p>
 <form action="." method="POST">
     {% csrf_token %}
-    <input type="hidden" value="{{ confirmation.confirmation_key }}"/>
-    <input type="submit"/>
+    {{ form.as_p }}
+    <input type="submit" value="{% trans 'Confirm my email' %}" />
 </form>
 {% endblock %}

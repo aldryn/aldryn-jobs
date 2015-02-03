@@ -306,6 +306,7 @@ class NewsletterSignup(models.Model):
         Confirms NewsletterSignup, excepts that is_verified is checked before calling this method.
         """
         self.is_verified = True
+        self.save()
 
 
 
