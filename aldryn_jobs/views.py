@@ -163,8 +163,6 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
                 return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
 
         # do not confirm second time
-        import ipdb
-        ipdb.set_trace()
         if not self.object.is_verified:
             self.object.confirm()
             # self.after_confirmation(self.object)
@@ -215,7 +213,6 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
 
 class RegisterJobNewsletter(CreateView):
-    # http_method_names = ["post", ]
 
     def get(self, request, *args, **kwargs):
         # TODO: add GET requests registration functionality
@@ -257,9 +254,9 @@ class RegisterJobNewsletter(CreateView):
         # ipdb.set_trace()
         return reverse('newsletter_registration_notification')
 
+
 class ConfirmNewsletterNotFound(TemplateView):
     template_name = 'aldryn_jobs/newsletter_confirm_not_found.html'
-
 
 
 class SuccessRegistrationMessage(TemplateView):
