@@ -11,6 +11,8 @@ REQUIREMENTS = [
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',
+    'django<1.8,>1.5',
+    'South>=1.0.2',
 ]
 
 CLASSIFIERS = [
