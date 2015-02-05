@@ -159,7 +159,8 @@ class JobApplicationForm(forms.ModelForm):
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
         admin_change_form = reverse(
-            'admin:%s_%s_change' % (self._meta.model._meta.app_label, self._meta.model._meta.module_name),
+            'admin:%s_%s_change' % (self._meta.model._meta.app_label,
+                                    self._meta.model._meta.module_name),
             args=(self.instance.pk,)
         )
 
@@ -174,8 +175,11 @@ class JobApplicationForm(forms.ModelForm):
                 kwargs['attachments'] = []
                 for attachment in attachments:
                     attachment.file.seek(0)
-                    kwargs['attachments'].append((os.path.split(attachment.file.name)[1], attachment.file.read(),))
-        send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification', **kwargs)
+                    kwargs['attachments'].append(
+                        (os.path.split(attachment.file.name)[1], attachment.file.read(),))
+        send_mail(recipients=recipients,
+                  context=context,
+                  template_base='aldryn_jobs/emails/notification', **kwargs)
 
 
 class NewsletterSignupForm(forms.ModelForm):

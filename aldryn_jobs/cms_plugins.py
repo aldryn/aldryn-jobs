@@ -7,6 +7,7 @@ from cms.plugin_pool import plugin_pool
 from aldryn_jobs import models
 from .forms import NewsletterSignupForm
 
+
 class JobList(CMSPluginBase):
     module = "Jobs"
     render_template = 'aldryn_jobs/plugins/latest_entries.html'

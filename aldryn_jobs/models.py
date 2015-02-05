@@ -263,9 +263,10 @@ class JobListPlugin(CMSPlugin):
 
 
 class JobNewsletterRegistrationPlugin(CMSPlugin):
-    def get_form(self):
-        from .forms import NewsletterSignupForm
-        return NewsletterSignupForm()
+    # get_form is deleted because of it was unneeded
+    # TODO: add configurable parameters for registration form plugin
+    pass
+
 
 class NewsletterSignup(models.Model):
     recipient = models.EmailField(_('Recipient'), unique=True)

@@ -15,8 +15,8 @@ from emailit.api import send_mail
 from hvad.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
-from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment, \
-    NewsletterSignup
+from .models import (JobApplication, JobCategory, JobOffer, JobApplicationAttachment,
+    NewsletterSignup)
 
 
 def _send_rejection_email(modeladmin, request, queryset, delete_application=False):

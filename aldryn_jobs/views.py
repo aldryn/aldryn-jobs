@@ -145,7 +145,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         self.object = self.get_object()
         ctx = self.get_context_data()
         # populate form with key
-        ctx['form'] = NewsletterConfirmationForm(initial={'confirmation_key': self.kwargs['key']})
+        ctx['form'] = NewsletterConfirmationForm(
+            initial={'confirmation_key': self.kwargs['key']})
         return self.render_to_response(ctx)
 
     def post(self, *args, **kwargs):
@@ -158,7 +159,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
                     self.kwargs["key"], form_confirmation_key)
 
             try:
-                self.object = NewsletterSignup.objects.get(confirmation_key=form_confirmation_key)
+                self.object = NewsletterSignup.objects.get(
+                    confirmation_key=form_confirmation_key)
             except NewsletterSignup.DoesNotExist:
                 return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
 
@@ -250,7 +252,8 @@ class RegisterJobNewsletter(CreateView):
         return super(RegisterJobNewsletter, self).form_valid(form)
 
     def form_invalid(self, form):
-        template_name = self.template_invalid_name if hasattr(self, 'template_invalid_name') else (
+        template_name = self.template_invalid_name if (
+            hasattr(self, 'template_invalid_name')) else (
             self.get_invalid_template_name())
         # context = self.get_context_data()
         return render(self.request, template_name=template_name)
