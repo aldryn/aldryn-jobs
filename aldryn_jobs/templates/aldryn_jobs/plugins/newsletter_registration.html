@@ -1,12 +1,12 @@
 {% load i18n %}
 <!-- CHK-JB -->
 <div class="plugin plugin-job-newsletter-registration">
+    <h2>{% trans 'Job Newsletter' context 'aldryn-jobs' %}</h2>
+    <p>{% trans 'Enter your e-mail to receive a job newsletter' context 'aldryn-jobs' %}</p>
 	<div class="jobs-newsletter-registration-form">
         <form action="{% url 'register_newsletter' %}" method="post">
             {% csrf_token %}
-            {% with instance.get_form as form %}
             {{ form.as_p }}
-            {% endwith %}
             <input type="submit" />
         </form>
 

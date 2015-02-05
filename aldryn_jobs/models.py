@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
+from django.contrib.sites.models import get_current_site
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -279,10 +280,10 @@ class NewsletterSignup(models.Model):
     objects = NewsletterSignupManager()
 
     def get_absolute_url(self):
-        kwargs = {'key': self.confirmation_key, }
+        kwargs = {'key': self.confirmation_key}
         with force_language(self.default_language):
             try:
-                return reverse('confirm_newsletter_email', kwargs)
+                return reverse('confirm_newsletter_email', kwargs=kwargs)
             except NoReverseMatch:
                 return reverse('confirm_newsletter_not_found')
 
@@ -295,9 +296,16 @@ class NewsletterSignup(models.Model):
         self.save(update_fields=['confirmation_key', ])
         self.send_confirmation_email()
 
-    def send_confirmation_email(self):
-        context = {'data': self.instance}
-        send_mail(recipients=[self.instance.recipient],
+    def send_newsletter_confirmation_email(self, request=None):
+        context = {'data': self}
+        if hasattr(self, 'user'):
+            context['first_name'] = self.user.first_name
+            context['last_name'] = self.user.last_name
+        # get site domain
+        context['link'] = '{0}{1}'.format(get_current_site(request).domain,
+                                          self.get_absolute_url())
+        # build url
+        send_mail(recipients=[self.recipient],
                   context=context,
                   template_base='aldryn_jobs/emails/newsletter_confirmation')
 

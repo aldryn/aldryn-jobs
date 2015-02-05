@@ -209,8 +209,12 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
     def after_confirmation(self, signup):
         """ Implement this for custom post-save operations """
         # send emails to admins + rahn-hr@rahn-group.com
+
         raise NotImplementedError()
 
+class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
+    # TODO: implement this view.
+    pass
 
 class RegisterJobNewsletter(CreateView):
 
@@ -240,6 +244,7 @@ class RegisterJobNewsletter(CreateView):
             self.object.default_language = get_default_language()
 
         self.object.save()
+        self.object.send_newsletter_confirmation_email()
         return super(RegisterJobNewsletter, self).form_valid(form)
 
     def form_invalid(self, form):

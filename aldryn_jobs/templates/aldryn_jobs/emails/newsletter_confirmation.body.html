@@ -2,5 +2,11 @@
 {% load i18n html_filter_tags %}
 
 {% block content %}
-	<p>{% trans 'We will inform you about the progress.' context 'aldryn-jobs' %}</p>
+<p>{% blocktrans context 'aldryn-jobs' %}Dear {{ first_name }} {{ last_name }}.{% endblocktrans %}</p>
+<p>{% blocktrans context 'aldryn-jobs' %}
+    You have registered for the job newsletter. Thank you for your interest in the vacancies at our site.
+    Please confirm your email address using the link below:
+    {% endblocktrans %}
+</p>
+<p><a href="{{ link }}">{{ link }}</a></p>
 {% endblock %}

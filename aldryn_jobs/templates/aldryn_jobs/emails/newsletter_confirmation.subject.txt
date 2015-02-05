@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans with job=job_application.job_offer.title context "aldryn-jobs" %}You have successfully applied for {{ job }}.{% endblocktrans %}
+{% blocktrans context "aldryn-jobs" %}Confirmation is needed for job newsletter.{% endblocktrans %}

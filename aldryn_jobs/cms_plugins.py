@@ -5,7 +5,7 @@ from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
 from aldryn_jobs import models
-
+from .forms import NewsletterSignupForm
 
 class JobList(CMSPluginBase):
     module = "Jobs"
@@ -26,6 +26,12 @@ class JobNewsletter(CMSPluginBase):
 
     def render(self, context, instance, placeholder):
         context['instance'] = instance
+        # if there is data for form (i.e validation errors) render that form with data.
+        request = context.get('request')
+        if request is not None and context['request'].POST.get('recipient') is not None:
+            context['form'] = NewsletterSignupForm(context['request'].POST)
+        else:
+            context['form'] = NewsletterSignupForm()
         return context
 
 
