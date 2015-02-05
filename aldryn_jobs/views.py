@@ -212,9 +212,11 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
         raise NotImplementedError()
 
+
 class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
     # TODO: implement this view.
     pass
+
 
 class RegisterJobNewsletter(CreateView):
 
@@ -254,9 +256,6 @@ class RegisterJobNewsletter(CreateView):
         return render(self.request, template_name=template_name)
 
     def get_success_url(self):
-        print "## Success url", reverse('newsletter_registration_notification')
-        # import ipdb
-        # ipdb.set_trace()
         return reverse('newsletter_registration_notification')
 
 
