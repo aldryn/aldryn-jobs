@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
@@ -233,10 +234,11 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         admin_recipients = set([user.email for group in all_groups
                                 for user in group.user_set.all()])
 
-        additional_recipients = None
+        additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS')
         if additional_recipients:
-            admin_recipients += additional_recipients
-        context ={
+            for additional_recipient in additional_recipients:
+                admin_recipients.add(additional_recipient)
+        context = {
             'new_recipient': signup.recipient
         }
         for admin_recipient in admin_recipients:
