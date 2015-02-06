@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.core.urlresolvers import reverse
 from django.contrib import admin
 from django.contrib.sites.models import get_current_site
 from django.utils.translation import ugettext_lazy as _
@@ -7,7 +6,6 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 
 import cms
-from cms.utils.i18n import force_language
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
 from distutils.version import LooseVersion
@@ -111,6 +109,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
     list_display = ['__unicode__', 'all_translations']
     frontend_editable_fields = ('title', 'lead_in')
     actions = ['send_newsletter_email']
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
             (_('Translatable fields'), {
@@ -136,42 +135,29 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
         """
         Sends a newsletter to all active recipients.
         """
-        recipients = NewsletterSignup.objects.active_recipients()
-        # TODO: get from settings if we need to send all translations or
-        # translations for recipient.default_language (NewsletterSignup) only
         # FIXME: this will use admin's domain instead of language specific
         current_domain = get_current_site(request).domain
-        # build links for jobs for all translations
-        jobs = []
-        for job in queryset:
-            for job_translation in job.translations.all():
-                jobs.append({
-                    'job': job_translation,
-                    'link': '{0}{1}'.format(current_domain,
-                                            job.get_absolute_url(
-                                                language=job_translation.language_code))
-                })
 
-        for recipient_user in recipients:
-            kwargs = {'key': recipient_user.confirmation_key}
-            link = reverse('unsubscribe_from_newsletter', kwargs=kwargs)
-            unsubscribe_link = '{0}{1}'.format(current_domain, link)
-            context = {
-                'jobs': jobs,
-                'unsubscribe_link': unsubscribe_link,
-            }
+        job_list = [job.pk for job in queryset]
+        jobs_sent = NewsletterSignup.objects.send_job_notifiation(
+            job_list=job_list, current_domain=current_domain)
 
-            with force_language(recipient_user.default_language):
-                send_mail(recipients=[recipient_user.recipient],
-                          context=context,
-                          template_base='aldryn_jobs/emails/newsletter_job_offers')
-        jobs_sent = len(jobs)
+        error_message = _('There was an error while sending messages. Please contact administratior')
+        success = True
         if jobs_sent == 1:
             message_bit = _("1 job was")
+        elif jobs_sent > 1:
+            message_bit = _('%s jobs were') % jobs_sent
         else:
-            message_bit = "%s jobs were" % jobs_sent
-        self.message_user(request, "%s successfully sent in the newsletter." % message_bit)
+            success = False
+
+        if success:
+            self.message_user(request,
+                              _('%s successfully sent in the newsletter.') % message_bit)
+        else:
+            self.message_user(request, error_message)
     send_newsletter_email.short_description = _("Send Job Newsletter")
+
 
 class JobNewsletterSignupAdmin(admin.ModelAdmin):
     list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']

@@ -8,8 +8,13 @@
         there are some mistakes.
         {% endblocktrans %}
     </p>
+    {% if resend_confirmation %}
     <p>
-        {% trans 'Please correct them or use different email.' %}
+        {% trans 'If you want to resend confirmation e-mail - click on the link below.' %}
     </p>
+    <p><a href="{{ resend_confirmation }}">{% trans 'Resend confirmation E-mail' context 'aldryn-jobs' %}</a></p>
+    {% else %}
+    <p>{% trans 'Please correct mistakes and try again.' context 'aldryn-jobs' %}</p>
+    {% endif %}
 </div>
 {% endblock %}

@@ -5,6 +5,7 @@ from os.path import join as join_path
 from uuid import uuid4
 
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.sites.models import get_current_site
 from django.db import models
@@ -265,7 +266,10 @@ class JobListPlugin(CMSPlugin):
 class JobNewsletterRegistrationPlugin(CMSPlugin):
     # get_form is deleted because of it was unneeded
     # TODO: add configurable parameters for registration form plugin
-    pass
+    mail_to_group = models.ManyToManyField(Group, verbose_name=_('Signup notification to'))
+
+    def copy_relations(self, oldinstance):
+        self.mail_to_group = oldinstance.mail_to_group.all()
 
 
 class NewsletterSignup(models.Model):
@@ -293,18 +297,20 @@ class NewsletterSignup(models.Model):
 
         Note that the old key won't work anymore
         """
-        self.confirmation_key = self.objects.generate_random_key()
+        self.confirmation_key = NewsletterSignupManager.generate_random_key()
         self.save(update_fields=['confirmation_key', ])
-        self.send_confirmation_email()
+        self.send_newsletter_confirmation_email()
 
     def send_newsletter_confirmation_email(self, request=None):
         context = {'data': self}
-        if hasattr(self, 'user'):
+        if hasattr(self, 'user') and self.user.is_authenticated:
             context['first_name'] = self.user.first_name
             context['last_name'] = self.user.last_name
         # get site domain
-        context['link'] = '{0}{1}'.format(get_current_site(request).domain,
+        full_link = '{0}{1}'.format(get_current_site(request).domain,
                                           self.get_absolute_url())
+        context['link'] = self.get_absolute_url()
+        context['full_link'] = full_link
         # build url
         send_mail(recipients=[self.recipient],
                   context=context,
@@ -317,6 +323,9 @@ class NewsletterSignup(models.Model):
         self.is_verified = True
         self.save()
 
+    def disable(self):
+        self.is_disabled = True
+        self.save()
 
 
 

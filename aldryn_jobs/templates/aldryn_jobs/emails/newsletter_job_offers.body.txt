@@ -1,4 +1,3 @@
-{% extends 'emailit/base_email.body.txt' %}
 {% load i18n %}
 
 {% block content %}
@@ -10,5 +9,5 @@
 {% blocktrans context 'aldryn-jobs' %}
 To unsubscribe form job newsletter please click this links and hit unsubscribe button:
 {% endblocktrans %}
-{{ unsubscribe_link }}
+{{ unsubscribe_link_full }}
 {% endblock %}

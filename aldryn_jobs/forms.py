@@ -200,3 +200,23 @@ class NewsletterConfirmationForm(forms.ModelForm):
         widgets = {
             'confirmation_key': forms.HiddenInput(),
         }
+
+
+class NewsletterUnsubscriptionForm(NewsletterConfirmationForm):
+    # form is actually the same
+    # if it shouldn't be the same - please rewrite this form
+    pass
+
+
+class NewsletterResendConfirmationForm(NewsletterSignupForm):
+    # form is actually the same, but for confirming the resend action
+    # if it shouldn't be the same - please rewrite this form
+    class Meta:
+        model = NewsletterSignup
+        fields = ['recipient']
+        labels = {
+            'recipient': _('Email'),
+        }
+        widgets = {
+            'recipient': forms.HiddenInput(),
+        }

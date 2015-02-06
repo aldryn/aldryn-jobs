@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 
 from .views import (CategoryJobOfferList, JobOfferDetail, JobOfferList,
     ConfirmNewsletterSignup, ConfirmNewsletterNotFound, SuccessRegistrationMessage,
-    RegisterJobNewsletter, UnsubscibeNewsletterSignup)
+    RegisterJobNewsletter, UnsubscibeNewsletterSignup, ResendNewsletterConfirmation)
 
 urlpatterns = patterns(
     '',
@@ -27,6 +27,10 @@ urlpatterns = patterns(
     url(r'^unsubscribe-newsletter/(?P<key>\w+)/$',
         UnsubscibeNewsletterSignup.as_view(),
         name="unsubscribe_from_newsletter"),
+
+    url(r'^resend-newsletter-confirmation/(?P<key>\w+)/$',
+        ResendNewsletterConfirmation.as_view(),
+        name="resend_confirmation_link"),
 
     url(r'^$', JobOfferList.as_view(),
         name='job-offer-list'),

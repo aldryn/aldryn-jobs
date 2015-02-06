@@ -2,7 +2,8 @@
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, render_to_response
+from django.template import RequestContext
 from django.utils.translation import pgettext
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
 from django.views.generic.base import TemplateResponseMixin
@@ -10,10 +11,14 @@ from django.utils.translation import ugettext_lazy as _
 from menus.utils import set_language_changer
 
 from cms.utils.i18n import get_default_language
+from emailit.api import send_mail
 
 from . import request_job_offer_identifier
-from .forms import JobApplicationForm, NewsletterConfirmationForm, NewsletterSignupForm
-from .models import JobCategory, JobOffer, NewsletterSignup
+from .forms import (JobApplicationForm, NewsletterConfirmationForm,
+                    NewsletterSignupForm, NewsletterUnsubscriptionForm,
+                    NewsletterResendConfirmationForm)
+from .models import (JobCategory, JobOffer, NewsletterSignup,
+                     JobNewsletterRegistrationPlugin)
 
 
 class JobOfferList(ListView):
@@ -134,7 +139,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
             "text": _("You have confirmed {email}.")
         }
     }
-
+    form_class = NewsletterConfirmationForm
     def get_template_names(self):
         return {
             "GET": ["aldryn_jobs/newsletter_confirm.html"],
@@ -143,14 +148,20 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
     def get(self, *args, **kwargs):
         self.object = self.get_object()
+        # if recipient already confirmed his email then there is
+        # a high chance that this is a brute force attack
+        if self.object.is_verified:
+            raise Http404()
         ctx = self.get_context_data()
         # populate form with key
-        ctx['form'] = NewsletterConfirmationForm(
+        form_class = self.get_form_class()
+        ctx['form'] = form_class(
             initial={'confirmation_key': self.kwargs['key']})
         return self.render_to_response(ctx)
 
     def post(self, *args, **kwargs):
-        form = NewsletterConfirmationForm(self.request.POST)
+        form_class = self.get_form_class()
+        form = form_class(self.request.POST)
         if form.is_valid():
             # TODO: some security checks...
             form_confirmation_key = form.cleaned_data['confirmation_key']
@@ -167,7 +178,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         # do not confirm second time
         if not self.object.is_verified:
             self.object.confirm()
-            # self.after_confirmation(self.object)
+            self.after_confirmation(self.object)
 
         redirect_url = self.get_redirect_url()
         if not redirect_url:
@@ -204,20 +215,113 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         ctx["confirmation"] = self.object
         return ctx
 
+    def get_form_class(self):
+        return self.form_class
+
     def get_redirect_url(self):
         """ Implement this for custom redirects """
         return None
 
     def after_confirmation(self, signup):
         """ Implement this for custom post-save operations """
-        # send emails to admins + rahn-hr@rahn-group.com
+        # FIXME: does not distinct between plugin instances, and draft/published pages
+        all_groups = set(
+            [group for plugin in
+                JobNewsletterRegistrationPlugin.objects.all()
+             for group in plugin.mail_to_group.all()]
+        )
+        admin_recipients = set([user.email for group in all_groups
+                                for user in group.user_set.all()])
 
-        raise NotImplementedError()
+        additional_recipients = None
+        if additional_recipients:
+            admin_recipients += additional_recipients
+        context ={
+            'new_recipient': signup.recipient
+        }
+        for admin_recipient in admin_recipients:
+            send_mail(
+                recipients=[admin_recipient],
+                context=context,
+                template_base='aldryn_jobs/emails/newsletter_new_recipient')
+
+
 
 
 class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
-    # TODO: implement this view.
-    pass
+    http_method_names = ["get", "post"]
+
+    def get_template_names(self):
+        return {
+            "GET": ["aldryn_jobs/newsletter_unsubscribe.html"],
+            "POST": ["aldryn_jobs/newsletter_unsubscribed.html"],
+        }[self.request.method]
+
+    def get(self, *args, **kwargs):
+        self.object = self.get_object()
+        ctx = self.get_context_data()
+        # populate form with key
+        ctx['form'] = NewsletterUnsubscriptionForm(
+            initial={'confirmation_key': self.kwargs['key']})
+        return self.render_to_response(ctx)
+
+    def post(self, *args, **kwargs):
+        form = NewsletterUnsubscriptionForm(self.request.POST)
+        if form.is_valid():
+            # TODO: some security checks...
+            form_confirmation_key = form.cleaned_data['confirmation_key']
+            if self.kwargs["key"] != form_confirmation_key:
+                print 'Warning! Confirmation keys missmatch for {0} != {1}'.format(
+                    self.kwargs["key"], form_confirmation_key)
+
+            try:
+                self.object = NewsletterSignup.objects.get(
+                    confirmation_key=form_confirmation_key)
+            except NewsletterSignup.DoesNotExist:
+                return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
+
+        # do not confirm second time
+        if not self.object.is_disabled:
+            self.object.disable()
+            # run custom actions, if there is
+            self.after_unsubscription(self.object)
+
+        redirect_url = self.get_redirect_url()
+        if not redirect_url:
+            ctx = self.get_context_data()
+            return self.render_to_response(ctx)
+
+        return redirect(redirect_url)
+
+    # for flexibility
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        try:
+            return queryset.filter(
+                confirmation_key=self.kwargs["key"])[:1].get()
+            # Until the model-field is not set to unique=True,
+            # we'll use the trick above
+        except NewsletterSignup.DoesNotExist:
+            raise Http404()
+
+    def get_queryset(self):
+        qs = NewsletterSignup.objects.all()
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = kwargs
+        ctx["confirmation"] = self.object
+        return ctx
+
+    def get_redirect_url(self):
+        """ Implement this for custom redirects """
+        return None
+
+    def after_unsubscription(self, signup):
+        """ Implement this for custom post-save operations """
+        # raise NotImplementedError()
+        pass
 
 
 class RegisterJobNewsletter(CreateView):
@@ -252,15 +356,59 @@ class RegisterJobNewsletter(CreateView):
         return super(RegisterJobNewsletter, self).form_valid(form)
 
     def form_invalid(self, form):
+        context = self.get_context_data()
+        # check if user needs a resend confirmation link
+        recipient_email = form.data.get('recipient')
+        recipient_object = NewsletterSignup.objects.filter(recipient=recipient_email)
+        # check for registered but not confirmed
+        context['resend_confirmation'] = None
+        if recipient_email is not None and recipient_object:
+            recipient_object = recipient_object[0]
+            context['resend_confirmation'] = reverse('resend_confirmation_link', kwargs={
+                'key': recipient_object.confirmation_key})
         template_name = self.template_invalid_name if (
             hasattr(self, 'template_invalid_name')) else (
             self.get_invalid_template_name())
-        # context = self.get_context_data()
-        return render(self.request, template_name=template_name)
+        context_instance = RequestContext(self.request, context)
+        return render(self.request, template_name=template_name, context_instance=context_instance)
 
     def get_success_url(self):
         return reverse('newsletter_registration_notification')
 
+
+class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
+    form_class = NewsletterResendConfirmationForm
+
+    def get_template_names(self):
+        return {
+            "GET": ["aldryn_jobs/newsletter_resend_confirmation.html"],
+            "POST": ["aldryn_jobs/newsletter_confirmation_resent.html"],
+        }[self.request.method]
+
+    def post(self, *args, **kwargs):
+        form_class = self.get_form_class()
+        form = form_class(self.request.POST)
+        if form.is_valid():
+            # TODO: some security checks...
+            form_confirmation_key = form.cleaned_data['confirmation_key']
+            if self.kwargs["key"] != form_confirmation_key:
+                print 'Warning! Confirmation keys missmatch for {0} != {1}, ResendConfirmation'.format(
+                    self.kwargs["key"], form_confirmation_key)
+
+            try:
+                self.object = NewsletterSignup.objects.get(
+                    confirmation_key=form_confirmation_key)
+            except NewsletterSignup.DoesNotExist:
+                return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
+        self.object = self.get_object()
+        self.object.reset_confirmation()
+
+        redirect_url = self.get_redirect_url()
+        if not redirect_url:
+            ctx = self.get_context_data()
+            return self.render_to_response(ctx)
+
+        return redirect(redirect_url)
 
 class ConfirmNewsletterNotFound(TemplateView):
     template_name = 'aldryn_jobs/newsletter_confirm_not_found.html'
