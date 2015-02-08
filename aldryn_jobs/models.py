@@ -303,7 +303,7 @@ class NewsletterSignup(models.Model):
 
     def send_newsletter_confirmation_email(self, request=None):
         context = {'data': self}
-        if hasattr(self, 'user') and self.user.is_authenticated:
+        if hasattr(request, 'user') and request.user.is_authenticated:
             context['first_name'] = self.user.first_name
             context['last_name'] = self.user.last_name
         # get site domain

@@ -1,10 +1,10 @@
 {% load i18n %}
 
 {% block content %}
-{% blocktrans context 'aldryn-jobs' %}Here are the list of available jobs:{% endblocktrans %}</p>
+{% blocktrans context 'aldryn-jobs' %}Here are the list of available jobs:{% endblocktrans %}
 {% for object in jobs%}
 {{ object.job.title}}
-{{ object.link }}
+{{ object.full_link }}
 {% endfor %}
 {% blocktrans context 'aldryn-jobs' %}
 To unsubscribe form job newsletter please click this links and hit unsubscribe button:

@@ -53,6 +53,7 @@ class NewsletterSignupManager(models.Manager):
             kwargs = {'key': recipient_user.confirmation_key}
             link = reverse('unsubscribe_from_newsletter', kwargs=kwargs)
             unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
+
             context = {
                 'jobs': jobs,
                 'unsubscribe_link': link,

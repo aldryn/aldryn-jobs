@@ -3,12 +3,11 @@
 
 {% block content %}
 <p>{% blocktrans context 'aldryn-jobs' %}Here are the list of available jobs:{% endblocktrans %}</p>
+<ul>
 {% for object in jobs%}
-    <p>
-    {{ object.job.title}} <br/>
-    {{ object.link }}
-    </p>
+    <li><a href="{{ object.link }}">{{ object.job.title}}</a></li>
 {% endfor %}
+</ul>
 <p>{% blocktrans context 'aldryn-jobs' %}
     To unsubscribe form job newsletter please click this links and hit unsubscribe button:
     {% endblocktrans %}
