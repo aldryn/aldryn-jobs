@@ -15,11 +15,13 @@ from cms.utils.i18n import get_default_language
 from emailit.api import send_mail
 
 from . import request_job_offer_identifier
-from .forms import (JobApplicationForm, NewsletterConfirmationForm,
-                    NewsletterSignupForm, NewsletterUnsubscriptionForm,
-                    NewsletterResendConfirmationForm)
-from .models import (JobCategory, JobOffer, NewsletterSignup,
-                     JobNewsletterRegistrationPlugin)
+from .forms import (
+    JobApplicationForm, NewsletterConfirmationForm,NewsletterSignupForm,
+    NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
+)
+from .models import (
+    JobCategory, JobOffer, NewsletterSignup,JobNewsletterRegistrationPlugin
+)
 
 
 class JobOfferList(ListView):
@@ -141,6 +143,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         }
     }
     form_class = NewsletterConfirmationForm
+
     def get_template_names(self):
         return {
             "GET": ["aldryn_jobs/newsletter_confirm.html"],
@@ -164,11 +167,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         form_class = self.get_form_class()
         form = form_class(self.request.POST)
         if form.is_valid():
-            # TODO: some security checks...
             form_confirmation_key = form.cleaned_data['confirmation_key']
-            if self.kwargs["key"] != form_confirmation_key:
-                print 'Warning! Confirmation keys missmatch for {0} != {1}'.format(
-                    self.kwargs["key"], form_confirmation_key)
 
             try:
                 self.object = NewsletterSignup.objects.get(
@@ -236,8 +235,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
         additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS')
         if additional_recipients:
-            for additional_recipient in additional_recipients:
-                admin_recipients.add(additional_recipient)
+            admin_recipients.update(additional_recipients)
+
         context = {
             'new_recipient': signup.recipient
         }
@@ -246,8 +245,6 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
                 recipients=[admin_recipient],
                 context=context,
                 template_base='aldryn_jobs/emails/newsletter_new_recipient')
-
-
 
 
 class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
@@ -261,6 +258,9 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
 
     def get(self, *args, **kwargs):
         self.object = self.get_object()
+        # if object is disabled - do not serve this page
+        if self.object.is_disabled:
+            raise Http404()
         ctx = self.get_context_data()
         # populate form with key
         ctx['form'] = NewsletterUnsubscriptionForm(
@@ -270,11 +270,7 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
     def post(self, *args, **kwargs):
         form = NewsletterUnsubscriptionForm(self.request.POST)
         if form.is_valid():
-            # TODO: some security checks...
             form_confirmation_key = form.cleaned_data['confirmation_key']
-            if self.kwargs["key"] != form_confirmation_key:
-                print 'Warning! Confirmation keys missmatch for {0} != {1}'.format(
-                    self.kwargs["key"], form_confirmation_key)
 
             try:
                 self.object = NewsletterSignup.objects.get(
@@ -342,7 +338,7 @@ class RegisterJobNewsletter(CreateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         # populate object with other data
-        if self.request.user.is_authenticated:
+        if self.request.user.is_authenticated():
             # in memory only property, will be used just for confirmation email
             self.object.user = self.request.user
 
@@ -391,17 +387,14 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
         form_class = self.get_form_class()
         form = form_class(self.request.POST)
         if form.is_valid():
-            # TODO: some security checks...
             form_confirmation_key = form.cleaned_data['confirmation_key']
-            if self.kwargs["key"] != form_confirmation_key:
-                print 'Warning! Confirmation keys missmatch for {0} != {1}, ResendConfirmation'.format(
-                    self.kwargs["key"], form_confirmation_key)
 
             try:
                 self.object = NewsletterSignup.objects.get(
                     confirmation_key=form_confirmation_key)
             except NewsletterSignup.DoesNotExist:
                 return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
+
         self.object = self.get_object()
         self.object.reset_confirmation()
 
@@ -411,6 +404,7 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
             return self.render_to_response(ctx)
 
         return redirect(redirect_url)
+
 
 class ConfirmNewsletterNotFound(TemplateView):
     template_name = 'aldryn_jobs/newsletter_confirm_not_found.html'

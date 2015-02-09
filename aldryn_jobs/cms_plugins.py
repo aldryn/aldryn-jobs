@@ -30,7 +30,7 @@ class JobNewsletter(CMSPluginBase):
         # if there is data for form (i.e validation errors) render that form with data.
         # explicitly check that request POST has the right data.
         request = context.get('request')
-        if request is not None and request.POST.get('recipient') is not None:
+        if request is not None and request.POST.get('recipient'):
             context['form'] = NewsletterSignupForm(request.POST)
         else:
             context['form'] = NewsletterSignupForm()

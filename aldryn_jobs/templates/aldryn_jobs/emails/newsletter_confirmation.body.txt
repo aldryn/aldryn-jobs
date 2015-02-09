@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% block content %}
-{% if first_name or last_name %}{% blocktrans context 'aldryn-jobs' %}Dear {{ first_name }} {{ last_name }}.{% endblocktrans %}
+{% if full_name %}{% blocktrans context 'aldryn-jobs' %}Dear {{ full_name }}.{% endblocktrans %}
 {% else %}{% blocktrans context 'aldryn-jobs' %}Dear User.{% endblocktrans %}
 {% endif %}
 {% blocktrans context 'aldryn-jobs' %}

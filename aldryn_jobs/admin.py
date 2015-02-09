@@ -140,7 +140,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
         current_domain = get_current_site(request).domain
 
         job_list = [job.pk for job in queryset]
-        NewsletterSignup.objects.send_job_notifiation(
+        sent_emails = NewsletterSignup.objects.send_job_notifiation(
             job_list=job_list, current_domain=current_domain)
 
         jobs_sent = len(job_list)
@@ -148,8 +148,12 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
             message_bit = _("1 job was")
         else:
             message_bit = _('%s jobs were') % jobs_sent
-        self.message_user(request,
-                          _('%s successfully sent in the newsletter.') % message_bit)
+        if sent_emails > 0:
+            self.message_user(request,
+                              _('%s successfully sent in the newsletter.') % message_bit)
+        else:
+            self.message_user(request,
+                              _('Seems there was some error. Please contact administrator'))
     send_newsletter_email.short_description = _("Send Job Newsletter")
 
 

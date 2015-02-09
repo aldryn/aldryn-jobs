@@ -2,8 +2,8 @@
 {% load i18n html_filter_tags %}
 
 {% block content %}
-<p>{% if first_name or last_name %}
-        {% blocktrans context 'aldryn-jobs' %}Dear {{ first_name }} {{ last_name }}.{% endblocktrans %}
+<p>{% if full_name %}
+        {% blocktrans context 'aldryn-jobs' %}Dear {{ full_name }}.{% endblocktrans %}
     {% else %}
         {% blocktrans context 'aldryn-jobs' %}Dear User.{% endblocktrans %}
     {% endif %}

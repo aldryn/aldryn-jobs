@@ -7,29 +7,41 @@ from cms.utils.i18n import force_language
 
 
 class NewsletterSignupManager(models.Manager):
-    @staticmethod
-    def generate_random_key():
-        return get_random_string()
+
+    def generate_random_key(self):
+        for trial in range(3):
+            new_key = get_random_string()
+            if self.filter(confirmation_key=new_key).count() > 0:
+                continue
+            return new_key
+        raise ValueError("Cannot generate unique random confirmation key!")
 
     def active_recipients(self, **kwargs):
         return self.filter(is_verified=True, is_disabled=False, **kwargs)
 
     def send_job_notifiation(self, recipients=None, job_list=None, current_domain=None):
+        # avoid circular import
+        from .models import JobOffer
+
         if not recipients:
             self.recipient_list = self.active_recipients()
         else:
             self.recipient_list = recipients
 
+        # since this method can and should be also used as a management
+        # command. check and warn user that this is required parameter
+        # right now it does not makes a lot of sense but in future someone
+        # will just change logic here
         if job_list is None:
             print "Can't send jobs newsletter without job list to be sent."
+            # also prevent from hard failures and message admin
+            # with error msg.
             return -1
 
         if current_domain is None:
             request = None
             current_domain = get_current_site(request).domain
 
-        # avoid circular import
-        from .models import JobOffer
         job_object_list = JobOffer.objects.filter(pk__in=job_list)
 
         # TODO: get from settings if we need to send all translations or

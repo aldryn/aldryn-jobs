@@ -297,15 +297,16 @@ class NewsletterSignup(models.Model):
 
         Note that the old key won't work anymore
         """
-        self.confirmation_key = NewsletterSignupManager.generate_random_key()
+        self.confirmation_key = NewsletterSignup.objects.generate_random_key()
         self.save(update_fields=['confirmation_key', ])
         self.send_newsletter_confirmation_email()
 
     def send_newsletter_confirmation_email(self, request=None):
         context = {'data': self}
-        if hasattr(request, 'user') and request.user.is_authenticated:
-            context['first_name'] = self.user.first_name
-            context['last_name'] = self.user.last_name
+        if hasattr(self, 'user'):
+            context['full_name'] = self.user.get_full_name()
+        elif request is not None and request.user.is_authenticated():
+            context['full_name'] = request.user.get_full_name()
         # get site domain
         full_link = '{0}{1}'.format(get_current_site(request).domain,
                                           self.get_absolute_url())
@@ -321,11 +322,11 @@ class NewsletterSignup(models.Model):
         Confirms NewsletterSignup, excepts that is_verified is checked before calling this method.
         """
         self.is_verified = True
-        self.save()
+        self.save(update_fields=['is_verified', ])
 
     def disable(self):
         self.is_disabled = True
-        self.save()
+        self.save(update_fields=['is_disabled', ])
 
 
 
