@@ -136,14 +136,14 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
         Sends a newsletter to all active recipients.
         """
         # FIXME: this will use admin's domain instead of language specific
+        # if site has multiple domains for different languages
         current_domain = get_current_site(request).domain
 
         job_list = [job.pk for job in queryset]
-        jobs_sent = len(job_list)
-
         NewsletterSignup.objects.send_job_notifiation(
             job_list=job_list, current_domain=current_domain)
 
+        jobs_sent = len(job_list)
         if jobs_sent == 1:
             message_bit = _("1 job was")
         else:
