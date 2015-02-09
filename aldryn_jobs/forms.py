@@ -123,7 +123,8 @@ class JobApplicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.job_offer = kwargs.pop('job_offer')
-        self.request = kwargs.pop('request')
+        if not hasattr(self, 'request') and kwargs.get('request') is not None:
+            self.request = kwargs.pop('request')
         super(JobApplicationForm, self).__init__(*args, **kwargs)
 
     class Meta:
@@ -154,7 +155,9 @@ class JobApplicationForm(forms.ModelForm):
 
     def send_confirmation_email(self):
         context = {'job_application': self.instance}
-        send_mail(recipients=[self.instance.email], context=context, template_base='aldryn_jobs/emails/confirmation')
+        send_mail(recipients=[self.instance.email],
+                  context=context,
+                  template_base='aldryn_jobs/emails/confirmation')
 
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
@@ -166,8 +169,11 @@ class JobApplicationForm(forms.ModelForm):
 
         context = {
             'job_application': self.instance,
-            'admin_change_form_url': self.request.build_absolute_uri(admin_change_form),
         }
+        # make admin change form url available
+        if hasattr(self, 'request'):
+            context['admin_change_form_url'] = self.request.build_absolute_uri(admin_change_form)
+
         kwargs = {}
         if SEND_ATTACHMENTS_WITH_EMAIL:
             attachments = self.instance.attachments.all()
