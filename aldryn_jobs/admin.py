@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 
 import cms
+from aldryn_apphooks_config.admin import BaseAppHookConfig
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
 from distutils.version import LooseVersion
@@ -12,7 +13,8 @@ from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
-from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment
+from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment, \
+    JobsConfig
 
 
 def _send_rejection_email(modeladmin, request, queryset, delete_application=False):
@@ -129,6 +131,10 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
         return fieldsets
 
 
+class JobsConfigAdmin(BaseAppHookConfig):
+    pass
+
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
 admin.site.register(JobOffer, JobOfferAdmin)
+admin.site.register(JobsConfig, JobsConfigAdmin)

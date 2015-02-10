@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from aldryn_apphooks_config.models import AppHookConfig
 
 from django import get_version
 from django.conf import settings
@@ -57,6 +58,10 @@ JobApplicationFileField = partial(
 )
 
 
+class JobsConfig(AppHookConfig):
+    pass
+
+
 class JobCategory(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
@@ -75,6 +80,8 @@ class JobCategory(TranslatableModel):
                     'application arrives.'),
         blank=True
     )
+    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+
     ordering = models.IntegerField(_('Ordering'), default=0)
 
     class Meta:
@@ -131,6 +138,7 @@ class JobOffer(TranslatableModel):
     can_apply = models.BooleanField(
         _('Viewer can apply for the job'), default=True
     )
+    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
 
     active = ActiveJobOffersManager()
 
@@ -197,6 +205,8 @@ class JobApplication(models.Model):
     is_rejected = models.BooleanField(_('Rejected'), default=False)
     rejection_date = models.DateTimeField(_('Rejection date'), null=True, blank=True)
 
+    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+
     class Meta:
         ordering = ['-created']
 
@@ -221,5 +231,7 @@ class JobApplicationAttachment(models.Model):
 
 
 class JobListPlugin(CMSPlugin):
+    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+
     def job_offers(self):
         return JobOffer.active.all()
