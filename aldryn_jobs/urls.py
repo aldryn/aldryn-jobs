@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import patterns, url
 
-from .views import (CategoryJobOfferList, JobOfferDetail, JobOfferList,
-    ConfirmNewsletterSignup, ConfirmNewsletterNotFound, SuccessRegistrationMessage,
-    RegisterJobNewsletter, UnsubscibeNewsletterSignup, ResendNewsletterConfirmation)
+from .views import (
+    CategoryJobOfferList, JobOfferDetail, JobOfferList,
+    ConfirmNewsletterSignup, SuccessRegistrationMessage,
+    RegisterJobNewsletter, UnsubscibeNewsletterSignup,
+    ResendNewsletterConfirmation
+)
 
 urlpatterns = patterns(
     '',
-
-    url(r'^confirm-newsletter/key-not-found/$',
-        ConfirmNewsletterNotFound.as_view(),
-        name="confirm_newsletter_not_found"),
 
     url(r'^confirm-newsletter/$',
         RegisterJobNewsletter.as_view(),

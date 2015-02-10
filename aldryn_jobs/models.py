@@ -280,7 +280,7 @@ class NewsletterSignup(models.Model):
     signup_date = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
     is_disabled = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=40)  # unique=True
+    confirmation_key = models.CharField(max_length=40, unique=True)  # unique=True
 
     objects = NewsletterSignupManager()
 
@@ -297,8 +297,15 @@ class NewsletterSignup(models.Model):
 
         Note that the old key won't work anymore
         """
+        update_fields = ['confirmation_key', ]
         self.confirmation_key = NewsletterSignup.objects.generate_random_key()
-        self.save(update_fields=['confirmation_key', ])
+        # check if user was in the mailing list but then disabled newsletter
+        # and now wants to get it again
+        if self.is_verified and self.is_disabled:
+            self.is_disabled = False
+            self.is_verified = False
+            update_fields.extend(['is_disabled', 'is_verified'])
+        self.save(update_fields=update_fields)
         self.send_newsletter_confirmation_email()
 
     def send_newsletter_confirmation_email(self, request=None):

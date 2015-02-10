@@ -154,7 +154,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         self.object = self.get_object()
         # if recipient already confirmed his email then there is
         # a high chance that this is a brute force attack
-        if self.object.is_verified:
+        if self.object.is_verified and not self.object.is_disabled:
             raise Http404()
         ctx = self.get_context_data()
         # populate form with key
@@ -165,20 +165,25 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
     def post(self, *args, **kwargs):
         form_class = self.get_form_class()
-        form = form_class(self.request.POST)
-        if form.is_valid():
-            form_confirmation_key = form.cleaned_data['confirmation_key']
-
-            try:
-                self.object = NewsletterSignup.objects.get(
+        form_confirmation_key = self.request.POST.get('confirmation_key')
+        # since we using a form and have a unique constraint on confirmation
+        # key we need to get instance before validating the form
+        try:
+            instance = NewsletterSignup.objects.get(
                     confirmation_key=form_confirmation_key)
-            except NewsletterSignup.DoesNotExist:
-                return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
-
-        # do not confirm second time
-        if not self.object.is_verified:
-            self.object.confirm()
-            self.after_confirmation(self.object)
+        except NewsletterSignup.DoesNotExist:
+            raise Http404()
+        form = form_class(self.request.POST, instance=instance)
+        if form.is_valid():
+            self.object = instance
+            # do not confirm second time
+            if not self.object.is_verified:
+                self.object.confirm()
+                self.after_confirmation(self.object)
+        else:
+            # be careful if you add custom fields on confirmation form
+            # validate errors will cause a 404.
+            raise Http404()
 
         redirect_url = self.get_redirect_url()
         if not redirect_url:
@@ -249,6 +254,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
 class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
     http_method_names = ["get", "post"]
+    form_class = NewsletterUnsubscriptionForm
 
     def get_template_names(self):
         return {
@@ -263,26 +269,35 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
             raise Http404()
         ctx = self.get_context_data()
         # populate form with key
-        ctx['form'] = NewsletterUnsubscriptionForm(
+        form_class = self.get_form_class()
+        ctx['form'] = form_class(
             initial={'confirmation_key': self.kwargs['key']})
         return self.render_to_response(ctx)
 
     def post(self, *args, **kwargs):
-        form = NewsletterUnsubscriptionForm(self.request.POST)
-        if form.is_valid():
-            form_confirmation_key = form.cleaned_data['confirmation_key']
-
-            try:
-                self.object = NewsletterSignup.objects.get(
+        form_confirmation_key = self.request.POST.get('confirmation_key')
+        # since we using a form and have a unique constraint on confirmation
+        # key we need to get instance before validating the form
+        try:
+            instance = NewsletterSignup.objects.get(
                     confirmation_key=form_confirmation_key)
-            except NewsletterSignup.DoesNotExist:
-                return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
+        except NewsletterSignup.DoesNotExist:
+            raise Http404()
 
-        # do not confirm second time
-        if not self.object.is_disabled:
-            self.object.disable()
-            # run custom actions, if there is
-            self.after_unsubscription(self.object)
+        form_class = self.get_form_class()
+        form = form_class(self.request.POST, instance=instance)
+
+        if form.is_valid():
+            self.object = instance
+            # do not confirm second time
+            if not self.object.is_disabled:
+                self.object.disable()
+                # run custom actions, if there is
+                self.after_unsubscription(self.object)
+        else:
+            # be careful if you add custom fields on confirmation form
+            # validate errors will cause a 404.
+            raise Http404()
 
         redirect_url = self.get_redirect_url()
         if not redirect_url:
@@ -312,6 +327,9 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
         ctx["confirmation"] = self.object
         return ctx
 
+    def get_form_class(self):
+        return self.form_class
+
     def get_redirect_url(self):
         """ Implement this for custom redirects """
         return None
@@ -323,6 +341,7 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
 
 
 class RegisterJobNewsletter(CreateView):
+    form_class = NewsletterSignupForm
 
     def get(self, request, *args, **kwargs):
         # TODO: add GET requests registration functionality
@@ -332,8 +351,16 @@ class RegisterJobNewsletter(CreateView):
     def get_invalid_template_name(self):
         return 'aldryn_jobs/newsletter_invalid_email.html'
 
-    def get_form_class(self):
-        return NewsletterSignupForm
+    def post(self, request, *args, **kwargs):
+        recipient_from_post = self.request.POST.get('recipient')
+        # since we using a form and have a unique constraint on confirmation
+        # key we need to get instance before validating the form
+        try:
+            self.object = NewsletterSignup.objects.get(
+                recipient=recipient_from_post)
+        except NewsletterSignup.DoesNotExist:
+            self.object = None
+        return super(RegisterJobNewsletter, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -368,7 +395,8 @@ class RegisterJobNewsletter(CreateView):
             hasattr(self, 'template_invalid_name')) else (
             self.get_invalid_template_name())
         context_instance = RequestContext(self.request, context)
-        return render(self.request, template_name=template_name, context_instance=context_instance)
+        return render(self.request, template_name=template_name,
+                      context_instance=context_instance)
 
     def get_success_url(self):
         return reverse('newsletter_registration_notification')
@@ -384,19 +412,19 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
         }[self.request.method]
 
     def post(self, *args, **kwargs):
+        import ipdb
+        ipdb.set_trace()
+        form_confirmation_key = self.request.POST.get('confirmation_key')
+        try:
+            self.object = NewsletterSignup.objects.get(
+                confirmation_key=form_confirmation_key)
+        except NewsletterSignup.DoesNotExist:
+            raise Http404()
         form_class = self.get_form_class()
-        form = form_class(self.request.POST)
+        form = form_class(self.request.POST, instance=self.object)
+
         if form.is_valid():
-            form_confirmation_key = form.cleaned_data['confirmation_key']
-
-            try:
-                self.object = NewsletterSignup.objects.get(
-                    confirmation_key=form_confirmation_key)
-            except NewsletterSignup.DoesNotExist:
-                return HttpResponseRedirect(reverse('confirm_newsletter_not_found'))
-
-        self.object = self.get_object()
-        self.object.reset_confirmation()
+            self.object.reset_confirmation()
 
         redirect_url = self.get_redirect_url()
         if not redirect_url:
@@ -404,10 +432,6 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
             return self.render_to_response(ctx)
 
         return redirect(redirect_url)
-
-
-class ConfirmNewsletterNotFound(TemplateView):
-    template_name = 'aldryn_jobs/newsletter_confirm_not_found.html'
 
 
 class SuccessRegistrationMessage(TemplateView):

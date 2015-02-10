@@ -214,15 +214,7 @@ class NewsletterUnsubscriptionForm(NewsletterConfirmationForm):
     pass
 
 
-class NewsletterResendConfirmationForm(NewsletterSignupForm):
+class NewsletterResendConfirmationForm(NewsletterConfirmationForm):
     # form is actually the same, but for confirming the resend action
     # if it shouldn't be the same - please rewrite this form
-    class Meta:
-        model = NewsletterSignup
-        fields = ['recipient']
-        labels = {
-            'recipient': _('Email'),
-        }
-        widgets = {
-            'recipient': forms.HiddenInput(),
-        }
+    pass
