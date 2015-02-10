@@ -19,8 +19,6 @@ class JobCategoryMenu(CMSAttachMenu):
     def get_nodes(self, request):
         nodes = []
         categories = JobCategory.objects.language()
-        # bug in hvad - Meta ordering isn't preserved
-        categories = categories.order_by('ordering')
         for category in categories:
             try:
                 node = NavigationNode(category.name,

@@ -50,7 +50,6 @@ class JobsAddTest(TestCase, BaseCMSTestCase):
         """
         title = 'Senior'
         offer = JobOffer.objects.create(title=title, category=self.category)
-        offer.title = offer
         offer.save()
         self.assertIn(offer, self.category.jobs.all())
 

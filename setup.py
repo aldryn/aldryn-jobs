@@ -3,16 +3,16 @@ from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
 REQUIREMENTS = [
+    'Django<1.8,>=1.5',
+    'South<1.1,>=1.0.2',
+    'aldryn-apphooks-config>=0.1.0',
     'django-emailit',
-    'django-hvad',
+    'django-parler',
     'django-standard-form',
-    # This might cause issues because the 2.x release of djangocms-text-ckeditor is not cms 2.x compatible.
     'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',
-    'django<1.8,>1.5',
-    'South>=1.0.2',
 ]
 
 CLASSIFIERS = [
@@ -41,5 +41,9 @@ setup(
     install_requires=REQUIREMENTS,
     classifiers=CLASSIFIERS,
     include_package_data=True,
-    zip_safe=False
+    zip_safe=False,
+    dependency_links=[
+        'git+https://github.com/yakky/django-cms@future/integration#egg=django-cms-3.0.90a3',
+        'git+https://github.com/aldryn/aldryn-apphooks-config#egg=aldryn-apphooks-config-0.1.0',
+    ],
 )

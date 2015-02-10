@@ -34,9 +34,10 @@ Add below apps to ``INSTALLED_APPS``: ::
     INSTALLED_APPS = [
         …
         'absolute',
+        'aldryn_common'
         'aldryn_jobs',
         'emailit',
-        'hvad',
+        'parler',
         'standard_form',
         …
     ]

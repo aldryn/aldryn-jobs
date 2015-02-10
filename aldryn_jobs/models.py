@@ -1,42 +1,51 @@
 # -*- coding: utf-8 -*-
-from cms.models import CMSPlugin
-from djangocms_text_ckeditor.fields import HTMLField
-from os.path import join as join_path
-from uuid import uuid4
-from functools import partial
 
+from django import get_version
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
-from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
-from cms.utils.i18n import force_language, get_current_language
+from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
+from cms.utils.i18n import force_language, get_current_language
+from distutils.version import StrictVersion
+from djangocms_text_ckeditor.fields import HTMLField
+from functools import partial
+from os.path import join as join_path
+from uuid import uuid4
 
-from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
-from hvad.utils import get_translation
+from parler.models import TranslatableModel, TranslatedFields
 
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:  # django < 1.5
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
-
+from .managers import ActiveJobOffersManager
 from .utils import get_valid_filename
+
+
+def get_user_model_for_fields():
+    if StrictVersion(get_version()) < StrictVersion('1.6.0'):
+        from django.contrib.auth.models import User
+    else:
+        return settings.AUTH_USER_MODEL
 
 
 def default_jobs_attachment_upload_to(instance, filename):
     date = now().strftime('%Y/%m')
-    return join_path('attachments', date, str(uuid4()), get_valid_filename(filename))
+    return join_path(
+        'attachments', date, str(uuid4()), get_valid_filename(filename)
+    )
 
 
-jobs_attachment_upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR', default_jobs_attachment_upload_to)
+jobs_attachment_upload_to = getattr(
+    settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR',
+    default_jobs_attachment_upload_to
+)
 
-jobs_attachment_storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_STORAGE', None)
+jobs_attachment_storage = getattr(
+    settings, 'ALDRYN_JOBS_ATTACHMENT_STORAGE', None
+)
 
 JobApplicationFileField = partial(
     models.FileField,
@@ -48,34 +57,24 @@ JobApplicationFileField = partial(
 )
 
 
-def get_slug_in_language(record, language):
-    cached_translation_language = record.safe_translation_getter('language_code')
-
-    if language == cached_translation_language:
-        # no need to hit db, use cache
-        return record.lazy_translation_getter('slug')
-    else:  # hit db
-        try:
-            translation = get_translation(record, language_code=language)
-        except models.ObjectDoesNotExist:
-            return None
-        else:
-            return translation.slug
-
-
 class JobCategory(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255, blank=True,
-                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
-                                          'Clean it to have it re-created.')),
+        slug=models.SlugField(
+            _('Slug'), max_length=255, blank=True,
+            help_text=_('Auto-generated. Used in the URL. If changed, the URL'
+                        ' will change. Clean it to have it re-created.')
+        ),
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
-    supervisors = models.ManyToManyField(User, verbose_name=_('Supervisors'), related_name='job_offer_categories',
-                                         help_text=_('Those people will be notified via e-mail when '
-                                                     'new application arrives.'),
-                                         blank=True)
+    supervisors = models.ManyToManyField(
+        get_user_model_for_fields(), verbose_name=_('Supervisors'),
+        related_name='job_offer_categories',
+        help_text=_('Those people will be notified via e-mail when new '
+                    'application arrives.'),
+        blank=True
+    )
     ordering = models.IntegerField(_('Ordering'), default=0)
 
     class Meta:
@@ -84,11 +83,11 @@ class JobCategory(TranslatableModel):
         ordering = ['ordering']
 
     def __unicode__(self):
-        return self.lazy_translation_getter('name', str(self.pk))
+        return self.safe_translation_getter('name', str(self.pk))
 
     def get_absolute_url(self, language=None):
         language = language or get_current_language()
-        slug = get_slug_in_language(self, language)
+        slug = self.safe_translation_getter('slug', language_code=language)
         with force_language(language):
             try:
                 if not slug:
@@ -102,54 +101,37 @@ class JobCategory(TranslatableModel):
         return self.supervisors.values_list('email', flat=True)
 
 
-class ActiveJobOffersManager(TranslationManager):
-    def apply_custom_filters(self, qs):
-        """
-        This is provided as a separate method because hvad's using_translations does not call get_query_set.
-        """
-        qs = qs.filter(is_active=True)
-        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(publication_start__lte=now()))
-        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(publication_end__gt=now()))
-        # bug in hvad - Meta ordering isn't preserved
-        qs = qs.order_by('category__ordering', 'category', '-created')
-        return qs
-
-    def get_query_set(self):
-        qs = super(ActiveJobOffersManager, self).get_query_set()
-        return self.apply_custom_filters(qs)
-
-    def using_translations(self):
-        qs = super(ActiveJobOffersManager, self).using_translations()
-        return self.apply_custom_filters(qs)
-
-    def _make_queryset(self, klass, core_filters):
-        # Added for >=hvad 0.5.0 compatibility
-        qs = super(ActiveJobOffersManager, self)._make_queryset(klass, core_filters)
-        import hvad
-        if hvad.VERSION >= (0, 5, 0):
-            return self.apply_custom_filters(qs)
-        return qs
-
-
 class JobOffer(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
-        slug=models.SlugField(_('Slug'), max_length=255, blank=True,
-                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
-                                          'Clean it to have it re-created.')),
-        lead_in=HTMLField(_('Lead in'), blank=True, help_text=_('Will be displayed in lists')),
+        slug=models.SlugField(
+            _('Slug'), max_length=255, blank=True,
+            help_text=_('Auto-generated. Used in the URL. If changed, the URL '
+                        'will change. Clean it to have it re-created.')
+        ),
+        lead_in=HTMLField(
+            _('Lead in'), blank=True,
+            help_text=_('Will be displayed in lists')
+        ),
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
     content = PlaceholderField('Job Offer Content')
-    category = models.ForeignKey(JobCategory, verbose_name=_('Category'), related_name='jobs')
+    category = models.ForeignKey(
+        JobCategory, verbose_name=_('Category'), related_name='jobs'
+    )
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(_('Active'), default=True)
-    publication_start = models.DateTimeField(_('Published since'), null=True, blank=True)
-    publication_end = models.DateTimeField(_('Published until'), null=True, blank=True)
-    can_apply = models.BooleanField(_('Viewer can apply for the job'), default=True)
+    publication_start = models.DateTimeField(
+        _('Published since'), null=True, blank=True
+    )
+    publication_end = models.DateTimeField(
+        _('Published until'), null=True, blank=True
+    )
+    can_apply = models.BooleanField(
+        _('Viewer can apply for the job'), default=True
+    )
 
-    objects = TranslationManager()
     active = ActiveJobOffersManager()
 
     class Meta:
@@ -158,17 +140,21 @@ class JobOffer(TranslatableModel):
         ordering = ['category__ordering', 'category', '-created']
 
     def __unicode__(self):
-        return self.lazy_translation_getter('title', str(self.pk))
+        return self.safe_translation_getter('title', str(self.pk))
 
     def get_absolute_url(self, language=None):
         language = language or get_current_language()
-        slug = get_slug_in_language(self, language)
+        slug = self.safe_translation_getter('slug', language_code=language)
+        category_slug = self.category.safe_translation_getter(
+            'slug', language_code=language
+        )
+
         with force_language(language):
             try:
                 if not slug:
                     return self.category.get_absolute_url(language=language)
                 kwargs = {
-                    'category_slug': get_slug_in_language(self.category, language),
+                    'category_slug': category_slug,
                     'job_offer_slug': slug,
                 }
                 return reverse('job-offer-detail', kwargs=kwargs)
@@ -176,9 +162,11 @@ class JobOffer(TranslatableModel):
                 return "/%s/" % language
 
     def get_active(self):
-        return all([self.is_active,
-                    self.publication_start is None or self.publication_start <= now(),
-                    self.publication_end is None or self.publication_end > now()])
+        return all([
+            self.is_active,
+            self.publication_start is None or self.publication_start <= now(),
+            self.publication_end is None or self.publication_end > now()
+        ])
 
     def get_notification_emails(self):
         return self.category.get_notification_emails()
@@ -213,7 +201,11 @@ class JobApplication(models.Model):
         ordering = ['-created']
 
     def __unicode__(self):
-        return u'%(first_name)s %(last_name)s' % self.__dict__
+        return self.get_full_name()
+
+    def get_full_name(self):
+        full_name = u' '.join([self.first_name, self.last_name])
+        return full_name.strip()
 
 
 @receiver(pre_delete, sender=JobApplication)

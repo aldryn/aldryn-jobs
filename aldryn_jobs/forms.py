@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
+from django.core.exceptions import ObjectDoesNotExist
 import os
 from django import forms
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext, get_language
+from django.utils.translation import ugettext as _, get_language
 
 from multiupload.fields import MultiFileField
 from distutils.version import LooseVersion
 from emailit.api import send_mail
-from hvad.forms import TranslatableModelForm
+from parler.forms import TranslatableModelForm
 from unidecode import unidecode
 import cms
 
-from .models import JobApplication, JobApplicationAttachment
+from .models import (
+    JobApplication, JobApplicationAttachment, JobCategory, JobOffer
+)
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
@@ -30,10 +33,12 @@ class AutoSlugForm(TranslatableModelForm):
         if not self.data.get(self.slug_field):
             slug = self.generate_slug()
             raw_data = self.data.copy()
-            # add to self.data in order to show generated slug in the form in case of an error
+            # add to self.data in order to show generated slug in the
+            # form in case of an error
             raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
 
-            # We cannot modify self.data directly because it can be Immutable QueryDict
+            # We cannot modify self.data directly because it can be
+            # Immutable QueryDict
             self.data = raw_data
         else:
             slug = self.cleaned_data[self.slug_field]
@@ -50,27 +55,30 @@ class AutoSlugForm(TranslatableModelForm):
         return slugify(unidecode(content_to_slugify))
 
     def get_slug_conflict(self, slug):
-        translations_model = self.instance._meta.translations_model
-
         try:
-            language_code = self.instance.language_code
-        except translations_model.DoesNotExist:
+            language_code = self.instance.get_current_language()
+        except ObjectDoesNotExist:
             language_code = get_language()
 
-        conflicts = translations_model.objects.filter(slug=slug, language_code=language_code)
+        conflicts = (
+            self._meta.model.objects.language(language_code)
+                              .translated(language_code, slug=slug)
+        )
         if self.is_edit_action():
-            conflicts = conflicts.exclude(master=self.instance)
+            conflicts = conflicts.exclude(pk=self.instance.pk)
 
         try:
             return conflicts.get()
-        except translations_model.DoesNotExist:
+        except self._meta.model.DoesNotExist:
             return None
 
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
-            'url': conflict.master.get_absolute_url(),
-            'label': ugettext('the conflicting object')}
-        error_message = ugettext('Conflicting slug. See %(address)s.') % {'address': address}
+            'url': conflict.get_absolute_url(),
+            'label': _('the conflicting object')}
+        error_message = (
+            _('Conflicting slug. See %(address)s.') % {'address': address}
+        )
         self.append_to_errors(field='slug', message=mark_safe(error_message))
 
     def append_to_errors(self, field, message):
@@ -88,6 +96,7 @@ class JobCategoryAdminForm(AutoSlugForm):
     slugified_field = 'name'
 
     class Meta:
+        model = JobCategory
         fields = ['name', 'slug', 'supervisors']
 
 
@@ -96,6 +105,7 @@ class JobOfferAdminForm(AutoSlugForm):
     slugified_field = 'title'
 
     class Meta:
+        model = JobOffer
         fields = [
             'title',
             'slug',

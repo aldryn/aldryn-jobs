@@ -9,7 +9,7 @@ from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
-from hvad.admin import TranslatableAdmin
+from parler.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
 from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment
@@ -86,7 +86,7 @@ class JobApplicationAdmin(admin.ModelAdmin):
 
 class JobCategoryAdmin(TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__unicode__', 'all_translations', 'ordering']
+    list_display = ['__unicode__', 'language_column', 'ordering']
     list_editable = ['ordering']
     filter_horizontal = ['supervisors']
 
@@ -104,7 +104,7 @@ class JobCategoryAdmin(TranslatableAdmin):
 
 class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
     form = JobOfferAdminForm
-    list_display = ['__unicode__', 'all_translations']
+    list_display = ['__unicode__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
 
     def get_fieldsets(self, request, obj=None):

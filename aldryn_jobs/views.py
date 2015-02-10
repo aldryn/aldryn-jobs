@@ -2,7 +2,7 @@
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext_lazy as _, get_language_from_request
 from django.views.generic import DetailView, ListView
 
 from aldryn_jobs import request_job_offer_identifier
@@ -17,17 +17,28 @@ class JobOfferList(ListView):
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
-        return (JobOffer.active.language().select_related('category')
-                .order_by('category__id'))
+        language = get_language_from_request(self.request)
+        return (
+            JobOffer.active.language(language)
+                           .translated(language)
+                           .select_related('category')
+                           .order_by('category__id')
+        )
 
 
 class CategoryJobOfferList(JobOfferList):
 
     def get_queryset(self):
         qs = super(CategoryJobOfferList, self).get_queryset()
+        language = get_language_from_request(self.request)
 
+        category_slug = self.kwargs['category_slug']
         try:
-            category = JobCategory.objects.language().get(slug=self.kwargs['category_slug'])
+            category = (
+                JobCategory.objects.language(language)
+                                   .translated(language, slug=category_slug)
+                                   .get()
+            )
         except JobCategory.DoesNotExist:
             raise Http404
 
@@ -49,12 +60,22 @@ class JobOfferDetail(DetailView):
         self.object = self.get_object()
         return super(JobOfferDetail, self).dispatch(request, *args, **kwargs)
 
-    def get_object(self):
-        # django-hvad 0.3.0 doesn't support Q conditions in `get` method
-        # https://github.com/KristianOellegaard/django-hvad/issues/119
-        job_offer = super(JobOfferDetail, self).get_object()
-        if not job_offer.get_active() and not self.request.user.is_staff:
-            raise Http404(pgettext('aldryn-jobs', 'Offer is not longer valid.'))
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        slug = self.kwargs.get(self.slug_url_kwarg, None)
+        slug_field = self.get_slug_field()
+        language = get_language_from_request(self.request)
+        queryset = (
+            queryset.language(language)
+                    .translated(language, **{slug_field: slug})
+        )
+
+        job_offer = queryset.get()
+        if not job_offer and not job_offer.get_active() and not self.request.user.is_staff:
+            raise Http404(_(
+                'aldryn-jobs', 'Offer is not longer valid.'
+            ))
         setattr(self.request, request_job_offer_identifier, job_offer)
         self.set_language_changer(job_offer=job_offer)
         return job_offer
@@ -83,7 +104,12 @@ class JobOfferDetail(DetailView):
 
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
-        return JobOffer.objects.language().select_related('category')
+        language = get_language_from_request(self.request)
+        return (
+            JobOffer.objects.language(language)
+                            .translated(language)
+                            .select_related('category')
+        )
 
     def set_language_changer(self, job_offer):
         """Translate the slug while changing the language."""
@@ -98,7 +124,10 @@ class JobOfferDetail(DetailView):
         """Handles application for the job."""
 
         if not self.object.can_apply:
-            messages.success(self.request, pgettext('aldryn-jobs', 'You can\'t apply for this job.'))
+            messages.success(
+                self.request,
+                _('aldryn-jobs', 'You can\'t apply for this job.')
+            )
             return redirect(self.object.get_absolute_url())
 
         form_class = self.get_form_class()
@@ -106,7 +135,10 @@ class JobOfferDetail(DetailView):
 
         if self.form.is_valid():
             self.form.save()
-            msg = pgettext('aldryn-jobs', 'You have successfully applied for %(job)s.') % {'job': self.object.title}
+            msg = (
+                _('aldryn-jobs', 'You have successfully applied for %(job)s.')
+                % {'job': self.object.title}
+            )
             messages.success(self.request, msg)
             return redirect(self.object.get_absolute_url())
         else:
