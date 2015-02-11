@@ -161,6 +161,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
 
 class JobNewsletterSignupAdmin(admin.ModelAdmin):
     list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
+    order_by = ['recipient']
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)

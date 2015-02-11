@@ -312,10 +312,7 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
         if queryset is None:
             queryset = self.get_queryset()
         try:
-            return queryset.filter(
-                confirmation_key=self.kwargs["key"])[:1].get()
-            # Until the model-field is not set to unique=True,
-            # we'll use the trick above
+            return queryset.get(confirmation_key=self.kwargs["key"])
         except NewsletterSignup.DoesNotExist:
             raise Http404()
 

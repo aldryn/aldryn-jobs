@@ -280,7 +280,7 @@ class NewsletterSignup(models.Model):
     signup_date = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
     is_disabled = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=40, unique=True)  # unique=True
+    confirmation_key = models.CharField(max_length=40, unique=True)
 
     objects = NewsletterSignupManager()
 
@@ -358,4 +358,4 @@ class NewsletterSignupUser(models.Model):
         return self.user.get_full_name()
 
     def __unicode__(self):
-        return unicode('recipient to user {0} link'.format(self.get_full_name()))
+        return unicode('link to user {0} '.format(self.get_full_name()))
