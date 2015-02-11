@@ -2,7 +2,13 @@
 {% load i18n html_filter_tags %}
 
 {% block content %}
-<p>{% blocktrans context 'aldryn-jobs' %}Here are the list of available jobs:{% endblocktrans %}</p>
+<p>{% if full_name %}
+        {% blocktrans context 'aldryn-jobs' %}Dear {{ full_name }}.{% endblocktrans %}
+    {% else %}
+        {% blocktrans context 'aldryn-jobs' %}Dear User.{% endblocktrans %}
+    {% endif %}
+</p>
+<p>{% blocktrans context 'aldryn-jobs' %}Here is a the list of new and available jobs:{% endblocktrans %}</p>
 <ul>
 {% for object in jobs%}
     <li><a href="{{ object.link }}">{{ object.job.title}}</a></li>
@@ -12,5 +18,5 @@
     To unsubscribe form job newsletter please click this links and hit unsubscribe button:
     {% endblocktrans %}
 </p>
-<p><a href="{{ unsubscribe_link }}">{{ unsubscribe_link_full }}</a></p>
+<p><a href="{{ unsubscribe_link }}">{% trans 'unsubscribe' context 'aldryn-jobs' %}</a></p>
 {% endblock %}

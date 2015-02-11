@@ -20,7 +20,8 @@ from .forms import (
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
 )
 from .models import (
-    JobCategory, JobOffer, NewsletterSignup,JobNewsletterRegistrationPlugin
+    JobCategory, JobOffer, NewsletterSignup, JobNewsletterRegistrationPlugin,
+    NewsletterSignupUser,
 )
 
 
@@ -364,12 +365,8 @@ class RegisterJobNewsletter(CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        # populate object with other data
-        if self.request.user.is_authenticated():
-            # in memory only property, will be used just for confirmation email
-            self.object.user = self.request.user
-
         self.object.confirmation_key = NewsletterSignup.objects.generate_random_key()
+
         # try to get language
         if self.request.LANGUAGE_CODE:
             self.object.default_language = self.request.LANGUAGE_CODE
@@ -377,6 +374,13 @@ class RegisterJobNewsletter(CreateView):
             self.object.default_language = get_default_language()
 
         self.object.save()
+        # populate object with other data
+        user = self.request.user
+        if user.is_authenticated():
+            # in memory only property, will be used just for confirmation email
+            self.object.user = user
+            NewsletterSignupUser.objects.create(signup=self.object, user=user)
+
         self.object.send_newsletter_confirmation_email()
         return super(RegisterJobNewsletter, self).form_valid(form)
 
@@ -412,8 +416,6 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
         }[self.request.method]
 
     def post(self, *args, **kwargs):
-        import ipdb
-        ipdb.set_trace()
         form_confirmation_key = self.request.POST.get('confirmation_key')
         try:
             self.object = NewsletterSignup.objects.get(

@@ -17,7 +17,7 @@ class NewsletterSignupManager(models.Manager):
         raise ValueError("Cannot generate unique random confirmation key!")
 
     def active_recipients(self, **kwargs):
-        return self.filter(is_verified=True, is_disabled=False, **kwargs)
+        return self.filter(is_verified=True, is_disabled=False, **kwargs).select_related()
 
     def send_job_notifiation(self, recipients=None, job_list=None, current_domain=None):
         # avoid circular import
@@ -57,12 +57,12 @@ class NewsletterSignupManager(models.Manager):
                 jobs.append({
                     'job': job_translation,
                     'link': job_link,
-                    'full_link': '{0}{1}'.format(current_domain, job_link)
+                    'full_link': '{0}{1}'.format(current_domain, job_link),
                 })
 
         sent_emails = 0
-        for recipient_user in self.recipient_list:
-            kwargs = {'key': recipient_user.confirmation_key}
+        for recipient_record in self.recipient_list:
+            kwargs = {'key': recipient_record.confirmation_key}
             link = reverse('unsubscribe_from_newsletter', kwargs=kwargs)
             unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
 
@@ -72,9 +72,13 @@ class NewsletterSignupManager(models.Manager):
                 'unsubscribe_link_full': unsubscribe_link_full,
             }
 
-            with force_language(recipient_user.default_language):
+            user = recipient_record.related_user.filter(signup__pk=recipient_record.pk)
+            if user:
+                user = user.get()
+                context['full_name'] = user.get_full_name()
+            with force_language(recipient_record.default_language):
                 sent_emails += send_mail(
-                    recipients=[recipient_user.recipient],
+                    recipients=[recipient_record.recipient],
                     context=context,
                     template_base='aldryn_jobs/emails/newsletter_job_offers')
         return sent_emails

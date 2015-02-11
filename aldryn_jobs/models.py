@@ -309,11 +309,22 @@ class NewsletterSignup(models.Model):
         self.send_newsletter_confirmation_email()
 
     def send_newsletter_confirmation_email(self, request=None):
-        context = {'data': self}
+        context = {
+            'data': self,
+            'full_name': None,
+        }
+        # check if we have a user somewhere
+        user = None
         if hasattr(self, 'user'):
-            context['full_name'] = self.user.get_full_name()
+            user = self.user
         elif request is not None and request.user.is_authenticated():
-            context['full_name'] = request.user.get_full_name()
+            user = request.user
+        elif self.related_user.filter(signup__pk=self.pk):
+            user = self.related_user.filter(signup__pk=self.pk).get()
+
+        if user:
+            context['full_name'] = user.get_full_name()
+
         # get site domain
         full_link = '{0}{1}'.format(get_current_site(request).domain,
                                           self.get_absolute_url())
@@ -335,5 +346,16 @@ class NewsletterSignup(models.Model):
         self.is_disabled = True
         self.save(update_fields=['is_disabled', ])
 
+    def __unicode__(self):
+        return unicode(self.recipient)
 
 
+class NewsletterSignupUser(models.Model):
+    signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
+    user = models.ForeignKey(User, related_name='newsletter_signup')
+
+    def get_full_name(self):
+        return self.user.get_full_name()
+
+    def __unicode__(self):
+        return unicode('recipient to user {0} link'.format(self.get_full_name()))
