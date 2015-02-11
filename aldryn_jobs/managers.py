@@ -3,7 +3,6 @@ from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.contrib.sites.models import get_current_site
 from emailit.api import send_mail
-from cms.utils.i18n import force_language
 
 
 class NewsletterSignupManager(models.Manager):
@@ -17,7 +16,7 @@ class NewsletterSignupManager(models.Manager):
         raise ValueError("Cannot generate unique random confirmation key!")
 
     def active_recipients(self, **kwargs):
-        return self.filter(is_verified=True, is_disabled=False, **kwargs).select_related()
+        return self.filter(is_verified=True, is_disabled=False, **kwargs)
 
     def send_job_notifiation(self, recipients=None, job_list=None, current_domain=None):
         # avoid circular import
@@ -76,9 +75,17 @@ class NewsletterSignupManager(models.Manager):
             if user:
                 user = user.get()
                 context['full_name'] = user.get_full_name()
-            with force_language(recipient_record.default_language):
-                sent_emails += send_mail(
-                    recipients=[recipient_record.recipient],
-                    context=context,
-                    template_base='aldryn_jobs/emails/newsletter_job_offers')
+
+            sent_successfully = send_mail(
+                recipients=[recipient_record.recipient],
+                context=context,
+                language=recipient_record.default_language,
+                template_base='aldryn_jobs/emails/newsletter_job_offers')
+
+            if sent_successfully:
+                sent_emails += 1
+            else:
+                # TODO: we can log or process failures.
+                pass
+
         return sent_emails
