@@ -1,23 +1,28 @@
 # -*- coding: utf-8 -*-
-from cms.models import CMSPlugin
-from djangocms_text_ckeditor.fields import HTMLField
+
+from functools import partial
 from os.path import join as join_path
 from uuid import uuid4
-from functools import partial
 
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse, NoReverseMatch
+from django.contrib.sites.models import get_current_site
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
-
+from cms.models import CMSPlugin
 from cms.utils.i18n import force_language, get_current_language
 from cms.models.fields import PlaceholderField
-
+from djangocms_text_ckeditor.fields import HTMLField
+from emailit.api import send_mail
 from hvad.models import TranslatableModel, TranslatedFields, TranslationManager
 from hvad.utils import get_translation
+
+from .managers import NewsletterSignupManager
+
 
 try:
     from django.contrib.auth import get_user_model
@@ -31,12 +36,17 @@ from .utils import get_valid_filename
 
 def default_jobs_attachment_upload_to(instance, filename):
     date = now().strftime('%Y/%m')
-    return join_path('attachments', date, str(uuid4()), get_valid_filename(filename))
+    return join_path('attachments', date, str(uuid4()),
+                     get_valid_filename(filename))
 
 
-jobs_attachment_upload_to = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR', default_jobs_attachment_upload_to)
+jobs_attachment_upload_to = getattr(settings,
+                                    'ALDRYN_JOBS_ATTACHMENT_UPLOAD_DIR',
+                                    default_jobs_attachment_upload_to)
 
-jobs_attachment_storage = getattr(settings, 'ALDRYN_JOBS_ATTACHMENT_STORAGE', None)
+jobs_attachment_storage = getattr(settings,
+                                  'ALDRYN_JOBS_ATTACHMENT_STORAGE',
+                                  None)
 
 JobApplicationFileField = partial(
     models.FileField,
@@ -49,7 +59,8 @@ JobApplicationFileField = partial(
 
 
 def get_slug_in_language(record, language):
-    cached_translation_language = record.safe_translation_getter('language_code')
+    cached_translation_language = record.safe_translation_getter(
+        'language_code')
 
     if language == cached_translation_language:
         # no need to hit db, use cache
@@ -67,14 +78,19 @@ class JobCategory(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
-                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
-                                          'Clean it to have it re-created.')),
+                              help_text=_(
+                                  'Auto-generated. Used in the URL. If '
+                                  'changed, the URL will change. '
+                                  'Clean it to have it re-created.')),
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
-    supervisors = models.ManyToManyField(User, verbose_name=_('Supervisors'), related_name='job_offer_categories',
-                                         help_text=_('Those people will be notified via e-mail when '
-                                                     'new application arrives.'),
+    supervisors = models.ManyToManyField(User, verbose_name=_('Supervisors'),
+                                         related_name='job_offer_categories',
+                                         help_text=_(
+                                             'Those people will be notified '
+                                             'via e-mail when '
+                                             'new application arrives.'),
                                          blank=True)
     ordering = models.IntegerField(_('Ordering'), default=0)
 
@@ -105,11 +121,14 @@ class JobCategory(TranslatableModel):
 class ActiveJobOffersManager(TranslationManager):
     def apply_custom_filters(self, qs):
         """
-        This is provided as a separate method because hvad's using_translations does not call get_query_set.
+        This is provided as a separate method because hvad's using_translations
+        does not call get_query_set.
         """
         qs = qs.filter(is_active=True)
-        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(publication_start__lte=now()))
-        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(publication_end__gt=now()))
+        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(
+            publication_start__lte=now()))
+        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(
+            publication_end__gt=now()))
         # bug in hvad - Meta ordering isn't preserved
         qs = qs.order_by('category__ordering', 'category', '-created')
         return qs
@@ -124,8 +143,10 @@ class ActiveJobOffersManager(TranslationManager):
 
     def _make_queryset(self, klass, core_filters):
         # Added for >=hvad 0.5.0 compatibility
-        qs = super(ActiveJobOffersManager, self)._make_queryset(klass, core_filters)
+        qs = super(ActiveJobOffersManager, self)._make_queryset(klass,
+                                                                core_filters)
         import hvad
+
         if hvad.VERSION >= (0, 5, 0):
             return self.apply_custom_filters(qs)
         return qs
@@ -135,19 +156,26 @@ class JobOffer(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
-                              help_text=_('Auto-generated. Used in the URL. If changed, the URL will change. '
-                                          'Clean it to have it re-created.')),
-        lead_in=HTMLField(_('Lead in'), blank=True, help_text=_('Will be displayed in lists')),
+                              help_text=_(
+                                  'Auto-generated. Used in the URL. If '
+                                  'changed, the URL will change. '
+                                  'Clean it to have it re-created.')),
+        lead_in=HTMLField(_('Lead in'), blank=True,
+                          help_text=_('Will be displayed in lists')),
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
     content = PlaceholderField('Job Offer Content')
-    category = models.ForeignKey(JobCategory, verbose_name=_('Category'), related_name='jobs')
+    category = models.ForeignKey(JobCategory, verbose_name=_('Category'),
+                                 related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(_('Active'), default=True)
-    publication_start = models.DateTimeField(_('Published since'), null=True, blank=True)
-    publication_end = models.DateTimeField(_('Published until'), null=True, blank=True)
-    can_apply = models.BooleanField(_('Viewer can apply for the job'), default=True)
+    publication_start = models.DateTimeField(_('Published since'), null=True,
+                                             blank=True)
+    publication_end = models.DateTimeField(_('Published until'), null=True,
+                                           blank=True)
+    can_apply = models.BooleanField(_('Viewer can apply for the job'),
+                                    default=True)
 
     objects = TranslationManager()
     active = ActiveJobOffersManager()
@@ -168,7 +196,8 @@ class JobOffer(TranslatableModel):
                 if not slug:
                     return self.category.get_absolute_url(language=language)
                 kwargs = {
-                    'category_slug': get_slug_in_language(self.category, language),
+                    'category_slug': get_slug_in_language(self.category,
+                                                          language),
                     'job_offer_slug': slug,
                 }
                 return reverse('job-offer-detail', kwargs=kwargs)
@@ -207,7 +236,8 @@ class JobApplication(models.Model):
     cover_letter = models.TextField(verbose_name=_('Cover letter'), blank=True)
     created = models.DateTimeField(auto_now_add=True)
     is_rejected = models.BooleanField(_('Rejected'), default=False)
-    rejection_date = models.DateTimeField(_('Rejection date'), null=True, blank=True)
+    rejection_date = models.DateTimeField(_('Rejection date'), null=True,
+                                          blank=True)
 
     class Meta:
         ordering = ['-created']
@@ -231,3 +261,101 @@ class JobApplicationAttachment(models.Model):
 class JobListPlugin(CMSPlugin):
     def job_offers(self):
         return JobOffer.active.all()
+
+
+class JobNewsletterRegistrationPlugin(CMSPlugin):
+    # get_form is deleted because of it was unneeded
+    # TODO: add configurable parameters for registration form plugin
+    mail_to_group = models.ManyToManyField(Group, verbose_name=_('Signup notification to'))
+
+    def copy_relations(self, oldinstance):
+        self.mail_to_group = oldinstance.mail_to_group.all()
+
+
+class NewsletterSignup(models.Model):
+    recipient = models.EmailField(_('Recipient'), unique=True)
+    default_language = models.CharField(_('Language'), blank=True,
+                                        default='', max_length=32,
+                                        choices=settings.LANGUAGES)
+    signup_date = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    is_disabled = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=40, unique=True)
+
+    objects = NewsletterSignupManager()
+
+    def get_absolute_url(self):
+        kwargs = {'key': self.confirmation_key}
+        with force_language(self.default_language):
+            try:
+                return reverse('confirm_newsletter_email', kwargs=kwargs)
+            except NoReverseMatch:
+                return reverse('confirm_newsletter_not_found')
+
+    def reset_confirmation(self):
+        """ Reset the confirmation key.
+
+        Note that the old key won't work anymore
+        """
+        update_fields = ['confirmation_key', ]
+        self.confirmation_key = NewsletterSignup.objects.generate_random_key()
+        # check if user was in the mailing list but then disabled newsletter
+        # and now wants to get it again
+        if self.is_verified and self.is_disabled:
+            self.is_disabled = False
+            self.is_verified = False
+            update_fields.extend(['is_disabled', 'is_verified'])
+        self.save(update_fields=update_fields)
+        self.send_newsletter_confirmation_email()
+
+    def send_newsletter_confirmation_email(self, request=None):
+        context = {
+            'data': self,
+            'full_name': None,
+        }
+        # check if we have a user somewhere
+        user = None
+        if hasattr(self, 'user'):
+            user = self.user
+        elif request is not None and request.user.is_authenticated():
+            user = request.user
+        elif self.related_user.filter(signup__pk=self.pk):
+            user = self.related_user.filter(signup__pk=self.pk).get()
+
+        if user:
+            context['full_name'] = user.get_full_name()
+
+        # get site domain
+        full_link = '{0}{1}'.format(get_current_site(request).domain,
+                                          self.get_absolute_url())
+        context['link'] = self.get_absolute_url()
+        context['full_link'] = full_link
+        # build url
+        send_mail(recipients=[self.recipient],
+                  context=context,
+                  template_base='aldryn_jobs/emails/newsletter_confirmation')
+
+    def confirm(self):
+        """
+        Confirms NewsletterSignup, excepts that is_verified is checked before calling this method.
+        """
+        self.is_verified = True
+        self.save(update_fields=['is_verified', ])
+
+    def disable(self):
+        self.is_disabled = True
+        self.save(update_fields=['is_disabled', ])
+
+    def __unicode__(self):
+        return unicode(self.recipient)
+
+
+class NewsletterSignupUser(models.Model):
+    signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
+    user = models.ForeignKey(User, related_name='newsletter_signup')
+
+    def get_full_name(self):
+        return self.user.get_full_name()
+
+    def __unicode__(self):
+        return unicode('link to user {0} '.format(self.get_full_name()))

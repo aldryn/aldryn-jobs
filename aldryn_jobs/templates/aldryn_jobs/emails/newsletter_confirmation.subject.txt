@@ -1,0 +1,2 @@
+{% load i18n %}
+{% blocktrans context "aldryn-jobs" %}Confirmation is needed for job newsletter.{% endblocktrans %}

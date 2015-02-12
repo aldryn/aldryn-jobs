@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
+from django.contrib.sites.models import get_current_site
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -12,7 +13,10 @@ from emailit.api import send_mail
 from hvad.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
-from .models import JobApplication, JobCategory, JobOffer, JobApplicationAttachment
+from .models import (
+    JobApplication, JobCategory, JobOffer, JobApplicationAttachment,
+    NewsletterSignup
+)
 
 
 def _send_rejection_email(modeladmin, request, queryset, delete_application=False):
@@ -106,6 +110,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
     form = JobOfferAdminForm
     list_display = ['__unicode__', 'all_translations']
     frontend_editable_fields = ('title', 'lead_in')
+    actions = ['send_newsletter_email']
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -128,7 +133,37 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
             fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
 
+    def send_newsletter_email(self, request, queryset):
+        """
+        Sends a newsletter to all active recipients.
+        """
+        # FIXME: this will use admin's domain instead of language specific
+        # if site has multiple domains for different languages
+        current_domain = get_current_site(request).domain
+
+        job_list = [job.pk for job in queryset]
+        sent_emails = NewsletterSignup.objects.send_job_notifiation(
+            job_list=job_list, current_domain=current_domain)
+
+        jobs_sent = len(job_list)
+        if jobs_sent == 1:
+            message_bit = _("1 job was")
+        else:
+            message_bit = _('%s jobs were') % jobs_sent
+        if sent_emails > 0:
+            self.message_user(request,
+                              _('%s successfully sent in the newsletter.') % message_bit)
+        else:
+            self.message_user(request,
+                              _('Seems there was some error. Please contact administrator'))
+    send_newsletter_email.short_description = _("Send Job Newsletter")
+
+
+class JobNewsletterSignupAdmin(admin.ModelAdmin):
+    list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
+    order_by = ['recipient']
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
 admin.site.register(JobOffer, JobOfferAdmin)
+admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)
