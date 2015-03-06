@@ -59,7 +59,7 @@ class SendRejectionEmail(object):
 class SendRejectionEmailAndDelete(SendRejectionEmail):
     def __init__(self, lang_code=''):
         super(SendRejectionEmailAndDelete, self).__init__(lang_code)
-        self.name = 'send_rejection_email_and_delete_{0}'.format(self.lang_code)
+        self.name = 'send_rejection_and_delete_{0}'.format(self.lang_code)
         self.title = _("Send rejection e-mail and delete application %s" % self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
