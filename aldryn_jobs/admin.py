@@ -28,7 +28,7 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
 
     for application in queryset:
         context = {'job_application': application, }
-        send_mail(recipients=[application.email], context=context, template_base='aldryn_jobs/emails/rejection_letter', language=lang_code)
+        send_mail(recipients=[application.email], context=context, template_base='aldryn_jobs/emails/rejection_letter', language=lang_code.lower())
 
     # 2. update status or delete objects
     qs_count = queryset.count()
@@ -47,9 +47,9 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
 class SendRejectionEmail(object):
     def __init__(self, lang_code=''):
         super(SendRejectionEmail, self).__init__()
-        self.lang_code = lang_code
-        self.name = 'send_rejection_email_{0}'.format(lang_code.upper())
-        self.title = _("Send rejection e-mail %s" % lang_code.upper())
+        self.lang_code = lang_code.upper()
+        self.name = 'send_rejection_email_{0}'.format(self.lang_code)
+        self.title = _("Send rejection e-mail %s" % self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
@@ -59,12 +59,12 @@ class SendRejectionEmail(object):
 class SendRejectionEmailAndDelete(SendRejectionEmail):
     def __init__(self, lang_code=''):
         super(SendRejectionEmailAndDelete, self).__init__(lang_code)
-        self.name = 'send_rejection_email_and_delete_{0}'.format(lang_code.upper())
-        self.title = _("Send rejection e-mail and delete application %s" % lang_code.upper())
+        self.name = 'send_rejection_email_and_delete_{0}'.format(self.lang_code)
+        self.title = _("Send rejection e-mail and delete application %s" % self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
-                              delete_application=True, lang_code=self.lang_code)
+                              lang_code=self.lang_code, delete_application=True)
 
 
 class JobApplicationAdmin(admin.ModelAdmin):
