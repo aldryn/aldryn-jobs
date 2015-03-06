@@ -28,7 +28,9 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
 
     for application in queryset:
         context = {'job_application': application, }
-        send_mail(recipients=[application.email], context=context, template_base='aldryn_jobs/emails/rejection_letter', language=lang_code.lower())
+        send_mail(recipients=[application.email], context=context,
+                  template_base='aldryn_jobs/emails/rejection_letter',
+                  language=lang_code.lower())
 
     # 2. update status or delete objects
     qs_count = queryset.count()
