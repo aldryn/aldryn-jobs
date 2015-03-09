@@ -1,27 +1,38 @@
 # -*- coding: utf-8 -*-
-from aldryn_apphooks_config.models import AppHookConfig
 
 from django import get_version
 from django.conf import settings
+from django.contrib.auth.models import Group
+from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from djangocms_text_ckeditor.fields import HTMLField
+from djangocms_text_ckeditor.fields import HTMLField
 
+from aldryn_apphooks_config.models import AppHookConfig
 from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
 from cms.utils.i18n import force_language, get_current_language
 from distutils.version import StrictVersion
-from djangocms_text_ckeditor.fields import HTMLField
+from emailit.api import send_mail
 from functools import partial
 from os.path import join as join_path
+from parler.models import TranslatableModel, TranslatedFields
 from uuid import uuid4
 
-from parler.models import TranslatableModel, TranslatedFields
 
-from .managers import ActiveJobOffersManager
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:  # django < 1.5
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
+
+from .managers import ActiveJobOffersManager, NewsletterSignupManager
 from .utils import get_valid_filename
 
 
@@ -80,7 +91,17 @@ class JobCategory(TranslatableModel):
                     'application arrives.'),
         blank=True
     )
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+    app_config = models.ForeignKey(
+        JobsConfig, verbose_name=_('app_config'), null=True
+    )
+
+    supervisors = models.ManyToManyField(User, verbose_name=_('Supervisors'),
+                                         related_name='job_offer_categories',
+                                         help_text=_(
+                                             'Those people will be notified '
+                                             'via e-mail when '
+                                             'new application arrives.'),
+                                         blank=True)
 
     ordering = models.IntegerField(_('Ordering'), default=0)
 
@@ -106,6 +127,40 @@ class JobCategory(TranslatableModel):
 
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
+
+
+class ActiveJobOffersManager(TranslationManager):
+    def apply_custom_filters(self, qs):
+        """
+        This is provided as a separate method because hvad's using_translations
+        does not call get_query_set.
+        """
+        qs = qs.filter(is_active=True)
+        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(
+            publication_start__lte=now()))
+        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(
+            publication_end__gt=now()))
+        # bug in hvad - Meta ordering isn't preserved
+        qs = qs.order_by('category__ordering', 'category', '-created')
+        return qs
+
+    def get_query_set(self):
+        qs = super(ActiveJobOffersManager, self).get_query_set()
+        return self.apply_custom_filters(qs)
+
+    def using_translations(self):
+        qs = super(ActiveJobOffersManager, self).using_translations()
+        return self.apply_custom_filters(qs)
+
+    def _make_queryset(self, klass, core_filters):
+        # Added for >=hvad 0.5.0 compatibility
+        qs = super(ActiveJobOffersManager, self)._make_queryset(klass,
+                                                                core_filters)
+        import hvad
+
+        if hvad.VERSION >= (0, 5, 0):
+            return self.apply_custom_filters(qs)
+        return qs
 
 
 class JobOffer(TranslatableModel):
@@ -138,9 +193,11 @@ class JobOffer(TranslatableModel):
     can_apply = models.BooleanField(
         _('Viewer can apply for the job'), default=True
     )
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+    app_config = models.ForeignKey(
+        JobsConfig, verbose_name=_('app_config'), null=True
+    )
 
-    active = ActiveJobOffersManager()
+    active = ActiveJobOffersManager()  # TODO: use default manager with .active()
 
     class Meta:
         verbose_name = _('Job offer')
@@ -203,7 +260,8 @@ class JobApplication(models.Model):
     cover_letter = models.TextField(verbose_name=_('Cover letter'), blank=True)
     created = models.DateTimeField(auto_now_add=True)
     is_rejected = models.BooleanField(_('Rejected'), default=False)
-    rejection_date = models.DateTimeField(_('Rejection date'), null=True, blank=True)
+    rejection_date = models.DateTimeField(_('Rejection date'), null=True,
+                                          blank=True)
 
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
 
@@ -235,3 +293,101 @@ class JobListPlugin(CMSPlugin):
 
     def job_offers(self):
         return JobOffer.active.all()
+
+
+class JobNewsletterRegistrationPlugin(CMSPlugin):
+    # get_form is deleted because of it was unneeded
+    # TODO: add configurable parameters for registration form plugin
+    mail_to_group = models.ManyToManyField(Group, verbose_name=_('Signup notification to'))
+
+    def copy_relations(self, oldinstance):
+        self.mail_to_group = oldinstance.mail_to_group.all()
+
+
+class NewsletterSignup(models.Model):
+    recipient = models.EmailField(_('Recipient'), unique=True)
+    default_language = models.CharField(_('Language'), blank=True,
+                                        default='', max_length=32,
+                                        choices=settings.LANGUAGES)
+    signup_date = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    is_disabled = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=40, unique=True)
+
+    objects = NewsletterSignupManager()
+
+    def get_absolute_url(self):
+        kwargs = {'key': self.confirmation_key}
+        with force_language(self.default_language):
+            try:
+                return reverse('confirm_newsletter_email', kwargs=kwargs)
+            except NoReverseMatch:
+                return reverse('confirm_newsletter_not_found')
+
+    def reset_confirmation(self):
+        """ Reset the confirmation key.
+
+        Note that the old key won't work anymore
+        """
+        update_fields = ['confirmation_key', ]
+        self.confirmation_key = NewsletterSignup.objects.generate_random_key()
+        # check if user was in the mailing list but then disabled newsletter
+        # and now wants to get it again
+        if self.is_verified and self.is_disabled:
+            self.is_disabled = False
+            self.is_verified = False
+            update_fields.extend(['is_disabled', 'is_verified'])
+        self.save(update_fields=update_fields)
+        self.send_newsletter_confirmation_email()
+
+    def send_newsletter_confirmation_email(self, request=None):
+        context = {
+            'data': self,
+            'full_name': None,
+        }
+        # check if we have a user somewhere
+        user = None
+        if hasattr(self, 'user'):
+            user = self.user
+        elif request is not None and request.user.is_authenticated():
+            user = request.user
+        elif self.related_user.filter(signup__pk=self.pk):
+            user = self.related_user.filter(signup__pk=self.pk).get()
+
+        if user:
+            context['full_name'] = user.get_full_name()
+
+        # get site domain
+        full_link = '{0}{1}'.format(get_current_site(request).domain,
+                                          self.get_absolute_url())
+        context['link'] = self.get_absolute_url()
+        context['full_link'] = full_link
+        # build url
+        send_mail(recipients=[self.recipient],
+                  context=context,
+                  template_base='aldryn_jobs/emails/newsletter_confirmation')
+
+    def confirm(self):
+        """
+        Confirms NewsletterSignup, excepts that is_verified is checked before calling this method.
+        """
+        self.is_verified = True
+        self.save(update_fields=['is_verified', ])
+
+    def disable(self):
+        self.is_disabled = True
+        self.save(update_fields=['is_disabled', ])
+
+    def __unicode__(self):
+        return unicode(self.recipient)
+
+
+class NewsletterSignupUser(models.Model):
+    signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
+    user = models.ForeignKey(User, related_name='newsletter_signup')
+
+    def get_full_name(self):
+        return self.user.get_full_name()
+
+    def __unicode__(self):
+        return unicode('link to user {0} '.format(self.get_full_name()))

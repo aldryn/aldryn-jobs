@@ -1,0 +1,9 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n %}
+
+{% block content_jobs %}
+<h3>{% block newsletter_confirm_title %}{% blocktrans with email=confirmation.recipient %}Your email {{ email }} is removed from newsletter e-mail list.{% endblocktrans %}{% endblock %}</h3>
+    {% block newsletter_confirm_content %}
+<p>{% trans 'You will no longer receive jobs newsletter.' %}</p>
+    {% endblock newsletter_confirm_content%}
+{% endblock %}

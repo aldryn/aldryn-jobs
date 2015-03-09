@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from django.core.exceptions import ObjectDoesNotExist
 import os
+import cms
+
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _, get_language
@@ -12,10 +15,9 @@ from distutils.version import LooseVersion
 from emailit.api import send_mail
 from parler.forms import TranslatableModelForm
 from unidecode import unidecode
-import cms
 
 from .models import (
-    JobApplication, JobApplicationAttachment, JobCategory, JobOffer
+    JobApplication, JobApplicationAttachment, JobCategory, JobOffer, NewsletterSignup
 )
 
 
@@ -74,7 +76,7 @@ class AutoSlugForm(TranslatableModelForm):
 
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
-            'url': conflict.get_absolute_url(),
+            'url': conflict.master.get_absolute_url(),
             'label': _('the conflicting object')}
         error_message = (
             _('Conflicting slug. See %(address)s.') % {'address': address}
@@ -131,6 +133,8 @@ class JobApplicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.job_offer = kwargs.pop('job_offer')
+        if not hasattr(self, 'request') and kwargs.get('request') is not None:
+            self.request = kwargs.pop('request')
         super(JobApplicationForm, self).__init__(*args, **kwargs)
 
     class Meta:
@@ -161,11 +165,25 @@ class JobApplicationForm(forms.ModelForm):
 
     def send_confirmation_email(self):
         context = {'job_application': self.instance}
-        send_mail(recipients=[self.instance.email], context=context, template_base='aldryn_jobs/emails/confirmation')
+        send_mail(recipients=[self.instance.email],
+                  context=context,
+                  template_base='aldryn_jobs/emails/confirmation')
 
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
-        context = {'job_application': self.instance}
+        admin_change_form = reverse(
+            'admin:%s_%s_change' % (self._meta.model._meta.app_label,
+                                    self._meta.model._meta.module_name),
+            args=(self.instance.pk,)
+        )
+
+        context = {
+            'job_application': self.instance,
+        }
+        # make admin change form url available
+        if hasattr(self, 'request'):
+            context['admin_change_form_url'] = self.request.build_absolute_uri(admin_change_form)
+
         kwargs = {}
         if SEND_ATTACHMENTS_WITH_EMAIL:
             attachments = self.instance.attachments.all()
@@ -173,5 +191,40 @@ class JobApplicationForm(forms.ModelForm):
                 kwargs['attachments'] = []
                 for attachment in attachments:
                     attachment.file.seek(0)
-                    kwargs['attachments'].append((os.path.split(attachment.file.name)[1], attachment.file.read(),))
-        send_mail(recipients=recipients, context=context, template_base='aldryn_jobs/emails/notification', **kwargs)
+                    kwargs['attachments'].append(
+                        (os.path.split(attachment.file.name)[1], attachment.file.read(),))
+        send_mail(recipients=recipients,
+                  context=context,
+                  template_base='aldryn_jobs/emails/notification', **kwargs)
+
+
+class NewsletterSignupForm(forms.ModelForm):
+
+    class Meta:
+        model = NewsletterSignup
+        fields = ['recipient']
+        labels = {
+            'recipient': _('Email'),
+        }
+
+
+class NewsletterConfirmationForm(forms.ModelForm):
+
+    class Meta:
+        model = NewsletterSignup
+        fields = ['confirmation_key']
+        widgets = {
+            'confirmation_key': forms.HiddenInput(),
+        }
+
+
+class NewsletterUnsubscriptionForm(NewsletterConfirmationForm):
+    # form is actually the same
+    # if it shouldn't be the same - please rewrite this form
+    pass
+
+
+class NewsletterResendConfirmationForm(NewsletterConfirmationForm):
+    # form is actually the same, but for confirming the resend action
+    # if it shouldn't be the same - please rewrite this form
+    pass
