@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.sites.models import get_current_site
 from django.utils.translation import ugettext_lazy as _
@@ -19,14 +20,17 @@ from .models import (
 )
 
 
-def _send_rejection_email(modeladmin, request, queryset, delete_application=False):
+def _send_rejection_email(modeladmin, request, queryset, lang_code='',
+                          delete_application=False):
     # 1. send rejection email - this should be refactored to use djangos "bulk" mail
     #
     # Info: Using mass rejection on many JobApplications can lead to a timeout, since SMTPs are not known to be fast
 
     for application in queryset:
         context = {'job_application': application, }
-        send_mail(recipients=[application.email], context=context, template_base='aldryn_jobs/emails/rejection_letter')
+        send_mail(recipients=[application.email], context=context,
+                  template_base='aldryn_jobs/emails/rejection_letter',
+                  language=lang_code.lower())
 
     # 2. update status or delete objects
     qs_count = queryset.count()
@@ -42,25 +46,33 @@ def _send_rejection_email(modeladmin, request, queryset, delete_application=Fals
     return
 
 
-def send_rejection_email(modeladmin, request, queryset):
-    _send_rejection_email(modeladmin, request, queryset)
+class SendRejectionEmail(object):
+    def __init__(self, lang_code=''):
+        super(SendRejectionEmail, self).__init__()
+        self.lang_code = lang_code.upper()
+        self.name = 'send_rejection_email_{0}'.format(self.lang_code)
+        self.title = _("Send rejection e-mail %s" % self.lang_code)
+
+    def __call__(self, modeladmin, request, queryset, *args, **kwargs):
+        _send_rejection_email(modeladmin, request, queryset,
+                              lang_code=self.lang_code)
 
 
-send_rejection_email.short_description = _("Send rejection e-mail")
+class SendRejectionEmailAndDelete(SendRejectionEmail):
+    def __init__(self, lang_code=''):
+        super(SendRejectionEmailAndDelete, self).__init__(lang_code)
+        self.name = 'send_rejection_and_delete_{0}'.format(self.lang_code)
+        self.title = _("Send rejection e-mail and delete application %s" % self.lang_code)
 
-
-def send_rejection_and_delete(modeladmin, request, queryset):
-    _send_rejection_email(modeladmin, request, queryset, delete_application=True)
-
-
-send_rejection_and_delete.short_description = _("Send rejection e-mail and delete application")
+    def __call__(self, modeladmin, request, queryset, *args, **kwargs):
+        _send_rejection_email(modeladmin, request, queryset,
+                              lang_code=self.lang_code, delete_application=True)
 
 
 class JobApplicationAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'job_offer', 'created', 'is_rejected', 'rejection_date']
     list_filter = ['job_offer', 'is_rejected']
     readonly_fields = ['job_offer', 'get_attachment_address']
-    actions = [send_rejection_email, send_rejection_and_delete]
 
     fieldsets = [
         (_('Personal information'), {
@@ -70,6 +82,24 @@ class JobApplicationAdmin(admin.ModelAdmin):
             'fields': ['cover_letter', 'get_attachment_address']
         }),
     ]
+
+    def get_actions(self, request):
+        actions = super(JobApplicationAdmin, self).get_actions(request)
+        language_codes = [language[0] for language in settings.LANGUAGES]
+        for lang_code in language_codes:
+            send_rejection_email = SendRejectionEmail(lang_code=lang_code)
+            actions[send_rejection_email.name] = (
+                send_rejection_email,
+                send_rejection_email.name,
+                send_rejection_email.title
+            )
+            send_rejection_and_delete = SendRejectionEmailAndDelete(lang_code=lang_code)
+            actions[send_rejection_and_delete.name] = (
+                send_rejection_and_delete,
+                send_rejection_and_delete.name,
+                send_rejection_and_delete.title
+            )
+        return actions
 
     def has_add_permission(self, request):
         # Don't allow creation of "new" applications via admin-backend until it's properly implemented
