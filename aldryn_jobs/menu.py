@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from aldryn_apphooks_config.utils import get_app_instance
 from django.core.urlresolvers import NoReverseMatch
 from django.utils.translation import ugettext_lazy as _
 
@@ -12,13 +13,18 @@ from aldryn_jobs.models import JobCategory
 from aldryn_jobs.models import JobOffer
 
 
+
 class JobCategoryMenu(CMSAttachMenu):
 
     name = _('Job Categories')
 
     def get_nodes(self, request):
+        app_namespace = self.instance.application_namespace
+        language = get_language_from_request(request)
         nodes = []
-        categories = JobCategory.objects.language()
+        categories = (
+            JobCategory.objects.namespace(app_namespace).language(language)
+        )
         for category in categories:
             try:
                 node = NavigationNode(category.name,
@@ -35,10 +41,15 @@ class JobOfferMenu(CMSAttachMenu):
     name = _("Job Offers Menu")
 
     def get_nodes(self, request):
-        nodes = []
+        app_namespace = self.instance.application_namespace
         current_language = get_language_from_request(request)
-
-        for job_offer in JobOffer.active.language(language_code=current_language):
+        nodes = []
+        offers = (
+            JobOffer.objects.active()
+                            .namespace(app_namespace)
+                            .language(current_language)
+        )
+        for job_offer in offers:
             try:
                 node = NavigationNode(
                     title=job_offer.title,

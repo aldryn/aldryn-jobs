@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from aldryn_apphooks_config.utils import setup_config
+from app_data import AppDataForm
+from django.forms.widgets import HiddenInput
 import os
 import cms
 
@@ -8,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _, get_language
+from django.utils.translation import pgettext_lazy as _, get_language
 
 from multiupload.fields import MultiFileField
 from distutils.version import LooseVersion
@@ -17,7 +20,8 @@ from parler.forms import TranslatableModelForm
 from unidecode import unidecode
 
 from .models import (
-    JobApplication, JobApplicationAttachment, JobCategory, JobOffer, NewsletterSignup
+    JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
+    NewsletterSignup, JobsConfig
 )
 
 
@@ -28,6 +32,13 @@ class AutoSlugForm(TranslatableModelForm):
 
     slug_field = 'slug'
     slugified_field = None
+
+    def __init__(self, *args, **kwargs):
+        super(AutoSlugForm, self).__init__(*args, **kwargs)
+        if 'app_config' in self.fields:
+            # if has only one choice, select it by default
+            if self.fields['app_config'].queryset.count() == 1:
+                self.fields['app_config'].empty_label = None
 
     def clean(self):
         super(AutoSlugForm, self).clean()
@@ -77,9 +88,11 @@ class AutoSlugForm(TranslatableModelForm):
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
             'url': conflict.master.get_absolute_url(),
-            'label': _('the conflicting object')}
+            'label': _('aldryn-jobs', 'the conflicting object')}
         error_message = (
-            _('Conflicting slug. See %(address)s.') % {'address': address}
+            _('aldryn-jobs', 'Conflicting slug. See %(address)s.') % {
+                'address': address
+            }
         )
         self.append_to_errors(field='slug', message=mark_safe(error_message))
 
@@ -99,7 +112,8 @@ class JobCategoryAdminForm(AutoSlugForm):
 
     class Meta:
         model = JobCategory
-        fields = ['name', 'slug', 'supervisors']
+        fields = ['name', 'slug', 'supervisors', 'app_config']
+
 
 
 class JobOfferAdminForm(AutoSlugForm):
@@ -115,12 +129,32 @@ class JobOfferAdminForm(AutoSlugForm):
             'category',
             'is_active',
             'can_apply',
+            'app_config',
             'publication_start',
             'publication_end'
         ]
 
         if LooseVersion(cms.__version__) < LooseVersion('3.0'):
             fields.append('content')
+
+    def __init__(self, *args, **kwargs):
+        super(JobOfferAdminForm, self).__init__(*args, **kwargs)
+
+        # small monkey patch to show better label for categories
+        def label_from_instance(obj):
+            return "{0} / {1}".format(obj.app_config, obj)
+        self.fields['category'].label_from_instance = label_from_instance
+
+    def clean(self):
+        cleaned_data = super(JobOfferAdminForm, self).clean()
+        category = cleaned_data.get('category')
+        app_config = cleaned_data.get('app_config')
+        if category and category.app_config != app_config:
+            self.append_to_errors(
+                'category',
+                _('aldryn-jobs', 'Category app_config must be the same '
+                                 'selected for Job Offer')
+            )
 
 
 class JobApplicationForm(forms.ModelForm):
@@ -150,6 +184,7 @@ class JobApplicationForm(forms.ModelForm):
     def save(self, commit=True):
         super(JobApplicationForm, self).save(commit=False)
         self.instance.job_offer = self.job_offer
+
         if commit:
             self.instance.save()
 
@@ -204,7 +239,7 @@ class NewsletterSignupForm(forms.ModelForm):
         model = NewsletterSignup
         fields = ['recipient']
         labels = {
-            'recipient': _('Email'),
+            'recipient': _('aldryn-jobs', 'Email'),
         }
 
 
@@ -228,3 +263,9 @@ class NewsletterResendConfirmationForm(NewsletterConfirmationForm):
     # form is actually the same, but for confirming the resend action
     # if it shouldn't be the same - please rewrite this form
     pass
+
+
+class JobsConfigForm(AppDataForm):
+    pass
+
+setup_config(JobsConfigForm, JobsConfig)

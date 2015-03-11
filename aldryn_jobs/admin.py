@@ -102,6 +102,9 @@ class JobCategoryAdmin(TranslatableAdmin):
             }),
             (_('Supervisors'), {
                 'fields': ['supervisors']
+            }),
+            (_('Options'), {
+                'fields': ['app_config']
             })
         ]
         return fieldsets
@@ -119,7 +122,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
                 'fields': ['title', 'slug', 'lead_in']
             }),
             (_('Options'), {
-                'fields': ['category', 'is_active', 'can_apply']
+                'fields': ['category', 'is_active', 'can_apply', 'app_config']
             }),
             (_('Publication period'), {
                 'fields': ['publication_start', 'publication_end']
@@ -165,7 +168,9 @@ class JobNewsletterSignupAdmin(admin.ModelAdmin):
     order_by = ['recipient']
 
 class JobsConfigAdmin(BaseAppHookConfig):
-    pass
+
+    def get_config_fields(self):
+        return []
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)

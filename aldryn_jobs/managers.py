@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from aldryn_apphooks_config.managers.parler import \
+    AppHookConfigTranslatableManager, AppHookConfigTranslatableQueryset
 
 from django.db.models import Q
-from django.utils.timezone import now
-from parler.managers import TranslatableManager
+from django.utils import timezone
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
@@ -10,39 +11,26 @@ from django.contrib.sites.models import get_current_site
 from emailit.api import send_mail
 
 
-class ActiveJobOffersManager(TranslatableManager):
+class JobOffersQuerySet(AppHookConfigTranslatableQueryset):
 
-    def apply_custom_filters(self, qs):
-        """
-        This is provided as a separate method because hvad's
-        using_translations does not call get_query_set.
-        """
-        qs = (
-            qs.filter(is_active=True)
-              .filter(Q(publication_start__isnull=True) |
-                      Q(publication_start__lte=now()))
-              .filter(Q(publication_end__isnull=True) |
-                      Q(publication_end__gt=now()))
+    def active(self):
+        now = timezone.now()
+        return self.filter(
+            Q(publication_start__isnull=True) | Q(publication_start__lte=now),
+            Q(publication_end__isnull=True) | Q(publication_end__gt=now),
+            is_active=True
         )
 
-        qs = qs.order_by('category__ordering', 'category', '-created')
-        return qs
 
-    def get_query_set(self):
-        qs = super(ActiveJobOffersManager, self).get_query_set()
-        return self.apply_custom_filters(qs)
+class JobOffersManager(AppHookConfigTranslatableManager):
 
-    def using_translations(self):
-        qs = super(ActiveJobOffersManager, self).using_translations()
-        return self.apply_custom_filters(qs)
+    def get_queryset(self):
+        return JobOffersQuerySet(self.model, using=self.db)
 
-    def _make_queryset(self, klass, core_filters):
-        # Added for >=hvad 0.5.0 compatibility
-        qs = super(ActiveJobOffersManager, self)._make_queryset(klass, core_filters)
-        import hvad
-        if hvad.VERSION >= (0, 5, 0):
-            return self.apply_custom_filters(qs)
-        return qs
+    get_query_set = get_queryset
+
+    def active(self):
+        return self.get_queryset().active()
 
 
 class NewsletterSignupManager(models.Manager):
@@ -102,7 +90,7 @@ class NewsletterSignupManager(models.Manager):
         sent_emails = 0
         for recipient_record in self.recipient_list:
             kwargs = {'key': recipient_record.confirmation_key}
-            link = reverse('unsubscribe_from_newsletter', kwargs=kwargs)
+            link = reverse('aldryn_jobs:unsubscribe_from_newsletter', kwargs=kwargs)
             unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
 
             context = {

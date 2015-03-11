@@ -22,7 +22,7 @@ class JobOffersIndex(get_index_base()):
         return {'translations__language_code': language}
 
     def get_index_queryset(self, language):
-        return self.get_model().active.all()
+        return self.get_model().objects.active()
 
     def get_model(self):
         return JobOffer

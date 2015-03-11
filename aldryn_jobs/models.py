@@ -11,12 +11,15 @@ from django.dispatch.dispatcher import receiver
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
-from djangocms_text_ckeditor.fields import HTMLField
 
 from aldryn_apphooks_config.models import AppHookConfig
+from aldryn_apphooks_config.managers.parler import (
+    AppHookConfigTranslatableManager
+)
+
 from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
-from cms.utils.i18n import force_language, get_current_language
+from cms.utils.i18n import force_language
 from distutils.version import StrictVersion
 from emailit.api import send_mail
 from functools import partial
@@ -24,21 +27,14 @@ from os.path import join as join_path
 from parler.models import TranslatableModel, TranslatedFields
 from uuid import uuid4
 
-
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:  # django < 1.5
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
-
-from .managers import ActiveJobOffersManager, NewsletterSignupManager
+from .managers import NewsletterSignupManager, JobOffersManager
 from .utils import get_valid_filename
 
 
 def get_user_model_for_fields():
     if StrictVersion(get_version()) < StrictVersion('1.6.0'):
         from django.contrib.auth.models import User
+        return User
     else:
         return settings.AUTH_USER_MODEL
 
@@ -95,15 +91,9 @@ class JobCategory(TranslatableModel):
         JobsConfig, verbose_name=_('app_config'), null=True
     )
 
-    supervisors = models.ManyToManyField(User, verbose_name=_('Supervisors'),
-                                         related_name='job_offer_categories',
-                                         help_text=_(
-                                             'Those people will be notified '
-                                             'via e-mail when '
-                                             'new application arrives.'),
-                                         blank=True)
-
     ordering = models.IntegerField(_('Ordering'), default=0)
+
+    objects = AppHookConfigTranslatableManager()
 
     class Meta:
         verbose_name = _('Job category')
@@ -114,53 +104,27 @@ class JobCategory(TranslatableModel):
         return self.safe_translation_getter('name', str(self.pk))
 
     def get_absolute_url(self, language=None):
-        language = language or get_current_language()
+        language = language or self.get_current_language()
         slug = self.safe_translation_getter('slug', language_code=language)
+        if self.app_config_id:
+            namespace = self.app_config.namespace
+        else:
+            namespace = 'aldryn_jobs'
         with force_language(language):
             try:
                 if not slug:
-                    return reverse('job-offer-list')
+                    return reverse('{0}:job-offer-list'.format(namespace))
                 kwargs = {'category_slug': slug}
-                return reverse('category-job-offer-list', kwargs=kwargs)
+                return reverse(
+                    '{0}:category-job-offer-list'.format(namespace),
+                    kwargs=kwargs,
+                    current_app=self.app_config.namespace
+                )
             except NoReverseMatch:
                 return "/%s/" % language
 
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
-
-
-class ActiveJobOffersManager(TranslationManager):
-    def apply_custom_filters(self, qs):
-        """
-        This is provided as a separate method because hvad's using_translations
-        does not call get_query_set.
-        """
-        qs = qs.filter(is_active=True)
-        qs = qs.filter(models.Q(publication_start__isnull=True) | models.Q(
-            publication_start__lte=now()))
-        qs = qs.filter(models.Q(publication_end__isnull=True) | models.Q(
-            publication_end__gt=now()))
-        # bug in hvad - Meta ordering isn't preserved
-        qs = qs.order_by('category__ordering', 'category', '-created')
-        return qs
-
-    def get_query_set(self):
-        qs = super(ActiveJobOffersManager, self).get_query_set()
-        return self.apply_custom_filters(qs)
-
-    def using_translations(self):
-        qs = super(ActiveJobOffersManager, self).using_translations()
-        return self.apply_custom_filters(qs)
-
-    def _make_queryset(self, klass, core_filters):
-        # Added for >=hvad 0.5.0 compatibility
-        qs = super(ActiveJobOffersManager, self)._make_queryset(klass,
-                                                                core_filters)
-        import hvad
-
-        if hvad.VERSION >= (0, 5, 0):
-            return self.apply_custom_filters(qs)
-        return qs
 
 
 class JobOffer(TranslatableModel):
@@ -197,7 +161,7 @@ class JobOffer(TranslatableModel):
         JobsConfig, verbose_name=_('app_config'), null=True
     )
 
-    active = ActiveJobOffersManager()  # TODO: use default manager with .active()
+    objects = JobOffersManager()
 
     class Meta:
         verbose_name = _('Job offer')
@@ -208,22 +172,32 @@ class JobOffer(TranslatableModel):
         return self.safe_translation_getter('title', str(self.pk))
 
     def get_absolute_url(self, language=None):
-        language = language or get_current_language()
+        language = language or self.get_current_language()
         slug = self.safe_translation_getter('slug', language_code=language)
         category_slug = self.category.safe_translation_getter(
             'slug', language_code=language
         )
-
+        if self.app_config_id:
+            namespace = self.app_config.namespace
+        else:
+            namespace = 'aldryn_jobs'
         with force_language(language):
             try:
+                # FIXME: does not looks correct return category url here
                 if not slug:
                     return self.category.get_absolute_url(language=language)
                 kwargs = {
                     'category_slug': category_slug,
                     'job_offer_slug': slug,
                 }
-                return reverse('job-offer-detail', kwargs=kwargs)
+                return reverse(
+                    '{0}:job-offer-detail'.format(namespace),
+                    kwargs=kwargs,
+                    current_app=self.app_config.namespace
+                )
             except NoReverseMatch:
+                # FIXME: this is wrong, if have some problem in reverse
+                #        we should know
                 return "/%s/" % language
 
     def get_active(self):
@@ -292,7 +266,8 @@ class JobListPlugin(CMSPlugin):
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
 
     def job_offers(self):
-        return JobOffer.active.all()
+        namespace = self.app_config and self.app_config.namespace
+        return JobOffer.objects.namespace(namespace).active()
 
 
 class JobNewsletterRegistrationPlugin(CMSPlugin):
@@ -320,9 +295,9 @@ class NewsletterSignup(models.Model):
         kwargs = {'key': self.confirmation_key}
         with force_language(self.default_language):
             try:
-                return reverse('confirm_newsletter_email', kwargs=kwargs)
+                return reverse('aldryn_jobs:confirm_newsletter_email', kwargs=kwargs)
             except NoReverseMatch:
-                return reverse('confirm_newsletter_not_found')
+                return reverse('aldryn_jobs:confirm_newsletter_not_found')
 
     def reset_confirmation(self):
         """ Reset the confirmation key.
@@ -384,7 +359,9 @@ class NewsletterSignup(models.Model):
 
 class NewsletterSignupUser(models.Model):
     signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
-    user = models.ForeignKey(User, related_name='newsletter_signup')
+    user = models.ForeignKey(
+        get_user_model_for_fields(), related_name='newsletter_signup'
+    )
 
     def get_full_name(self):
         return self.user.get_full_name()
