@@ -1,0 +1,22 @@
+{
+    "name": "Aldryn Jobs",
+    "description": "Publish job offers on your site",
+    "url": "https://github.com/aldryn/aldryn-jobs",
+    "package-name": "aldryn-jobs",
+    "installed-apps": [
+        "absolute",
+        "aldryn_jobs",
+        "emailit",
+        "hvad",
+        "standard_form",
+        "aldryn_common"
+    ],
+    "author": {
+        "name": "Divio AG",
+        "url": "divio.ch"
+    },
+    "license": {
+        "name": "BSD",
+        "text": "!literal-include LICENSE.txt"
+    }
+}
