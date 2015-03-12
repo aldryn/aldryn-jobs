@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from aldryn_apphooks_config.utils import setup_config
-from app_data import AppDataForm
-from django.forms.widgets import HiddenInput
 import os
 import cms
 
@@ -13,9 +10,11 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import pgettext_lazy as _, get_language
 
-from multiupload.fields import MultiFileField
+from aldryn_apphooks_config.utils import setup_config
+from app_data import AppDataForm
 from distutils.version import LooseVersion
 from emailit.api import send_mail
+from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
 from unidecode import unidecode
 
@@ -155,10 +154,11 @@ class JobOfferAdminForm(AutoSlugForm):
                 _('aldryn-jobs', 'Category app_config must be the same '
                                  'selected for Job Offer')
             )
+        return cleaned_data
 
 
 class JobApplicationForm(forms.ModelForm):
-    attachments  = MultiFileField(
+    attachments = MultiFileField(
         max_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT', 5),
         min_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT', 0),
         max_file_size=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024*1024*5),

@@ -13,7 +13,6 @@ from aldryn_jobs.models import JobCategory
 from aldryn_jobs.models import JobOffer
 
 
-
 class JobCategoryMenu(CMSAttachMenu):
 
     name = _('Job Categories')
