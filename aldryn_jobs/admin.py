@@ -197,10 +197,10 @@ class JobNewsletterSignupAdmin(admin.ModelAdmin):
     list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
     order_by = ['recipient']
 
-class JobsConfigAdmin(BaseAppHookConfig):
 
-    def get_config_fields(self):
-        return []
+class JobsConfigAdmin(BaseAppHookConfig):
+    pass
+
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
