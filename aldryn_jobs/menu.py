@@ -40,7 +40,12 @@ class JobOfferMenu(CMSAttachMenu):
     name = _("Job Offers Menu")
 
     def get_nodes(self, request):
-        app_namespace = self.instance.application_namespace
+
+        try:
+            app_namespace = self.instance.application_namespace
+        except AttributeError:
+            app_namespace = None
+
         current_language = get_language_from_request(request)
         nodes = []
         offers = (
