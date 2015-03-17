@@ -22,7 +22,9 @@ class JobCategoryMenu(CMSAttachMenu):
         language = get_language_from_request(request)
         nodes = []
         categories = (
-            JobCategory.objects.namespace(app_namespace).language(language)
+            JobCategory.objects.namespace(app_namespace)
+                               .language(language)
+                               .translated(language)
         )
         for category in categories:
             try:
@@ -52,6 +54,7 @@ class JobOfferMenu(CMSAttachMenu):
             JobOffer.objects.active()
                             .namespace(app_namespace)
                             .language(current_language)
+                            .translated(current_language)
         )
         for job_offer in offers:
             try:

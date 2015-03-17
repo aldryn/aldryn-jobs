@@ -263,11 +263,18 @@ class JobApplicationAttachment(models.Model):
 
 
 class JobListPlugin(CMSPlugin):
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+    app_config = models.ForeignKey(
+        JobsConfig, verbose_name=_('app_config'), null=True
+    )
 
     def job_offers(self):
         namespace = self.app_config and self.app_config.namespace
-        return JobOffer.objects.namespace(namespace).active()
+        return (
+            JobOffer.objects.namespace(namespace)
+                            .language(self.language)
+                            .translated(self.language)
+                            .active()
+        )
 
 
 class JobNewsletterRegistrationPlugin(CMSPlugin):
