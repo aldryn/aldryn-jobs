@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from aldryn_apphooks_config.utils import get_app_instance
 from django.core.urlresolvers import NoReverseMatch
 from django.utils.translation import ugettext_lazy as _
 
@@ -17,10 +18,12 @@ class JobCategoryMenu(CMSAttachMenu):
     name = _('Job Categories')
 
     def get_nodes(self, request):
+        app_namespace = self.instance.application_namespace
+        language = get_language_from_request(request)
         nodes = []
-        categories = JobCategory.objects.language()
-        # bug in hvad - Meta ordering isn't preserved
-        categories = categories.order_by('ordering')
+        categories = (
+            JobCategory.objects.namespace(app_namespace).language(language)
+        )
         for category in categories:
             try:
                 node = NavigationNode(category.name,
@@ -37,10 +40,20 @@ class JobOfferMenu(CMSAttachMenu):
     name = _("Job Offers Menu")
 
     def get_nodes(self, request):
-        nodes = []
-        current_language = get_language_from_request(request)
 
-        for job_offer in JobOffer.active.language(language_code=current_language):
+        try:
+            app_namespace = self.instance.application_namespace
+        except AttributeError:
+            app_namespace = None
+
+        current_language = get_language_from_request(request)
+        nodes = []
+        offers = (
+            JobOffer.objects.active()
+                            .namespace(app_namespace)
+                            .language(current_language)
+        )
+        for job_offer in offers:
             try:
                 node = NavigationNode(
                     title=job_offer.title,

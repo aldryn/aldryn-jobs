@@ -7,16 +7,17 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 
 import cms
+from aldryn_apphooks_config.admin import BaseAppHookConfig
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
-from hvad.admin import TranslatableAdmin
+from parler.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
 from .models import (
-    JobApplication, JobCategory, JobOffer, JobApplicationAttachment,
-    NewsletterSignup
+    JobApplication, JobCategory, JobOffer,
+    JobsConfig, NewsletterSignup
 )
 
 
@@ -120,7 +121,7 @@ class JobApplicationAdmin(admin.ModelAdmin):
 
 class JobCategoryAdmin(TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__unicode__', 'all_translations', 'ordering']
+    list_display = ['__unicode__', 'language_column', 'ordering']
     list_editable = ['ordering']
     filter_horizontal = ['supervisors']
 
@@ -131,6 +132,9 @@ class JobCategoryAdmin(TranslatableAdmin):
             }),
             (_('Supervisors'), {
                 'fields': ['supervisors']
+            }),
+            (_('Options'), {
+                'fields': ['app_config']
             })
         ]
         return fieldsets
@@ -138,7 +142,7 @@ class JobCategoryAdmin(TranslatableAdmin):
 
 class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
     form = JobOfferAdminForm
-    list_display = ['__unicode__', 'all_translations']
+    list_display = ['__unicode__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
     actions = ['send_newsletter_email']
 
@@ -148,7 +152,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
                 'fields': ['title', 'slug', 'lead_in']
             }),
             (_('Options'), {
-                'fields': ['category', 'is_active', 'can_apply']
+                'fields': ['category', 'is_active', 'can_apply', 'app_config']
             }),
             (_('Publication period'), {
                 'fields': ['publication_start', 'publication_end']
@@ -193,7 +197,13 @@ class JobNewsletterSignupAdmin(admin.ModelAdmin):
     list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
     order_by = ['recipient']
 
+
+class JobsConfigAdmin(BaseAppHookConfig):
+    pass
+
+
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
 admin.site.register(JobOffer, JobOfferAdmin)
+admin.site.register(JobsConfig, JobsConfigAdmin)
 admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)

@@ -1,21 +1,27 @@
 # -*- coding: utf-8 -*-
 import os
+import cms
+
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language
-from django.utils.translation import ugettext as _
+from django.utils.translation import pgettext_lazy as _, get_language
 
-from multiupload.fields import MultiFileField
+from aldryn_apphooks_config.utils import setup_config
+from app_data import AppDataForm
 from distutils.version import LooseVersion
 from emailit.api import send_mail
-from hvad.forms import TranslatableModelForm
+from multiupload.fields import MultiFileField
+from parler.forms import TranslatableModelForm
 from unidecode import unidecode
-import cms
 
-from .models import JobApplication, JobApplicationAttachment, NewsletterSignup
+from .models import (
+    JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
+    NewsletterSignup, JobsConfig
+)
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
@@ -26,16 +32,25 @@ class AutoSlugForm(TranslatableModelForm):
     slug_field = 'slug'
     slugified_field = None
 
+    def __init__(self, *args, **kwargs):
+        super(AutoSlugForm, self).__init__(*args, **kwargs)
+        if 'app_config' in self.fields:
+            # if has only one choice, select it by default
+            if self.fields['app_config'].queryset.count() == 1:
+                self.fields['app_config'].empty_label = None
+
     def clean(self):
         super(AutoSlugForm, self).clean()
 
         if not self.data.get(self.slug_field):
             slug = self.generate_slug()
             raw_data = self.data.copy()
-            # add to self.data in order to show generated slug in the form in case of an error
+            # add to self.data in order to show generated slug in the
+            # form in case of an error
             raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
 
-            # We cannot modify self.data directly because it can be Immutable QueryDict
+            # We cannot modify self.data directly because it can be
+            # Immutable QueryDict
             self.data = raw_data
         else:
             slug = self.cleaned_data[self.slug_field]
@@ -52,27 +67,32 @@ class AutoSlugForm(TranslatableModelForm):
         return slugify(unidecode(content_to_slugify))
 
     def get_slug_conflict(self, slug):
-        translations_model = self.instance._meta.translations_model
-
         try:
-            language_code = self.instance.language_code
-        except translations_model.DoesNotExist:
+            language_code = self.instance.get_current_language()
+        except ObjectDoesNotExist:
             language_code = get_language()
 
-        conflicts = translations_model.objects.filter(slug=slug, language_code=language_code)
+        conflicts = (
+            self._meta.model.objects.language(language_code)
+                              .translated(language_code, slug=slug)
+        )
         if self.is_edit_action():
-            conflicts = conflicts.exclude(master=self.instance)
+            conflicts = conflicts.exclude(pk=self.instance.pk)
 
         try:
             return conflicts.get()
-        except translations_model.DoesNotExist:
+        except self._meta.model.DoesNotExist:
             return None
 
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
             'url': conflict.master.get_absolute_url(),
-            'label': _('the conflicting object')}
-        error_message = _('Conflicting slug. See %(address)s.') % {'address': address}
+            'label': _('aldryn-jobs', 'the conflicting object')}
+        error_message = (
+            _('aldryn-jobs', 'Conflicting slug. See %(address)s.') % {
+                'address': address
+            }
+        )
         self.append_to_errors(field='slug', message=mark_safe(error_message))
 
     def append_to_errors(self, field, message):
@@ -90,7 +110,9 @@ class JobCategoryAdminForm(AutoSlugForm):
     slugified_field = 'name'
 
     class Meta:
-        fields = ['name', 'slug', 'supervisors']
+        model = JobCategory
+        fields = ['name', 'slug', 'supervisors', 'app_config']
+
 
 
 class JobOfferAdminForm(AutoSlugForm):
@@ -98,6 +120,7 @@ class JobOfferAdminForm(AutoSlugForm):
     slugified_field = 'title'
 
     class Meta:
+        model = JobOffer
         fields = [
             'title',
             'slug',
@@ -105,6 +128,7 @@ class JobOfferAdminForm(AutoSlugForm):
             'category',
             'is_active',
             'can_apply',
+            'app_config',
             'publication_start',
             'publication_end'
         ]
@@ -112,9 +136,29 @@ class JobOfferAdminForm(AutoSlugForm):
         if LooseVersion(cms.__version__) < LooseVersion('3.0'):
             fields.append('content')
 
+    def __init__(self, *args, **kwargs):
+        super(JobOfferAdminForm, self).__init__(*args, **kwargs)
+
+        # small monkey patch to show better label for categories
+        def label_from_instance(obj):
+            return "{0} / {1}".format(obj.app_config, obj)
+        self.fields['category'].label_from_instance = label_from_instance
+
+    def clean(self):
+        cleaned_data = super(JobOfferAdminForm, self).clean()
+        category = cleaned_data.get('category')
+        app_config = cleaned_data.get('app_config')
+        if category and category.app_config != app_config:
+            self.append_to_errors(
+                'category',
+                _('aldryn-jobs', 'Category app_config must be the same '
+                                 'selected for Job Offer')
+            )
+        return cleaned_data
+
 
 class JobApplicationForm(forms.ModelForm):
-    attachments  = MultiFileField(
+    attachments = MultiFileField(
         max_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT', 5),
         min_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT', 0),
         max_file_size=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024*1024*5),
@@ -140,6 +184,7 @@ class JobApplicationForm(forms.ModelForm):
     def save(self, commit=True):
         super(JobApplicationForm, self).save(commit=False)
         self.instance.job_offer = self.job_offer
+
         if commit:
             self.instance.save()
 
@@ -194,7 +239,7 @@ class NewsletterSignupForm(forms.ModelForm):
         model = NewsletterSignup
         fields = ['recipient']
         labels = {
-            'recipient': _('Email'),
+            'recipient': _('aldryn-jobs', 'Email'),
         }
 
 
@@ -218,3 +263,9 @@ class NewsletterResendConfirmationForm(NewsletterConfirmationForm):
     # form is actually the same, but for confirming the resend action
     # if it shouldn't be the same - please rewrite this form
     pass
+
+
+class JobsConfigForm(AppDataForm):
+    pass
+
+setup_config(JobsConfigForm, JobsConfig)

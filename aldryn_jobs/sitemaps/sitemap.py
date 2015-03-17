@@ -17,7 +17,7 @@ class JobOfferSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return JobOffer.active.all()
+        return JobOffer.objects.active()
 
     def lastmod(self, obj):
         return obj.publication_start

@@ -1,22 +1,30 @@
 # -*- coding: utf-8 -*-
+from aldryn_apphooks_config.mixins import AppConfigMixin
+from aldryn_apphooks_config.utils import get_app_instance
+
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.http import Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.core.urlresolvers import reverse
+from django.http import (
+    Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+)
 from django.shortcuts import redirect, render, render_to_response
 from django.template import RequestContext
-from django.utils.translation import pgettext
-from django.views.generic import CreateView, DetailView, ListView, TemplateView, View
+from django.utils.translation import (
+    pgettext_lazy as _, get_language_from_request
+)
+from django.views.generic import (
+    CreateView, DetailView, ListView, TemplateView, View
+)
 from django.views.generic.base import TemplateResponseMixin
-from django.utils.translation import ugettext_lazy as _
-from menus.utils import set_language_changer
 
 from cms.utils.i18n import get_default_language
 from emailit.api import send_mail
+from menus.utils import set_language_changer
 
 from . import request_job_offer_identifier
 from .forms import (
-    JobApplicationForm, NewsletterConfirmationForm,NewsletterSignupForm,
+    JobApplicationForm, NewsletterConfirmationForm, NewsletterSignupForm,
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
 )
 from .models import (
@@ -25,22 +33,37 @@ from .models import (
 )
 
 
-class JobOfferList(ListView):
+class JobOfferList(AppConfigMixin, ListView):
     template_name = 'aldryn_jobs/jobs_list.html'
+    model = JobOffer
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
-        return (JobOffer.active.language().select_related('category')
-                .order_by('category__id'))
+        language = get_language_from_request(self.request)
+        return (
+            JobOffer.objects.active()
+                            .language(language)
+                            .translated(language)
+                            .select_related('category')
+                            .namespace(self.namespace)
+                            .order_by('category__id')
+        )
 
 
 class CategoryJobOfferList(JobOfferList):
+
     def get_queryset(self):
         qs = super(CategoryJobOfferList, self).get_queryset()
+        language = get_language_from_request(self.request)
 
+        category_slug = self.kwargs['category_slug']
         try:
-            category = JobCategory.objects.language().get(
-                slug=self.kwargs['category_slug'])
+            category = (
+                JobCategory.objects.language(language)
+                                   .translated(language, slug=category_slug)
+                                   .namespace(self.namespace)
+                                   .get()
+            )
         except JobCategory.DoesNotExist:
             raise Http404
 
@@ -52,25 +75,40 @@ class CategoryJobOfferList(JobOfferList):
         set_language_changer(self.request, category.get_absolute_url)
 
 
-class JobOfferDetail(DetailView):
+class JobOfferDetail(AppConfigMixin, DetailView):
     form_class = JobApplicationForm
     template_name = 'aldryn_jobs/jobs_detail.html'
     slug_url_kwarg = 'job_offer_slug'
 
     def dispatch(self, request, *args, **kwargs):
         self.request = request
+        self.namespace, self.config = get_app_instance(request)
         self.object = self.get_object()
         return super(JobOfferDetail, self).dispatch(request, *args, **kwargs)
 
-    def get_object(self):
-        # django-hvad 0.3.0 doesn't support Q conditions in `get` method
-        # https://github.com/KristianOellegaard/django-hvad/issues/119
-        job_offer = super(JobOfferDetail, self).get_object()
-        if not job_offer.get_active() and not self.request.user.is_staff:
-            raise Http404(
-                pgettext('aldryn-jobs', 'Offer is not longer valid.'))
-        setattr(self.request, request_job_offer_identifier, job_offer)
-        self.set_language_changer(job_offer=job_offer)
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        slug = self.kwargs.get(self.slug_url_kwarg, None)
+        slug_field = self.get_slug_field()
+        language = get_language_from_request(self.request)
+        queryset = (
+            queryset.namespace(self.namespace)
+                    .language(language)
+                    .translated(language, **{slug_field: slug})
+        )
+
+        job_offer = None
+        try:
+            job_offer = queryset.get()
+        except JobOffer.DoesNotExist:
+            pass
+        finally:
+            if (not job_offer or (not job_offer.get_active() and
+                                  not self.request.user.is_staff)):
+                raise Http404(_(
+                    'aldryn-jobs', 'Offer is not longer valid.'
+                ))
         return job_offer
 
     def get_form_class(self):
@@ -97,7 +135,12 @@ class JobOfferDetail(DetailView):
 
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
-        return JobOffer.objects.language().select_related('category')
+        language = get_language_from_request(self.request)
+        return (
+            JobOffer.objects.language(language)
+                            .translated(language)
+                            .select_related('category')
+        )
 
     def set_language_changer(self, job_offer):
         """Translate the slug while changing the language."""
@@ -110,10 +153,11 @@ class JobOfferDetail(DetailView):
 
     def post(self, *args, **kwargs):
         """Handles application for the job."""
-
         if not self.object.can_apply:
-            messages.success(self.request, pgettext('aldryn-jobs',
-                                                    'You can\'t apply for this job.'))
+            messages.success(
+                self.request,
+                _('aldryn-jobs', 'You can\'t apply for this job.')
+            )
             return redirect(self.object.get_absolute_url())
 
         form_class = self.get_form_class()
@@ -121,9 +165,10 @@ class JobOfferDetail(DetailView):
 
         if self.form.is_valid():
             self.form.save()
-            msg = pgettext('aldryn-jobs',
-                           'You have successfully applied for %(job)s.') % {
-                      'job': self.object.title}
+            msg = (
+                _('aldryn-jobs', 'You have successfully applied for %(job)s.')
+                % {'job': self.object.title}
+            )
             messages.success(self.request, msg)
             return redirect(self.object.get_absolute_url())
         else:
@@ -239,7 +284,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         admin_recipients = set([user.email for group in all_groups
                                 for user in group.user_set.all()])
 
-        additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS')
+        additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS', [])
         if additional_recipients:
             admin_recipients.update(additional_recipients)
 
@@ -344,7 +389,7 @@ class RegisterJobNewsletter(CreateView):
     def get(self, request, *args, **kwargs):
         # TODO: add GET requests registration functionality
         # don't serve get requests, only plugin registration so far
-        return HttpResponsePermanentRedirect(reverse('job-offer-list'))
+        return HttpResponsePermanentRedirect(reverse('aldryn_jobs:job-offer-list'))
 
     def get_invalid_template_name(self):
         return 'aldryn_jobs/newsletter_invalid_email.html'
@@ -390,7 +435,7 @@ class RegisterJobNewsletter(CreateView):
         context['resend_confirmation'] = None
         if recipient_email is not None and recipient_object:
             recipient_object = recipient_object[0]
-            context['resend_confirmation'] = reverse('resend_confirmation_link', kwargs={
+            context['resend_confirmation'] = reverse('aldryn_jobs:resend_confirmation_link', kwargs={
                 'key': recipient_object.confirmation_key})
         template_name = self.template_invalid_name if (
             hasattr(self, 'template_invalid_name')) else (
@@ -400,7 +445,7 @@ class RegisterJobNewsletter(CreateView):
                       context_instance=context_instance)
 
     def get_success_url(self):
-        return reverse('newsletter_registration_notification')
+        return reverse('aldryn_jobs:newsletter_registration_notification')
 
 
 class ResendNewsletterConfirmation(ConfirmNewsletterSignup):

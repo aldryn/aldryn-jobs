@@ -1,8 +1,36 @@
+# -*- coding: utf-8 -*-
+from aldryn_apphooks_config.managers.parler import \
+    AppHookConfigTranslatableManager, AppHookConfigTranslatableQueryset
+
+from django.db.models import Q
+from django.utils import timezone
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.contrib.sites.models import get_current_site
 from emailit.api import send_mail
+
+
+class JobOffersQuerySet(AppHookConfigTranslatableQueryset):
+
+    def active(self):
+        now = timezone.now()
+        return self.filter(
+            Q(publication_start__isnull=True) | Q(publication_start__lte=now),
+            Q(publication_end__isnull=True) | Q(publication_end__gt=now),
+            is_active=True
+        )
+
+
+class JobOffersManager(AppHookConfigTranslatableManager):
+
+    def get_queryset(self):
+        return JobOffersQuerySet(self.model, using=self.db)
+
+    get_query_set = get_queryset
+
+    def active(self):
+        return self.get_queryset().active()
 
 
 class NewsletterSignupManager(models.Manager):
@@ -62,7 +90,7 @@ class NewsletterSignupManager(models.Manager):
         sent_emails = 0
         for recipient_record in self.recipient_list:
             kwargs = {'key': recipient_record.confirmation_key}
-            link = reverse('unsubscribe_from_newsletter', kwargs=kwargs)
+            link = reverse('aldryn_jobs:unsubscribe_from_newsletter', kwargs=kwargs)
             unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
 
             context = {

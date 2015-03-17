@@ -1,16 +1,41 @@
 # -*- coding: utf-8 -*-
+import sys
 from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
+py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
+py27 = sys.version_info < (2, 8, 0) and sys.version_info >= (2, 7, 0)
+
+if not py26 and not py27:
+    raise ValueError(
+        "Aldryn Events currently support only python >= 2.6.5"
+    )
+
+
 REQUIREMENTS = [
+    'South<1.1,>=1.0.2',
+    'aldryn-apphooks-config>=0.1.3',
     'django-emailit',
-    'django-hvad',
+    'django-parler',
     'django-standard-form',
-    # This might cause issues because the 2.x release of djangocms-text-ckeditor is not cms 2.x compatible.
     'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',
+]
+
+if py26:
+    REQUIREMENTS += [
+        'Django<1.6,>=1.5',
+    ]
+
+if py27:
+    REQUIREMENTS += [
+        'Django<1.8,>=1.5',
+    ]
+
+DEPENDENCY_LINKS = [
+    'https://github.com/aldryn/aldryn-apphooks-config/archive/master.zip#egg=aldryn-apphooks-config-0.1.3'  # NOQA
 ]
 
 CLASSIFIERS = [
@@ -37,7 +62,8 @@ setup(
     license='LICENSE.txt',
     platforms=['OS Independent'],
     install_requires=REQUIREMENTS,
+    dependency_links=DEPENDENCY_LINKS,
     classifiers=CLASSIFIERS,
     include_package_data=True,
-    zip_safe=False
+    zip_safe=False,
 )
