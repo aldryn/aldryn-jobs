@@ -1,0 +1,11 @@
+{% load i18n %}
+
+<div class="plugin plugin-jobs">
+	<ul class="jobs-latest-entries">
+	{% for job in instance.job_offers %}
+		<li><p><a href="{{ job.get_absolute_url }}">{{ job }}</a></p></li>
+	{% empty %}
+		<li class="jobs-empty"><p>{% trans "There are currently no job openings." %}</p></li>
+	{% endfor %}
+	</ul>
+</div>

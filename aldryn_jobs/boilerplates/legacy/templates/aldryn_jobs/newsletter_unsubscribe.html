@@ -1,0 +1,11 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n %}
+
+{% block content_jobs %}
+<p>{%trans 'After pushing unsubscribe button you will not receive jobs newsletter anymore.' %}</p>
+<form action="." method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% trans 'Unsubscribe from newsletter' %}" />
+</form>
+{% endblock %}

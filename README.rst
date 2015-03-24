@@ -17,17 +17,19 @@ This add-on lets you:
 Installation
 ============
 
-Aldryn Platrofm Users
+Aldryn Platform Users
 ---------------------
 
-Choose a site you want to install the add-on to from the dashboard. Then go to ``Apps -> Install app`` and click ``Install`` next to ``Jobs`` app.
+Choose a site you want to install the add-on to from the dashboard. Then go to ``Apps -> Install app`` and click ``Install`` next to ``Aldryn Jobs`` app.
 
 Redeploy the site.
 
 Manuall Installation
 --------------------
 
-Run ``pip install aldryn-blog``.
+::
+
+    pip install aldryn-events
 
 Add below apps to ``INSTALLED_APPS``: ::
 
@@ -41,6 +43,13 @@ Add below apps to ``INSTALLED_APPS``: ::
         'standard_form',
         …
     ]
+
+Configure ``aldryn-boilerplates`` (https://pypi.python.org/pypi/aldryn-boilerplates/).
+
+To use the old templates, set ``ALDRYN_BOILERPLATE_NAME='legacy'``.
+To use https://github.com/aldryn/aldryn-boilerplate-standard (recommended, will be renamed to
+``aldryn-boilerplate-bootstrap3``) set ``ALDRYN_BOILERPLATE_NAME='bootstrap3'``.
+
 
 Adding a job offer
 ==================
