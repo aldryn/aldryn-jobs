@@ -1,6 +1,7 @@
 {% load i18n %}
 
 <div class="plugin plugin-jobs">
+    <p>{% blocktrans with total=instance.job_offers.count %}Showing {{ total }} Job Offers{% endblocktrans %}
 	<ul class="jobs-latest-entries">
 	{% for job in instance.job_offers %}
 		<li><p><a href="{{ job.get_absolute_url }}">{{ job }}</a></p></li>

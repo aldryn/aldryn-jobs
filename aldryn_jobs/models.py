@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
+from django.utils.encoding import force_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
@@ -25,6 +26,7 @@ from emailit.api import send_mail
 from functools import partial
 from os.path import join as join_path
 from parler.models import TranslatableModel, TranslatedFields
+from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
 from .managers import NewsletterSignupManager, JobOffersManager
@@ -263,11 +265,35 @@ class JobApplicationAttachment(models.Model):
 
 
 class JobListPlugin(CMSPlugin):
+
+    """ Store job list for JobListPlugin. """
+
     app_config = models.ForeignKey(
         JobsConfig, verbose_name=_('app_config'), null=True
     )
 
+    joboffers = SortedManyToManyField(
+        JobOffer, blank=True, null=True,
+        help_text=_("Select Job Offers to show or don't select any to show "
+                   "lasted job offers.")
+    )
+    num_entries = models.PositiveSmallIntegerField(
+        verbose_name=_('Number of entries'),
+        default=25,
+        help_text=_('The number of entries to be displayed. Default is 25. '
+                    'Only apply when any Job Offers are selected.')
+    )
+
     def job_offers(self):
+        """
+        Return the selected JobOffer for JobListPlugin.
+
+        If no JobOffer are selected, return all active events for namespace
+        and language.
+        """
+        if self.joboffers.exists():
+            return self.joboffers.filter()[:self.num_entries]
+
         namespace = self.app_config and self.app_config.namespace
         return (
             JobOffer.objects.namespace(namespace)
@@ -275,6 +301,12 @@ class JobListPlugin(CMSPlugin):
                             .translated(self.language)
                             .active()
         )
+
+    def __unicode__(self):
+        return force_text(self.pk)
+
+    def copy_relations(self, oldinstance):
+        self.joboffers = oldinstance.joboffers.all()
 
 
 class JobNewsletterRegistrationPlugin(CMSPlugin):

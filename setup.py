@@ -22,6 +22,7 @@ REQUIREMENTS = [
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',
+    'django-sortedm2m'
 ]
 
 if py26:

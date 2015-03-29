@@ -5,18 +5,15 @@ from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
 from .models import JobListPlugin, JobNewsletterRegistrationPlugin
-from .forms import NewsletterSignupForm
+from .forms import NewsletterSignupForm, JobListPluginForm
 
 
 class JobList(CMSPluginBase):
-    module = "Jobs"
-    render_template = 'aldryn_jobs/plugins/latest_entries.html'
-    name = _('Job List')
+    form = JobListPluginForm
     model = JobListPlugin
-
-    def render(self, context, instance, placeholder):
-        context['instance'] = instance
-        return context
+    module = "Jobs"
+    name = _('Job List')
+    render_template = 'aldryn_jobs/plugins/latest_entries.html'
 
 
 class JobNewsletter(CMSPluginBase):
