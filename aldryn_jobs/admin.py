@@ -73,15 +73,19 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
 class JobApplicationAdmin(admin.ModelAdmin):
     list_display = ['__unicode__', 'job_offer', 'created', 'is_rejected', 'rejection_date']
     list_filter = ['job_offer', 'is_rejected']
-    readonly_fields = ['job_offer', 'get_attachment_address']
+    readonly_fields = ['get_attachment_address']
+    raw_id_fields = ['job_offer']
 
     fieldsets = [
+        (_('Job Offer'), {
+            'fields': ['job_offer']
+        }),
         (_('Personal information'), {
             'fields': ['salutation', 'first_name', 'last_name', 'email']
         }),
         (_('Cover letter & attachments'), {
             'fields': ['cover_letter', 'get_attachment_address']
-        }),
+        })
     ]
 
     def get_actions(self, request):
