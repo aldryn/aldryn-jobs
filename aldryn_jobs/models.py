@@ -264,60 +264,6 @@ class JobApplicationAttachment(models.Model):
     file = JobApplicationFileField()
 
 
-class JobListPlugin(CMSPlugin):
-
-    """ Store job list for JobListPlugin. """
-
-    app_config = models.ForeignKey(
-        JobsConfig, verbose_name=_('app_config'), null=True
-    )
-
-    joboffers = SortedManyToManyField(
-        JobOffer, blank=True, null=True,
-        help_text=_("Select Job Offers to show or don't select any to show "
-                   "lasted job offers.")
-    )
-    num_entries = models.PositiveSmallIntegerField(
-        verbose_name=_('Number of entries'),
-        default=25,
-        help_text=_('The number of entries to be displayed. Default is 25. '
-                    'Only apply when any Job Offers are selected.')
-    )
-
-    def job_offers(self):
-        """
-        Return the selected JobOffer for JobListPlugin.
-
-        If no JobOffer are selected, return all active events for namespace
-        and language.
-        """
-        if self.joboffers.exists():
-            return self.joboffers.filter()[:self.num_entries]
-
-        namespace = self.app_config and self.app_config.namespace
-        return (
-            JobOffer.objects.namespace(namespace)
-                            .language(self.language)
-                            .translated(self.language)
-                            .active()
-        )
-
-    def __unicode__(self):
-        return force_text(self.pk)
-
-    def copy_relations(self, oldinstance):
-        self.joboffers = oldinstance.joboffers.all()
-
-
-class JobNewsletterRegistrationPlugin(CMSPlugin):
-    # get_form is deleted because of it was unneeded
-    # TODO: add configurable parameters for registration form plugin
-    mail_to_group = models.ManyToManyField(Group, verbose_name=_('Signup notification to'))
-
-    def copy_relations(self, oldinstance):
-        self.mail_to_group = oldinstance.mail_to_group.all()
-
-
 class NewsletterSignup(models.Model):
     recipient = models.EmailField(_('Recipient'), unique=True)
     default_language = models.CharField(_('Language'), blank=True,
@@ -407,3 +353,74 @@ class NewsletterSignupUser(models.Model):
 
     def __unicode__(self):
         return unicode('link to user {0} '.format(self.get_full_name()))
+
+
+class BaseJobsPlugin(CMSPlugin):
+    app_config = models.ForeignKey(
+        JobsConfig, verbose_name=_('app_config'), null=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class JobListPlugin(BaseJobsPlugin):
+
+    """ Store job list for JobListPlugin. """
+
+    joboffers = SortedManyToManyField(
+        JobOffer, blank=True, null=True,
+        help_text=_("Select Job Offers to show or don't select any to show "
+                    "last job offers.")
+        )
+
+    def job_offers(self):
+        """
+        Return the selected JobOffer for JobListPlugin.
+
+        If no JobOffer are selected, return all active events for namespace
+        and language.
+        """
+        if self.joboffers.exists():
+            return self.joboffers.all()
+
+        namespace = self.app_config and self.app_config.namespace
+        return (
+            JobOffer.objects.namespace(namespace)
+                            .language(self.language)
+                            .translated(self.language)
+                            .active()
+        )
+
+    def __unicode__(self):
+        return force_text(self.pk)
+
+    def copy_relations(self, oldinstance):
+        self.joboffers = oldinstance.joboffers.all()
+
+
+class JobCategoriesPlugin(BaseJobsPlugin):
+
+    def __str__(self):
+        return _('%s categories') % (self.app_config.get_app_title(), )
+
+    @property
+    def categories(self):
+        return (
+            JobCategory.objects
+                       .namespace(self.app_config.namespace)
+                       .filter(jobs=True)
+                       .annotate(count=models.Count('jobs'))
+                       .order_by('ordering', '-count', 'translations__name')
+        )
+
+
+class JobNewsletterRegistrationPlugin(CMSPlugin):
+    # NOTE: does not need app_config in this one
+    # TODO: add configurable parameters for registration form plugin
+    mail_to_group = models.ManyToManyField(
+        Group, verbose_name=_('Signup notification to')
+    )
+
+    def copy_relations(self, oldinstance):
+        self.mail_to_group = oldinstance.mail_to_group.all()
