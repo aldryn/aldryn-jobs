@@ -17,4 +17,6 @@ script:
 
 after_success:
   - coveralls
-dddd
+
+notifications:
+  webhooks: http://addons.us-iad-rs.aldryn.io/en/travis-endpoint/
