@@ -28,7 +28,9 @@ def get_joboffer_from_path(path, language):
             job_slug = current_url.kwargs['job_offer_slug']
             job_offer = job_offer.translated('en', slug=job_slug)
 
-        return job_offer
+        if job_offer.count():
+            # Let MultipleObjectsReturned propagate if it is raised
+            return job_offer.get()
 
     return None
 
