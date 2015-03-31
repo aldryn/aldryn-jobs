@@ -5,7 +5,7 @@ class Form(forms.BaseForm):
 
     default_send_to = forms.CharField(
         "Default send to",
-        help_text="E-mail in this field will be default e-mail to send"
+        help_text="E-mail in this field will be default e-mail to send "
                   "staff notifications."
     )
 
