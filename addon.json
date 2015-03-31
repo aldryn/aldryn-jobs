@@ -1,4 +1,7 @@
 {
+    "name": "Aldryn Jobs",
+    "description": "Publish job offers on your site",
+    "url": "https://github.com/aldryn/aldryn-jobs",
     "package-name": "aldryn-jobs",
     "installed-apps": [
         "absolute",
