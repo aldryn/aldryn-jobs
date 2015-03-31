@@ -2,9 +2,10 @@
 import os
 import cms
 
-from django import forms
+from django import forms, get_version
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError, \
+    NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
@@ -12,7 +13,7 @@ from django.utils.translation import pgettext_lazy as _, get_language
 
 from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
-from distutils.version import LooseVersion
+from distutils.version import LooseVersion, StrictVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
@@ -20,12 +21,12 @@ from unidecode import unidecode
 
 from .models import (
     JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
-    NewsletterSignup, JobsConfig
-)
+    NewsletterSignup, JobsConfig,
+    JobListPlugin)
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
-
+DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
 
 class AutoSlugForm(TranslatableModelForm):
 
@@ -206,6 +207,8 @@ class JobApplicationForm(forms.ModelForm):
 
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
+        if DEFAULT_SEND_TO:
+            recipients += [DEFAULT_SEND_TO]
         admin_change_form = reverse(
             'admin:%s_%s_change' % (self._meta.model._meta.app_label,
                                     self._meta.model._meta.module_name),
@@ -267,5 +270,60 @@ class NewsletterResendConfirmationForm(NewsletterConfirmationForm):
 
 class JobsConfigForm(AppDataForm):
     pass
+
+
+class JobListPluginForm(forms.ModelForm):
+    model = JobListPlugin
+
+    def add_error(self, field, error):
+        # TODO: move it to a form mixin in aldryn-commons would be good idea?
+        #       (or even something more generic)
+        if StrictVersion(get_version()) >= StrictVersion('1.7'):
+            return super(JobListPluginForm, self).add_error(field, error)
+
+        if not isinstance(error, ValidationError):
+            # Normalize to ValidationError and let its constructor
+            # do the hard work of making sense of the input.
+            error = ValidationError(error)
+
+        if hasattr(error, 'error_dict'):
+            if field is not None:
+                raise TypeError(
+                    "The argument `field` must be `None` when the `error` "
+                    "argument contains errors for multiple fields."
+                )
+            else:
+                error = error.error_dict
+        else:
+            error = {field or NON_FIELD_ERRORS: error}
+        for field, error_list in error.items():
+            if field not in self.errors:
+                if field != NON_FIELD_ERRORS and field not in self.fields:
+                    raise ValueError(
+                        "'%s' has no field named '%s'." % (self.__class__.__name__, field))
+                self._errors[field] = self.error_class()
+            self._errors[field].extend(error_list.messages)
+            if field in self.cleaned_data:
+                del self.cleaned_data[field]
+
+    def clean(self):
+        data = super(JobListPluginForm, self).clean()
+        app_config = data.get('app_config')
+        offers = data.get('joboffers')
+        if app_config and offers:
+            for offer in offers:
+                if offer.app_config != app_config:
+                    self.add_error(
+                        'joboffers',
+                        _('aldryn-jobs',
+                          "Job Offer '%(joboffer)s' does not match app_config "
+                          "'%(config)s'. Please, remove it from selected Job "
+                          "Offers.") % {'joboffer': offer,
+                                        'config': app_config}
+                    )
+                    if 'joboffers' in data:
+                        data.pop('joboffers')
+        return data
+
 
 setup_config(JobsConfigForm, JobsConfig)
