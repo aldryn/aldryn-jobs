@@ -284,6 +284,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
                                 for user in group.user_set.all()])
 
         additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS', [])
+        additional_recipients += getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', [])
+
         if additional_recipients:
             admin_recipients.update(additional_recipients)
 

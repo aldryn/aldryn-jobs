@@ -26,7 +26,7 @@ from .models import (
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
-
+DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
 
 class AutoSlugForm(TranslatableModelForm):
 
@@ -207,6 +207,8 @@ class JobApplicationForm(forms.ModelForm):
 
     def send_staff_notifications(self):
         recipients = self.instance.job_offer.get_notification_emails()
+        if DEFAULT_SEND_TO:
+            recipients += [DEFAULT_SEND_TO]
         admin_change_form = reverse(
             'admin:%s_%s_change' % (self._meta.model._meta.app_label,
                                     self._meta.model._meta.module_name),
