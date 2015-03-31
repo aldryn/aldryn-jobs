@@ -1,32 +1,40 @@
 # -*- coding: utf-8 -*-
-from aldryn_jobs.models import JobCategory, JobOffer
-from django.core.urlresolvers import reverse, resolve
-from django.utils.translation import ugettext_lazy as _, \
-    get_language_from_request
 
+from django.core.urlresolvers import reverse, resolve
+from django.utils.translation import (
+    ugettext_lazy as _,
+    get_language_from_request
+)
+
+from aldryn_jobs.models import JobOffer
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
 
 def get_joboffer_from_path(path, language):
     current_url = resolve(path)
-    category_slug = current_url.kwargs['category_slug']
-    job_slug = current_url.kwargs['job_offer_slug']
+
     if current_url.url_name == 'job-offer-detail':
-        job_offer = (
-            JobOffer.objects
-                    .language(language)
-                    .translated('en', slug=job_slug)
-                    .filter(category__translations__slug=category_slug,
-                            category__translations__language_code=language)
-                    .get()
-        )
+        job_offer = JobOffer.objects.language(language).get()
+
+        if 'category_slug' in current_url.kwargs:
+            category_slug = current_url.kwargs['category_slug']
+            job_offer = job_offer.filter(
+                category__translations__slug=category_slug,
+                category__translations__language_code=language
+            )
+
+        if 'job_offer_slug' in current_url.kwargs:
+            job_slug = current_url.kwargs['job_offer_slug']
+            job_offer = job_offer.translated('en', slug=job_slug)
+
         return job_offer
+
     return None
+
 
 @toolbar_pool.register
 class JobsToolbar(CMSToolbar):
-
 
     def populate(self):
         def can(actions, model):
