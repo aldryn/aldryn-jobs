@@ -15,7 +15,7 @@ def get_joboffer_from_path(path, language):
     current_url = resolve(path)
 
     if current_url.url_name == 'job-offer-detail':
-        job_offer = JobOffer.objects.language(language).get()
+        job_offer = JobOffer.objects.language(language)
 
         if 'category_slug' in current_url.kwargs:
             category_slug = current_url.kwargs['category_slug']
