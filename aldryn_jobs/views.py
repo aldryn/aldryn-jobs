@@ -22,7 +22,6 @@ from cms.utils.i18n import get_default_language
 from emailit.api import send_mail
 from menus.utils import set_language_changer
 
-from . import request_job_offer_identifier
 from .forms import (
     JobApplicationForm, NewsletterConfirmationForm, NewsletterSignupForm,
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
@@ -58,7 +57,7 @@ class CategoryJobOfferList(JobOfferList):
 
         category_slug = self.kwargs['category_slug']
         try:
-            category = (
+            self.category = (
                 JobCategory.objects.language(language)
                                    .translated(language, slug=category_slug)
                                    .namespace(self.namespace)
@@ -67,8 +66,8 @@ class CategoryJobOfferList(JobOfferList):
         except JobCategory.DoesNotExist:
             raise Http404
 
-        self.set_language_changer(category=category)
-        return qs.filter(category=category)
+        self.set_language_changer(category=self.category)
+        return qs.filter(category=self.category)
 
     def set_language_changer(self, category):
         """Translate the slug while changing the language."""
@@ -285,6 +284,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
                                 for user in group.user_set.all()])
 
         additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS', [])
+        additional_recipients += getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', [])
+
         if additional_recipients:
             admin_recipients.update(additional_recipients)
 

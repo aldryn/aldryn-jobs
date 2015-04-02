@@ -6,7 +6,8 @@ HELPER_SETTINGS = {
         'filer',
         'easy_thumbnails',
         'parler',
-	'aldryn_common'
+	    'aldryn_common',
+        'django_sortedm2m'
     ],
     'THUMBNAIL_PROCESSORS': (
         'easy_thumbnails.processors.colorspace',
