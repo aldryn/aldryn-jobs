@@ -1,0 +1,22 @@
+{% load i18n standard_form %}
+
+{% if object.can_apply %}
+<div class="jobs-application">
+	<h3>{% trans "Apply for this job" %}</h3>
+
+	<form action="." method="post" class="form form-jobs" role="form" enctype="multipart/form-data">
+		{% if form.errors %}
+		<ul class="messages text-error list-reset">
+			{% for field in form %}{% if field.errors %}{% for error in field.errors %}
+			<li><strong>{{ field.label }}</strong>: {{ error }}</li>
+			{% endfor %}{% endif %}{% endfor %}
+		</ul>
+		{% endif %}
+		<fieldset class="align-horizontal">
+			{% csrf_token %}
+			{% standard_form form %}
+			{% standard_submit %}
+		</fieldset>
+	</form>
+</div>
+{% endif %}

@@ -19,6 +19,7 @@ REQUIREMENTS = [
     'django-parler',
     'django-standard-form',
     'djangocms-text-ckeditor>= 1.0.10',
+    'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',

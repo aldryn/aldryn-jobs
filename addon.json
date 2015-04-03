@@ -9,7 +9,8 @@
         "emailit",
         "parler",
         "standard_form",
-        "aldryn_common"
+        "aldryn_common",
+        "aldryn_boilerplates"
     ],
     "author": {
         "name": "Divio AG",
