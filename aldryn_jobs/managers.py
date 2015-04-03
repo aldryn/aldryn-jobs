@@ -1,14 +1,25 @@
 # -*- coding: utf-8 -*-
-from aldryn_apphooks_config.managers.parler import \
-    AppHookConfigTranslatableManager, AppHookConfigTranslatableQueryset
 
+from django.contrib.sites.models import get_current_site
+from django.core.urlresolvers import reverse
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from django.db import models
-from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
-from django.contrib.sites.models import get_current_site
+
+from aldryn_apphooks_config.managers.parler import (
+    AppHookConfigTranslatableManager, AppHookConfigTranslatableQueryset
+)
+from aldryn_categories.models import CategoryManager, CategoryQuerySet
 from emailit.api import send_mail
+
+
+class JobCategoryQuerySet(AppHookConfigTranslatableQueryset, CategoryQuerySet):
+    pass
+
+
+class JobCategoryManager(AppHookConfigTranslatableManager, CategoryManager):
+    queryset_class = JobCategoryQuerySet
 
 
 class JobOffersQuerySet(AppHookConfigTranslatableQueryset):

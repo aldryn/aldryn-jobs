@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_apphooks_config.utils import get_app_instance
-
+from aldryn_categories.models import Category
 from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -27,7 +27,7 @@ from .forms import (
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
 )
 from .models import (
-    JobCategory, JobOffer, NewsletterSignup, JobNewsletterRegistrationPlugin,
+    JobOffer, NewsletterSignup, JobNewsletterRegistrationPlugin,
     NewsletterSignupUser,
 )
 
@@ -54,16 +54,17 @@ class CategoryJobOfferList(JobOfferList):
     def get_queryset(self):
         qs = super(CategoryJobOfferList, self).get_queryset()
         language = get_language_from_request(self.request)
-
         category_slug = self.kwargs['category_slug']
         try:
             self.category = (
-                JobCategory.objects.language(language)
-                                   .translated(language, slug=category_slug)
-                                   .namespace(self.namespace)
-                                   .get()
+                Category.objects
+                         .language(language)
+                         .translated(language, slug=category_slug)
+                         .filter(
+                            jobs_opts__app_config__namespace=self.namespace
+                         ).get()
             )
-        except JobCategory.DoesNotExist:
+        except Category.DoesNotExist:
             raise Http404
 
         self.set_language_changer(category=self.category)
@@ -71,7 +72,7 @@ class CategoryJobOfferList(JobOfferList):
 
     def set_language_changer(self, category):
         """Translate the slug while changing the language."""
-        set_language_changer(self.request, category.get_absolute_url)
+        set_language_changer(self.request, category.jobs_opts.get_absolute_url)
 
 
 class JobOfferDetail(AppConfigMixin, DetailView):

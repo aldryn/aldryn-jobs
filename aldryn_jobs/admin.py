@@ -8,16 +8,18 @@ from django.utils.timezone import now
 
 import cms
 from aldryn_apphooks_config.admin import BaseAppHookConfig
+from aldryn_categories.admin import CategoryAdmin
+from aldryn_categories.models import Category
 from cms.admin.placeholderadmin import PlaceholderAdmin
 from cms.admin.placeholderadmin import FrontendEditableAdmin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
 
-from .forms import JobCategoryAdminForm, JobOfferAdminForm
+from .forms import JobOfferAdminForm
 from .models import (
-    JobApplication, JobCategory, JobOffer,
-    JobsConfig, NewsletterSignup
+    JobApplication, JobOffer,
+    JobsConfig, NewsletterSignup, JobCategoryOpts
 )
 
 
@@ -123,28 +125,45 @@ class JobApplicationAdmin(admin.ModelAdmin):
     get_attachment_address.short_description = _('Attachments')
 
 
-class JobCategoryAdmin(TranslatableAdmin):
-    form = JobCategoryAdminForm
-    list_display = ['__unicode__', 'language_column', 'ordering']
-    list_editable = ['ordering']
-    filter_horizontal = ['supervisors']
+# class JobCategoryAdmin(TranslatableAdmin):
+#     form = JobCategoryAdminForm
+#     list_display = ['__unicode__', 'language_column', 'ordering']
+#     list_editable = ['ordering']
+#     filter_horizontal = ['supervisors']
 
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = [
-            (_('Translatable fields'), {
-                'fields': ['name', 'slug']
-            }),
-            (_('Supervisors'), {
-                'fields': ['supervisors']
-            }),
-            (_('Options'), {
-                'fields': ['app_config']
-            })
-        ]
-        return fieldsets
+#     def get_fieldsets(self, request, obj=None):
+#         fieldsets = [
+#             (_('Translatable fields'), {
+#                 'fields': ['name', 'slug']
+#             }),
+#             (_('Supervisors'), {
+#                 'fields': ['supervisors']
+#             }),
+#             (_('Options'), {
+#                 'fields': ['app_config']
+#             })
+#         ]
+#         return fieldsets
 
 
-class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
+class JobCategoryOptsInline(admin.StackedInline):
+    extra = 1
+    max_num = 1
+    model = JobCategoryOpts
+    verbose_name = _("Aldryn Jobs option")
+    verbose_name_plural = _("Aldryn Jobs options")
+
+    def has_delete_permission(self, *args, **kwargs):
+        return False
+
+
+class JobCategoryAdmin(CategoryAdmin):
+    list_display = ['__unicode__', 'language_column']
+    inlines = [JobCategoryOptsInline]
+
+
+class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin,
+                    PlaceholderAdmin):
     form = JobOfferAdminForm
     list_display = ['__unicode__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
@@ -156,7 +175,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
                 'fields': ['title', 'slug', 'lead_in']
             }),
             (_('Options'), {
-                'fields': ['category', 'is_active', 'can_apply', 'app_config']
+                'fields': ['category', 'category_new', 'is_active', 'can_apply', 'app_config']
             }),
             (_('Publication period'), {
                 'fields': ['publication_start', 'publication_end']
@@ -207,7 +226,8 @@ class JobsConfigAdmin(BaseAppHookConfig):
 
 
 admin.site.register(JobApplication, JobApplicationAdmin)
-admin.site.register(JobCategory, JobCategoryAdmin)
+admin.site.unregister(Category)
+admin.site.register(Category, JobCategoryAdmin)
 admin.site.register(JobOffer, JobOfferAdmin)
 admin.site.register(JobsConfig, JobsConfigAdmin)
 admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)

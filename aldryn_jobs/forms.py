@@ -17,10 +17,11 @@ from distutils.version import LooseVersion, StrictVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
+from treebeard.forms import MoveNodeForm
 from unidecode import unidecode
 
 from .models import (
-    JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
+    JobApplication, JobApplicationAttachment, JobOffer,
     NewsletterSignup, JobsConfig,
     JobListPlugin)
 
@@ -104,16 +105,6 @@ class AutoSlugForm(TranslatableModelForm):
 
     def is_edit_action(self):
         return self.instance.pk is not None
-
-
-class JobCategoryAdminForm(AutoSlugForm):
-
-    slugified_field = 'name'
-
-    class Meta:
-        model = JobCategory
-        fields = ['name', 'slug', 'supervisors', 'app_config']
-
 
 
 class JobOfferAdminForm(AutoSlugForm):

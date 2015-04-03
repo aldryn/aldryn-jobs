@@ -14,10 +14,12 @@ from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
 
 from aldryn_apphooks_config.models import AppHookConfig
+from aldryn_apphooks_config.managers import AppHookConfigManager
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
 )
-
+from aldryn_categories.models import Category
+from aldryn_categories.fields import CategoryOneToOneField, CategoryForeignKey
 from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
 from cms.utils.i18n import force_language
@@ -71,20 +73,11 @@ class JobsConfig(AppHookConfig):
     pass
 
 
-class JobCategory(TranslatableModel):
-    translations = TranslatedFields(
-        name=models.CharField(_('Name'), max_length=255),
-        slug=models.SlugField(
-            _('Slug'), max_length=255, blank=True,
-            help_text=_('Auto-generated. Used in the URL. If changed, the URL'
-                        ' will change. Clean it to have it re-created.')
-        ),
-        meta={'unique_together': [['slug', 'language_code']]}
-    )
-
+class JobCategoryOpts(models.Model):
+    category = CategoryOneToOneField(Category, related_name='jobs_opts')
     supervisors = models.ManyToManyField(
         get_user_model_for_fields(), verbose_name=_('Supervisors'),
-        related_name='job_offer_categories',
+        related_name='job_categories_opts',
         help_text=_('Those people will be notified via e-mail when new '
                     'application arrives.'),
         blank=True
@@ -93,21 +86,19 @@ class JobCategory(TranslatableModel):
         JobsConfig, verbose_name=_('app_config'), null=True
     )
 
-    ordering = models.IntegerField(_('Ordering'), default=0)
-
-    objects = AppHookConfigTranslatableManager()
+    objects = AppHookConfigManager()
 
     class Meta:
-        verbose_name = _('Job category')
-        verbose_name_plural = _('Job categories')
-        ordering = ['ordering']
+        verbose_name = _('Job category opts')
+        verbose_name_plural = _('Job categories opts')
 
     def __unicode__(self):
-        return self.safe_translation_getter('name', str(self.pk))
+        return self.category.safe_translation_getter('name', str(self.pk))
 
     def get_absolute_url(self, language=None):
-        language = language or self.get_current_language()
-        slug = self.safe_translation_getter('slug', language_code=language)
+        language = language or self.category.get_current_language()
+        slug = self.category.safe_translation_getter('slug',
+                                                     language_code=language)
         if self.app_config_id:
             namespace = self.app_config.namespace
         else:
@@ -145,8 +136,9 @@ class JobOffer(TranslatableModel):
     )
 
     content = PlaceholderField('Job Offer Content')
-    category = models.ForeignKey(
-        JobCategory, verbose_name=_('Category'), related_name='jobs'
+    category = CategoryForeignKey(
+        Category, related_name='job_offers',
+        null=False
     )
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(_('Active'), default=True)
@@ -168,7 +160,7 @@ class JobOffer(TranslatableModel):
     class Meta:
         verbose_name = _('Job offer')
         verbose_name_plural = _('Job offers')
-        ordering = ['category__ordering', 'category', '-created']
+        ordering = ['category', '-created']
 
     def __unicode__(self):
         return self.safe_translation_getter('title', str(self.pk))
@@ -210,7 +202,7 @@ class JobOffer(TranslatableModel):
         ])
 
     def get_notification_emails(self):
-        return self.category.get_notification_emails()
+        return self.category.jobs_opts.get_notification_emails()
 
 
 class JobApplication(models.Model):
@@ -407,11 +399,12 @@ class JobCategoriesPlugin(BaseJobsPlugin):
     @property
     def categories(self):
         return (
-            JobCategory.objects
-                       .namespace(self.app_config.namespace)
-                       .filter(jobs=True)
-                       .annotate(count=models.Count('jobs'))
-                       .order_by('ordering', '-count', 'translations__name')
+            Category.objects
+                    .filter(
+                        jobs_opts__app_config__namespace=self.app_config.namespace,  # NOQA
+                        job_offers=True
+                    )
+                    .annotate(count=models.Count('job_offers'))
         )
 
 

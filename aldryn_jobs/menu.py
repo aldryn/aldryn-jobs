@@ -9,7 +9,7 @@ from cms.utils import get_language_from_request
 from menus.base import NavigationNode
 from menus.menu_pool import menu_pool
 
-from aldryn_jobs.models import JobCategory
+from aldryn_categories.models import Category
 from aldryn_jobs.models import JobOffer
 
 
@@ -22,14 +22,15 @@ class JobCategoryMenu(CMSAttachMenu):
         language = get_language_from_request(request)
         nodes = []
         categories = (
-            JobCategory.objects.namespace(app_namespace)
-                               .language(language)
-                               .translated(language)
+            Category.objects
+                    .language(language)
+                    .translated(language)
+                    .filter(jobs_opts__app_config__namespace=app_namespace)
         )
         for category in categories:
             try:
                 node = NavigationNode(category.name,
-                                      category.get_absolute_url(),
+                                      category.jobs_opts.get_absolute_url(),
                                       category.slug)
                 nodes.append(node)
             except NoReverseMatch:
