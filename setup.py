@@ -8,7 +8,7 @@ py27 = sys.version_info < (2, 8, 0) and sys.version_info >= (2, 7, 0)
 
 if not py26 and not py27:
     raise ValueError(
-        "Aldryn Events currently support only python >= 2.6.5"
+        "Aldryn Events currently support only python >= 2.6.5, not %s" % '.'.join(map(str, sys.version_info))  # NOQA
     )
 
 
@@ -22,17 +22,18 @@ REQUIREMENTS = [
     'aldryn-common>=0.0.4',
     'unidecode',
     'django-multiupload>=0.3',
-    'django-sortedm2m'
+    'django-sortedm2m',
+    'aldryn-categories'
 ]
 
 if py26:
     REQUIREMENTS += [
-        'Django<1.6,>=1.5',
+        'Django<1.7,>=1.6',
     ]
 
 if py27:
     REQUIREMENTS += [
-        'Django<1.8,>=1.5',
+        'Django<1.8,>=1.6',
     ]
 
 DEPENDENCY_LINKS = [

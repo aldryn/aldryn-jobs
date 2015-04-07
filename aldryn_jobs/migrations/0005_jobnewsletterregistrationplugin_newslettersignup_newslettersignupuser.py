@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0001_initial'),
-        ('cms', '0004_auto_20150309_1408'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('aldryn_jobs', '0004_data_create_default_namespace_20150210_1211'),
     ]

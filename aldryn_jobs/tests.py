@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.template.defaultfilters import slugify
 from django.test import TestCase
-
 from cms import api
 from cms.utils import get_cms_setting
 from cms.test_utils.testcases import BaseCMSTestCase
 
+from aldryn_categories.models import Category
 from .cms_plugins import JobList
-from .models import JobCategory, JobOffer
+from .models import JobOffer
 
 
 class JobsAddTest(TestCase, BaseCMSTestCase):
@@ -23,17 +24,17 @@ class JobsAddTest(TestCase, BaseCMSTestCase):
         self.category = self.create_category()
 
     def create_category(self, name='Administration'):
-        return JobCategory.objects.create(name=name)
+        return Category.add_root(name=name, slug=slugify(name))
 
     def create_superuser(self):
-         return User.objects.create_superuser(self.su_username, 'email@example.com', self.su_password)
+        return User.objects.create_superuser(self.su_username, 'email@example.com', self.su_password)
 
     def test_create_job_category(self):
         """
         We can create a new job category
         """
         self.assertEqual(self.category.name, 'Administration')
-        self.assertEqual(JobCategory.objects.all()[0], self.category)
+        self.assertEqual(Category.objects.all()[0], self.category)
 
     def test_create_job_offer(self):
         """
@@ -51,7 +52,7 @@ class JobsAddTest(TestCase, BaseCMSTestCase):
         title = 'Senior'
         offer = JobOffer.objects.create(title=title, category=self.category)
         offer.save()
-        self.assertIn(offer, self.category.jobs.all())
+        self.assertIn(offer, self.category.job_offers.all())
 
     def test_add_offer_list_plugin_api(self):
         """

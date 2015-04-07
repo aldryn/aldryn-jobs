@@ -3,11 +3,12 @@
 HELPER_SETTINGS = {
     'TIME_ZONE': 'Europe/Zurich',
     'INSTALLED_APPS': [
-        'filer',
+        'aldryn_common',
+        'aldryn_categories',
         'easy_thumbnails',
+        'filer',
         'parler',
-	    'aldryn_common',
-        'django_sortedm2m'
+        'sortedm2m',
     ],
     'THUMBNAIL_PROCESSORS': (
         'easy_thumbnails.processors.colorspace',

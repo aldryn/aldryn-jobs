@@ -179,7 +179,7 @@ class JobOffer(TranslatableModel):
             try:
                 # FIXME: does not looks correct return category url here
                 if not slug:
-                    return self.category.get_absolute_url(language=language)
+                    return self.category.jobs_opts.get_absolute_url(language)
                 kwargs = {
                     'category_slug': category_slug,
                     'job_offer_slug': slug,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+from aldryn_categories.models import Category
 from django.contrib.sitemaps import Sitemap
-
-from ..models import JobCategory, JobOffer
+from ..models import JobOffer
 
 
 class JobOfferCategoriesSitemap(Sitemap):
@@ -9,7 +9,7 @@ class JobOfferCategoriesSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return JobCategory.objects.all()
+        return Category.objects.all()
 
 
 class JobOfferSitemap(Sitemap):
