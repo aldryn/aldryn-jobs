@@ -11,12 +11,14 @@
 <p>{% blocktrans context 'aldryn-jobs' %}Here is a the list of new and available jobs:{% endblocktrans %}</p>
 <ul>
 {% for object in jobs%}
-    <li><a href="{{ object.link }}">{{ object.job.title}}</a></li>
+    {# FIXME: if you have a doubled domain in the href - change to `object.link`. doubling is caused because of emailit #}
+    <li><a href="{{ object.full_link }}">{{ object.job.title}}</a></li>
 {% endfor %}
 </ul>
 <p>{% blocktrans context 'aldryn-jobs' %}
     To unsubscribe form job newsletter please click this links and hit unsubscribe button:
     {% endblocktrans %}
 </p>
-<p><a href="{{ unsubscribe_link }}">{% trans 'unsubscribe' context 'aldryn-jobs' %}</a></p>
+{# FIXME: if you will get a url inside of a href with doubled domain name - delete domian variable from href. #}
+<p><a href="{{ domain }}{% url 'unsubscribe_from_newsletter' key=recipient.confirmation_key %}">{% trans 'Unsubscribe' context 'aldryn-jobs' %}</a></p>
 {% endblock %}

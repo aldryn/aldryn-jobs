@@ -12,5 +12,5 @@
 {% blocktrans context 'aldryn-jobs' %}
 To unsubscribe form job newsletter please click this links and hit unsubscribe button:
 {% endblocktrans %}
-{{ unsubscribe_link_full }}
+{{ domain }}{% url 'unsubscribe_from_newsletter' key=recipient.confirmation_key %}
 {% endblock %}

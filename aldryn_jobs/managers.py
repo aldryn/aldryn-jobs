@@ -61,14 +61,12 @@ class NewsletterSignupManager(models.Manager):
 
         sent_emails = 0
         for recipient_record in self.recipient_list:
-            kwargs = {'key': recipient_record.confirmation_key}
-            link = reverse('unsubscribe_from_newsletter', kwargs=kwargs)
-            unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
-
+            # domain will be used to build full url (in conjunction with url tag)
+            # than this will provide a language aware unsubscribe link
             context = {
+                'recipient': recipient_record,
                 'jobs': jobs,
-                'unsubscribe_link': link,
-                'unsubscribe_link_full': unsubscribe_link_full,
+                'domain': current_domain,
             }
 
             user = recipient_record.related_user.filter(signup__pk=recipient_record.pk)
