@@ -392,6 +392,7 @@ class RegisterJobNewsletter(CreateView):
             recipient_object = recipient_object[0]
             context['resend_confirmation'] = reverse('resend_confirmation_link', kwargs={
                 'key': recipient_object.confirmation_key})
+            context['invalid_email'] = recipient_email
         template_name = self.template_invalid_name if (
             hasattr(self, 'template_invalid_name')) else (
             self.get_invalid_template_name())
