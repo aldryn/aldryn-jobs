@@ -10,7 +10,8 @@
         "parler",
         "standard_form",
         "aldryn_common",
-        "aldryn_boilerplates"
+        "aldryn_boilerplates",
+        "aldryn_apphooks_config"
     ],
     "author": {
         "name": "Divio AG",
