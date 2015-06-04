@@ -9,12 +9,18 @@
         {% endblocktrans %}
     </p>
     {% if resend_confirmation %}
-    <p>
-        {% trans 'If you want to resend confirmation e-mail - click on the link below.' %}
-    </p>
-    <p><a href="{{ resend_confirmation }}">{% trans 'Resend confirmation E-mail' context 'aldryn-jobs' %}</a></p>
+        {% if condition == 'disabled' %}
+            <p>
+                {% trans "You have been unsubscribed from the newsletter. If you'd like to change your mind please click the link below." %}
+            </p>
+        {% elif condiion == 'not_confirmed' %}
+            <p>
+                {% trans 'To resend the confirmation email please click the link below.' %}
+            </p>
+        {% endif %}
+        <p><a href="{{ resend_confirmation }}">{% trans 'Resend confirmation e-mail' context 'aldryn-jobs' %}</a></p>
     {% else %}
-    <p>{% trans 'Please correct mistakes and try again.' context 'aldryn-jobs' %}</p>
+        <p>{% trans 'Please correct the errors and try again.' context 'aldryn-jobs' %}</p>
     {% endif %}
 </div>
 {% endblock %}

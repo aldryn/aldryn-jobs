@@ -135,6 +135,31 @@ class JobOfferDetail(DetailView):
         return context
 
 
+class CheckResendSettingsMixin(object):
+    def check_options(self, recipient_object):
+        """
+        Check if user is allowed to resend confirmation by himself.
+        returns tuple allowed (True/False) and a condition - disabled or not_confirmed
+        """
+        # check if resend confirmation is allowed by settings
+        ALLOW_RESEND_CONFIRMATION = getattr(
+            settings, 'ALLOW_RESEND_CONFIRMATION', {})
+        # check the reason and update context if settings are allowing
+        # manual resend confirmation. Messages can be changed by overriding
+        # inclusion templates (see invalid template)
+        allowed = False
+        condition = None
+        if recipient_object.is_disabled:
+            condition = 'disabled'
+            if ALLOW_RESEND_CONFIRMATION.get('disabled', False):
+                allowed = True
+        elif not recipient_object.is_verified:
+            condition = 'not_confirmed'
+            if ALLOW_RESEND_CONFIRMATION.get('not_confirmed', False):
+                allowed = True
+        return allowed, condition
+
+
 class ConfirmNewsletterSignup(TemplateResponseMixin, View):
     http_method_names = ["get", "post"]
     messages = {
@@ -338,7 +363,7 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
         pass
 
 
-class RegisterJobNewsletter(CreateView):
+class RegisterJobNewsletter(CheckResendSettingsMixin, CreateView):
     form_class = NewsletterSignupForm
 
     def get(self, request, *args, **kwargs):
@@ -388,10 +413,16 @@ class RegisterJobNewsletter(CreateView):
         recipient_object = NewsletterSignup.objects.filter(recipient=recipient_email)
         # check for registered but not confirmed
         context['resend_confirmation'] = None
+        context['resend_reason'] = None
         if recipient_email is not None and recipient_object:
             recipient_object = recipient_object[0]
-            context['resend_confirmation'] = reverse('resend_confirmation_link', kwargs={
-                'key': recipient_object.confirmation_key})
+            # if maual resend is allowed - prepare data for that
+            resend_allowed, condition = self.check_options(recipient_object)
+            context['condition'] = condition
+            if resend_allowed:
+                context['resend_confirmation'] = reverse(
+                    'resend_confirmation_link',
+                    kwargs={'key': recipient_object.confirmation_key})
             context['invalid_email'] = recipient_email
         template_name = self.template_invalid_name if (
             hasattr(self, 'template_invalid_name')) else (
@@ -404,7 +435,7 @@ class RegisterJobNewsletter(CreateView):
         return reverse('newsletter_registration_notification')
 
 
-class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
+class ResendNewsletterConfirmation(CheckResendSettingsMixin, ConfirmNewsletterSignup):
     form_class = NewsletterResendConfirmationForm
 
     def get_template_names(self):
@@ -413,6 +444,15 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
             "POST": ["aldryn_jobs/newsletter_confirmation_resent.html"],
         }[self.request.method]
 
+    def get_context_data(self, **kwargs):
+        # check if we are allowed to serve resend confirmation page.
+        # performing check here since atm self.object is set already,
+        # but no response were served yet.
+        resend_allowed, _ = self.check_options(self.object)
+        if not resend_allowed:
+            raise Http404
+        return super(ResendNewsletterConfirmation, self).get_context_data(**kwargs)
+
     def post(self, *args, **kwargs):
         form_confirmation_key = self.request.POST.get('confirmation_key')
         try:
@@ -420,6 +460,12 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
                 confirmation_key=form_confirmation_key)
         except NewsletterSignup.DoesNotExist:
             raise Http404()
+
+        # if manual resend is not allowed - raise 404
+        resend_allowed, condition = self.check_options(self.object)
+        if not resend_allowed:
+            raise Http404()
+
         form_class = self.get_form_class()
         form = form_class(self.request.POST, instance=self.object)
 
