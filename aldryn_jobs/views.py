@@ -151,11 +151,11 @@ class CheckResendSettingsMixin(object):
         condition = None
         if recipient_object.is_disabled:
             condition = 'disabled'
-            if ALLOW_RESEND_CONFIRMATION.get('disabled'):
+            if ALLOW_RESEND_CONFIRMATION.get('disabled', False):
                 allowed = True
         elif not recipient_object.is_verified:
             condition = 'not_confirmed'
-            if ALLOW_RESEND_CONFIRMATION.get('not_confirmed'):
+            if ALLOW_RESEND_CONFIRMATION.get('not_confirmed', False):
                 allowed = True
         return allowed, condition
 
