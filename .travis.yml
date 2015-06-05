@@ -11,11 +11,11 @@ env:
   - TOXENV=py27-dj17-cms31-sqlite
   - TOXENV=py27-dj17-cms31-mysql
   - TOXENV=py27-dj17-cms31-postgres
-  - TOX_ENV=pep8
+  - TOXENV=pep8
 
 matrix:
   allow_failures:
-    - env: TOX_ENV=pep8
+    - env: TOXENV=pep8
 
 install:
   - pip install tox
