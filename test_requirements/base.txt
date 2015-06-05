@@ -1,0 +1,5 @@
+coverage
+djangocms-helper
+pysqlite
+pytz
+django-filer

@@ -28,12 +28,13 @@ REQUIREMENTS = [
 
 if py26:
     REQUIREMENTS += [
-        'Django<1.6,>=1.5',
+        'Django<1.7,>1.5',
+        'ordereddict',
     ]
 
 if py27:
     REQUIREMENTS += [
-        'Django<1.8,>=1.5',
+        'Django<1.8,>1.5',
     ]
 
 DEPENDENCY_LINKS = [
