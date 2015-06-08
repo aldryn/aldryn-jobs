@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import reversion
 
 from django import get_version
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -13,6 +15,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
 
+from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.models import AppHookConfig
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
@@ -31,6 +34,13 @@ from uuid import uuid4
 
 from .managers import NewsletterSignupManager, JobOffersManager
 from .utils import get_valid_filename
+
+# check if user model is registered, since we're following on that relation
+# for EventCoordinator model, if not - register it to avoid RegistrationError
+actual_user_model = get_user_model()
+revision_manager = reversion.default_revision_manager
+if actual_user_model not in revision_manager.get_registered_models():
+    reversion.register(actual_user_model)
 
 
 def get_user_model_for_fields():
@@ -66,11 +76,11 @@ JobApplicationFileField = partial(
     storage=jobs_attachment_storage
 )
 
-
+@version_controlled_content
 class JobsConfig(AppHookConfig):
     pass
 
-
+@version_controlled_content(follow=['supervisors', 'app_config'])
 class JobCategory(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
@@ -128,7 +138,7 @@ class JobCategory(TranslatableModel):
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
 
-
+@version_controlled_content(follow=['category', 'app_config'])
 class JobOffer(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
@@ -212,7 +222,7 @@ class JobOffer(TranslatableModel):
     def get_notification_emails(self):
         return self.category.get_notification_emails()
 
-
+@version_controlled_content(follow=['job_offer', 'app_config'])
 class JobApplication(models.Model):
     MALE = 'male'
     FEMALE = 'female'
@@ -258,12 +268,12 @@ def cleanup_attachments(sender, instance, **kwargs):
         if attachment:
             attachment.file.delete(False)
 
-
+@version_controlled_content(follow=['application'])
 class JobApplicationAttachment(models.Model):
     application = models.ForeignKey(JobApplication, related_name='attachments')
     file = JobApplicationFileField()
 
-
+@version_controlled_content
 class NewsletterSignup(models.Model):
     recipient = models.EmailField(_('Recipient'), unique=True)
     default_language = models.CharField(_('Language'), blank=True,
@@ -341,7 +351,7 @@ class NewsletterSignup(models.Model):
     def __unicode__(self):
         return unicode(self.recipient)
 
-
+@version_controlled_content(follow=['signup', 'user'])
 class NewsletterSignupUser(models.Model):
     signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
     user = models.ForeignKey(

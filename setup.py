@@ -21,6 +21,7 @@ REQUIREMENTS = [
     'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
+    'aldryn-reversion>=0.0.2',
     'unidecode',
     'django-multiupload>=0.3',
     'django-sortedm2m'
