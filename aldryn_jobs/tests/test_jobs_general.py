@@ -8,8 +8,8 @@ from cms import api
 from cms.utils import get_cms_setting
 from cms.test_utils.testcases import BaseCMSTestCase, CMSTestCase
 
-from .cms_plugins import JobList
-from .models import JobCategory, JobOffer
+from ..cms_plugins import JobList
+from ..models import JobCategory, JobOffer
 
 
 class JobsAddTest(TestCase, BaseCMSTestCase):

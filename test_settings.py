@@ -8,6 +8,10 @@ HELPER_SETTINGS = {
         'parler',
         'aldryn_common',
         'sortedm2m',
+        'reversion',
+        'aldryn_reversion',
+        'aldryn_jobs',
+        'djangocms_text_ckeditor',
     ],
     'THUMBNAIL_PROCESSORS': (
         'easy_thumbnails.processors.colorspace',
