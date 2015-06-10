@@ -3,15 +3,12 @@ import six
 from datetime import datetime, timedelta
 
 from django.db import transaction
-from django.utils.translation import override
+from django.contrib.auth.models import User
 from parler.utils.context import switch_language
 
-from cms import api
-from cms.utils.i18n import force_language
-from cms.test_utils.testcases import CMSTestCase
 from aldryn_reversion.core import create_revision_with_placeholders
 
-from ..models import (JobCategory, JobOffer, JobApplication,
+from ..models import (JobCategory, JobOffer, JobApplication, NewsletterSignup,
 NewsletterSignupUser, JobApplicationAttachment)
 
 from .base import JobsBaseTestCase, tz_datetime
@@ -459,3 +456,244 @@ class ReversionTestCase(JobsBaseTestCase):
         offer = JobOffer.objects.get(pk=offer.pk)
         self.assertNotEqual(offer.category, category_2)
         self.assertEqual(JobCategory.objects.all().count(), 2)
+
+    # JobApplication
+    def test_job_application_revision_is_created(self):
+        job_offer = self.create_default_job_offer()
+        application = JobApplication.objects.create(
+            job_offer=job_offer, **self.application_default_values)
+        self.assertEqual(len(reversion.get_for_object(application)), 0)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.application_values_raw, 1)
+        self.create_revision(application, **new_values_1)
+        self.assertEqual(len(reversion.get_for_object(application)), 1)
+
+    def test_job_application_contains_latest_values(self):
+        job_offer = self.create_default_job_offer()
+        application = JobApplication.objects.create(
+            job_offer=job_offer, **self.application_default_values)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.application_values_raw, 1)
+        self.create_revision(application, **new_values_1)
+        self.assertEqual(len(reversion.get_for_object(application)), 1)
+
+        application = JobApplication.objects.get(pk=application.pk)
+        for prop in new_values_1.keys():
+            self.assertEqual(getattr(application, prop), new_values_1[prop])
+
+        # revision 2
+        new_values_2 = self.make_new_values(self.application_values_raw, 2)
+        new_offer = JobOffer.objects.create(
+            category=self.default_category,
+            **self.make_new_values(self.offer_values_raw['en'], 2))
+        new_values_2['job_offer'] = new_offer
+        self.create_revision(application, **new_values_2)
+        self.assertEqual(len(reversion.get_for_object(application)), 2)
+
+        application = JobApplication.objects.get(pk=application.pk)
+        for prop in new_values_2.keys():
+            self.assertEqual(getattr(application, prop), new_values_2[prop])
+
+    def test_job_application_revision_is_reverted(self):
+        job_offer = self.create_default_job_offer()
+        application = JobApplication.objects.create(
+            job_offer=job_offer, **self.application_default_values)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.application_values_raw, 1)
+        self.create_revision(application, **new_values_1)
+        self.assertEqual(len(reversion.get_for_object(application)), 1)
+
+
+        # revision 2
+        new_values_2 = self.make_new_values(self.application_values_raw, 2)
+        new_offer = JobOffer.objects.create(
+            category=self.default_category,
+            **self.make_new_values(self.offer_values_raw['en'], 2))
+        new_values_2['job_offer'] = new_offer
+        self.create_revision(application, **new_values_2)
+        self.assertEqual(len(reversion.get_for_object(application)), 2)
+
+        # revert to 1
+        self.revert_to(application, 1)
+        application = JobApplication.objects.get(pk=application.pk)
+        # add initial job_offer to values list to be checked
+        new_values_1['job_offer'] = job_offer
+        for prop in new_values_1.keys():
+            self.assertEqual(getattr(application, prop), new_values_1[prop])
+
+    def test_job_application_revision_is_reverted_if_fk_obj_was_deleted(self):
+        job_offer = self.create_default_job_offer()
+        application = JobApplication.objects.create(
+            job_offer=job_offer, **self.application_default_values)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.application_values_raw, 1)
+        self.create_revision(application, **new_values_1)
+        self.assertEqual(len(reversion.get_for_object(application)), 1)
+
+
+        # revision 2
+        new_values_2 = self.make_new_values(self.application_values_raw, 2)
+        new_offer = JobOffer.objects.create(
+            category=self.default_category,
+            **self.make_new_values(self.offer_values_raw['en'], 2))
+        new_values_2['job_offer'] = new_offer
+        self.create_revision(application, **new_values_2)
+        self.assertEqual(len(reversion.get_for_object(application)), 2)
+
+        # delete initial offer
+        with transaction.atomic():
+            job_offer.delete()
+
+        # revert to 1
+        self.revert_to(application, 1)
+        application = JobApplication.objects.get(pk=application.pk)
+        self.assertEqual(JobOffer.objects.all().count(), 2)
+        # get restored job offer
+        job_offer = JobOffer.objects.all().exclude(pk=new_offer.pk).get()
+        # add initial job_offer to values list to be checked
+        new_values_1['job_offer'] = job_offer
+        for prop in new_values_1.keys():
+            self.assertEqual(getattr(application, prop), new_values_1[prop])
+
+    # NewsletterSignup
+    def test_signup_revision_is_created(self):
+        signup = NewsletterSignup.objects.create(**self.signup_default_values)
+        self.assertEqual(len(reversion.get_for_object(signup)), 0)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.signup_values_raw, 1)
+        self.create_revision(signup, **new_values_1)
+        self.assertEqual(len(reversion.get_for_object(signup)), 1)
+
+    def test_signup_revision_contains_latest_values(self):
+        signup = NewsletterSignup.objects.create(**self.signup_default_values)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.signup_values_raw, 1)
+        self.create_revision(signup, **new_values_1)
+
+        # revision 2
+        new_values_2 = {
+            'is_verified': True,
+            'is_disabled': True,
+        }
+        self.create_revision(signup, **new_values_2)
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        for prop in new_values_2.keys():
+            self.assertEqual(getattr(signup, prop), new_values_2[prop])
+        # check that not changed values are the same
+        for prop in new_values_1.keys():
+            self.assertEqual(getattr(signup, prop), new_values_1[prop])
+
+        # revision 3
+        new_values_3 = self.make_new_values(self.signup_values_raw, 3)
+        new_values_3.update({
+            'is_verified': False,
+            'is_disabled': False,
+        })
+        self.create_revision(signup, **new_values_3)
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        for prop in new_values_3.keys():
+            self.assertEqual(getattr(signup, prop), new_values_3[prop])
+
+    def test_signup_revision_is_reverted(self):
+        signup = NewsletterSignup.objects.create(**self.signup_default_values)
+
+        # revision 1
+        new_values_1 = self.make_new_values(self.signup_values_raw, 1)
+        self.create_revision(signup, **new_values_1)
+
+        # revision 2
+        new_values_2 = {
+            'is_verified': True,
+            'is_disabled': True,
+        }
+        self.create_revision(signup, **new_values_2)
+
+        # revision 3
+        new_values_3 = self.make_new_values(self.signup_values_raw, 3)
+        new_values_3.update({
+            'is_verified': False,
+            'is_disabled': False,
+        })
+        self.create_revision(signup, **new_values_3)
+
+        # revert to 2
+        self.revert_to(signup, 2)
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        # since that revision is a mix-up prepare values at that revision
+        new_values_1.update(new_values_2)
+        for prop in new_values_1.keys():
+            self.assertEqual(getattr(signup, prop), new_values_1[prop])
+
+    # NewsletterSignupUser
+    def test_signup_user_revision_is_created(self):
+        signup = NewsletterSignup.objects.create(**self.signup_default_values)
+        user = User.objects.create(
+            username='test_user', first_name='First_name',
+            last_name='Last_name')
+
+        signup_user = NewsletterSignupUser.objects.create(signup=signup, user=user)
+        self.assertEqual(len(reversion.get_for_object(signup_user)), 0)
+        signup_2 = NewsletterSignup.objects.create(
+            **self.make_new_values(self.signup_values_raw, 1))
+
+        # revision 1
+        self.create_revision(signup_user, signup=signup_2)
+        self.assertEqual(len(reversion.get_for_object(signup_user)), 1)
+
+    def test_signup_user_revision_is_reverted(self):
+        signup = NewsletterSignup.objects.create(**self.signup_default_values)
+        user = User.objects.create(
+            username='test_user', first_name='First_name',
+            last_name='Last_name')
+
+        signup_user = NewsletterSignupUser.objects.create(signup=signup, user=user)
+        signup_1 = NewsletterSignup.objects.create(
+            **self.make_new_values(self.signup_values_raw, 1))
+
+        # revision 1
+        self.create_revision(signup_user, signup=signup_1)
+
+        # revision 2
+        signup_2 = NewsletterSignup.objects.create(
+            **self.make_new_values(self.signup_values_raw, 3))
+        self.create_revision(signup_user, signup=signup_2)
+
+        # revert to 1
+        self.revert_to(signup_user, 1)
+        signup_user = NewsletterSignupUser.objects.get(pk=signup_user.pk)
+        self.assertEqual(signup_user.signup, signup_1)
+
+    def test_signup_user_revision_reverted_if_fk_was_deleted(self):
+        signup = NewsletterSignup.objects.create(**self.signup_default_values)
+        user = User.objects.create(
+            username='test_user', first_name='First_name',
+            last_name='Last_name')
+
+        # revision 1
+        signup_user = NewsletterSignupUser.objects.create(signup=signup, user=user)
+        signup_1 = NewsletterSignup.objects.create(
+            **self.make_new_values(self.signup_values_raw, 1))
+        self.create_revision(signup_user, signup=signup_1)
+
+        # revision 2
+        signup_2 = NewsletterSignup.objects.create(
+            **self.make_new_values(self.signup_values_raw, 3))
+        self.create_revision(signup_user, signup=signup_2)
+        # delete revision 1 signup
+        signup_1.delete()
+        self.assertEqual(NewsletterSignup.objects.count(), 2)
+
+        # revert to 1
+        self.revert_to(signup_user, 1)
+        signup_user = NewsletterSignupUser.objects.get(pk=signup_user.pk)
+        self.assertEqual(NewsletterSignup.objects.count(), 3)
+        # get deleted signup
+        signup_restored = NewsletterSignup.objects.all().exclude(
+            pk__in=(signup.pk, signup_2.pk)).get()
+        self.assertEqual(signup_user.signup, signup_restored)

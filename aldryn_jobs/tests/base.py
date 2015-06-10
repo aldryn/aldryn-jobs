@@ -70,10 +70,30 @@ class JobsBaseTestCase(TransactionTestCase):
         },
     }
     default_publication_start = {
-        'publication_start': datetime.now(tz=get_current_timezone())
+        'publication_start': datetime.now(tz=get_current_timezone()),
     }
     default_publication_end = {
-        'publication_end': datetime.now(tz=get_current_timezone()) + timedelta(days=1)
+        'publication_end': datetime.now(tz=get_current_timezone()) + timedelta(days=1),
+    }
+    application_default_values = {
+        'first_name': 'Default_first_name',
+        'last_name': 'Default_last_name',
+        'email': 'example@example.com',
+    }
+    application_values_raw = {
+        'first_name': 'First_name_{0}',
+        'last_name': 'Last_name_{0}',
+        'email': 'example_{0}@example.com',
+    }
+    signup_default_values = {
+        'recipient': 'initial@example.com',
+        'is_verified': False,
+        'is_disabled': False,
+        'confirmation_key': 'default confirmation key',
+    }
+    signup_values_raw = {
+        'confirmation_key': 'confirmation key {0}{0}{0}',
+        'recipient': 'recipient_{0}@example.com'
     }
 
     def setUp(self):
