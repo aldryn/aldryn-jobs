@@ -136,7 +136,9 @@ class JobsBaseTestCase(TransactionTestCase):
         cache.clear()
 
     def create_default_job_category(self, translated=False):
-        job_category = JobCategory.objects.create(**self.default_category_values['en'])
+        job_category = JobCategory.objects.create(
+            app_config=self.app_config,
+            **self.default_category_values['en'])
 
         # check if we need a translated job_category
         if translated:
@@ -146,8 +148,10 @@ class JobsBaseTestCase(TransactionTestCase):
 
     def create_default_job_offer(self, translated=False):
 
-        job_offer = JobOffer.objects.create(category=self.default_category,
-                                            **self.default_job_values['en'])
+        job_offer = JobOffer.objects.create(
+            category=self.default_category,
+            app_config=self.app_config,
+            **self.default_job_values['en'])
         with override('en'):
             api.add_plugin(job_offer.content, 'TextPlugin', 'en',
                            body=self.default_plugin_content['en'])
