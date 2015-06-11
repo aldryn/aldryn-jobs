@@ -1,9 +1,10 @@
-{% load i18n %}
+{% load apphooks_config_tags i18n %}
 <div class="plugin plugin-job-newsletter-registration">
     <h2>{% trans 'Job Newsletter' context 'aldryn-jobs' %}</h2>
     <p>{% trans 'Enter your e-mail to receive a job newsletter' context 'aldryn-jobs' %}</p>
     <div class="jobs-newsletter-registration-form">
-        <form action="{% url 'aldryn_jobs:register_newsletter' %}" method="post">
+        {# FIXME: actually without apphook config this is not working. #}
+        <form action="{% namespace_url 'register_newsletter' %}" method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="{% trans 'Subscribe' context 'aldryn-jobs' %}"/>

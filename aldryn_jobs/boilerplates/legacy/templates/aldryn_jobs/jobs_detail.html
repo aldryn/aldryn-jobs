@@ -1,5 +1,5 @@
 {% extends "aldryn_jobs/base.html" %}
-{% load i18n cms_tags %}
+{% load i18n apphooks_config_tags cms_tags  %}
 
 {% block content_jobs %}
 <div class="jobs-detail {% if user.is_staff and not object.get_active %}jobs-not-active{% endif %}">
@@ -16,6 +16,6 @@
 
 	{% include "aldryn_jobs/includes/jobs_application.html" %}
 
-	<p class="jobs-back"><a href="{% url 'aldryn_jobs:job-offer-list' %}">{% trans "Back" %}</a></p>
+	<p class="jobs-back"><a href="{% namespace_url 'job-offer-list' %}">{% trans "Back" %}</a></p>
 </div>
 {% endblock %}
