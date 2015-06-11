@@ -101,7 +101,7 @@ class JobsBaseTestCase(TransactionTestCase):
         self.template = get_cms_setting('TEMPLATES')[0][0]
         self.language = settings.LANGUAGES[0][0]
         self.app_config = JobsConfig.objects.create(
-            namespace='aldryn_jobs'
+            namespace='jobs_test_namespace'
         )
         self.default_category = self.create_default_job_category(translated=True)
         self.root_page = self.create_root_page()

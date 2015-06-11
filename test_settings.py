@@ -16,11 +16,16 @@ HELPER_SETTINGS = {
     'TIME_ZONE': 'Europe/Zurich',
     'INSTALLED_APPS': [
         'aldryn_apphooks_config',
+        # needed for tests, since we need to reload server after apphook has
+        # been added to a page, otherwise we cannot get a correct url.
+        'aldryn_apphook_reload',
         'aldryn_boilerplates',
         'aldryn_reversion',
         'aldryn_common',
         'aldryn_jobs',
         'reversion',
+        # TODO: findout who needs this dependency (maybe actually not this one
+        'appconf',
         'filer',
         'parler',
         'sortedm2m',
@@ -33,8 +38,6 @@ HELPER_SETTINGS = {
         'filer.thumbnail_processors.scale_and_crop_with_subject_location',
         'easy_thumbnails.processors.filters',
     ),
-    'MIGRATION_MODULES': DisableMigrations(),  # disable migration for DJ 1.7 in tests
-    'SOUTH_TESTS_MIGRATE': False,  # disable migration for DJ < 1.6 in tests
     'LANGUAGES': (
         ('en', 'English'),
         ('de', 'German'),
@@ -73,6 +76,22 @@ HELPER_SETTINGS = {
         ],
     },
     'ALDRYN_BOILERPLATE_NAME': 'legacy',
+    # add aldryn_apphook_reload so that pages would be restored on apphook reload.
+    'MIDDLEWARE_CLASSES': [
+        'aldryn_apphook_reload.middleware.ApphookReloadMiddleware',
+        'django.middleware.http.ConditionalGetMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.doc.XViewMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'cms.middleware.language.LanguageCookieMiddleware',
+        'cms.middleware.user.CurrentUserMiddleware',
+        'cms.middleware.page.CurrentPageMiddleware',
+        'cms.middleware.toolbar.ToolbarMiddleware'
+    ],
     'STATICFILES_FINDERS': [
         'django.contrib.staticfiles.finders.FileSystemFinder',
         # important! place right before django.contrib.staticfiles.finders.AppDirectoriesFinder
