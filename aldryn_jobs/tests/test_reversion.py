@@ -1,6 +1,7 @@
 import reversion
 import six
 from datetime import datetime, timedelta
+import time
 
 from django.db import transaction
 from django.contrib.auth.models import User
@@ -122,7 +123,7 @@ class ReversionTestCase(JobsBaseTestCase):
         job_offer = self.create_default_job_offer()
         # revision 1
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
         job_offer = JobOffer.objects.get(pk=job_offer.pk)
@@ -133,7 +134,7 @@ class ReversionTestCase(JobsBaseTestCase):
         job_offer = self.create_default_job_offer()
         # revision 1
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
         # test url and served content
@@ -168,12 +169,12 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 1
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.offer_values_raw['en'], 2)
-        content_en_2 = self.default_plugin_content['en'].format(2)
+        content_en_2 = self.plugin_values_raw['en'].format(2)
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
         job_offer = JobOffer.objects.get(pk=job_offer.pk)
@@ -185,12 +186,12 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 1
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.offer_values_raw['en'], 2)
-        content_en_2 = self.default_plugin_content['en'].format(2)
+        content_en_2 = self.plugin_values_raw['en'].format(2)
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
         # test served title
@@ -230,12 +231,12 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 1
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.offer_values_raw['en'], 2)
-        content_en_2 = self.default_plugin_content['en'].format(2)
+        content_en_2 = self.plugin_values_raw['en'].format(2)
         new_category = JobCategory.objects.create(
             app_config=self.app_config,
             **self.make_new_values(self.category_values_raw['en'], 2))
@@ -243,22 +244,24 @@ class ReversionTestCase(JobsBaseTestCase):
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
         # revert to 1
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
         self.revert_to(job_offer, 1)
+        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        new_values_en_1['category'] = self.default_category
         for prop in new_values_en_1.keys():
             self.assertEqual(getattr(job_offer, prop), new_values_en_1[prop])
+        self.assertNotEqual(job_offer.category, new_category)
 
     def test_offer_reverted_revision_serves_appropriate_content(self):
         job_offer = self.create_default_job_offer()
 
         # revision 1
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.offer_values_raw['en'], 2)
-        content_en_2 = self.default_plugin_content['en'].format(2)
+        content_en_2 = self.plugin_values_raw['en'].format(2)
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
         # revert to 1
@@ -277,24 +280,27 @@ class ReversionTestCase(JobsBaseTestCase):
         job_offer = self.create_default_job_offer()
 
         # revision 1
-        content_en_1 = self.default_plugin_content['en'].format(1)
-        self.create_revision(job_offer, content_en_1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
+        self.create_revision(job_offer, content=content_en_1)
 
         self.assertEqual(len(reversion.get_for_object(job_offer)), 1)
 
         # revision 2
-        content_en_2 = self.default_plugin_content['en'].format(2)
+        content_en_2 = self.plugin_values_raw['en'].format(2)
         with transaction.atomic():
             with reversion.create_revision():
-                plugins = job_offer.content.get_plugins()
+                language = job_offer.get_current_language()
+                plugins = job_offer.content.get_plugins().filter(language=language)
                 plugin = plugins[0].get_plugin_instance()[0]
                 plugin.body = content_en_2
                 plugin.save()
                 create_revision_with_placeholders(job_offer)
-
         self.assertEqual(len(reversion.get_for_object(job_offer)), 2)
 
-        response = self.client.get(job_offer.get_absolute_url())
+        with switch_language(job_offer, 'en'):
+            url = job_offer.get_absolute_url()
+        response = self.client.get(url)
+
         self.assertContains(response, content_en_2)
         self.assertNotContains(response, content_en_1)
 
@@ -399,24 +405,24 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 1: en 1, de 0
         new_values_en_1 = self.make_new_values(self.offer_values_raw['en'], 1)
-        content_en_1 = self.default_plugin_content['en'].format(1)
+        content_en_1 = self.plugin_values_raw['en'].format(1)
         with switch_language(offer, 'en'):
             self.create_revision(offer, content=content_en_1, **new_values_en_1)
 
         # revision 2: en 1, de 1
         new_values_de_1 = self.make_new_values(self.offer_values_raw['de'], 1)
-        content_de_1 = self.default_plugin_content['de'].format(1)
+        content_de_1 = self.plugin_values_raw['de'].format(1)
         with switch_language(offer, 'de'):
             self.create_revision(offer, content=content_de_1, **new_values_de_1)
 
         # revision 3: en 1, de 2
         new_values_de_2 = self.make_new_values(self.offer_values_raw['de'], 2)
-        content_de_2 = self.default_plugin_content['de'].format(2)
+        content_de_2 = self.plugin_values_raw['de'].format(2)
         with switch_language(offer, 'de'):
             self.create_revision(offer, content=content_de_2,  **new_values_de_2)
 
         # revision 4: en 2, de 2
-        content_en_2 = self.default_plugin_content['en'].format(2)
+        content_en_2 = self.plugin_values_raw['en'].format(2)
         new_values_en_2 = self.make_new_values(self.offer_values_raw['en'], 2)
         with switch_language(offer, 'en'):
             self.create_revision(offer, content=content_en_2, **new_values_en_2)

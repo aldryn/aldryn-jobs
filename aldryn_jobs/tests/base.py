@@ -45,7 +45,11 @@ class JobsBaseTestCase(TransactionTestCase):
     }
     default_plugin_content = {
         'en': 'Awesome job details here EN',
-        'de': 'Awesome job details here DE',
+        'de': 'Awesome German job details here DE',
+    }
+    plugin_values_raw = {
+        'en': 'English New, revision {0}, content en',
+        'de': 'German revision {0}, new content de',
     }
     offer_values_raw = {
         'en': {
@@ -128,6 +132,12 @@ class JobsBaseTestCase(TransactionTestCase):
         api.create_title('de', 'Jobs de', page, slug='jobs-app-de')
         page.publish('en')
         page.publish('de')
+        # unfortunately aphook reload doesn't restart server fast,
+        # so we do an empty request otherwise tests might
+        # fail because it can't get correct url
+        with override('en'):
+            empty_url = page.get_absolute_url()
+        self.client.get(empty_url)
         return page.reload()
 
     def tearDown(self):
@@ -136,9 +146,13 @@ class JobsBaseTestCase(TransactionTestCase):
         cache.clear()
 
     def create_default_job_category(self, translated=False):
-        job_category = JobCategory.objects.create(
-            app_config=self.app_config,
-            **self.default_category_values['en'])
+        # ensure that we always start with english, since it looks
+        # like there is some issues with handling active language
+        # between tests cases run
+        with override('en'):
+            job_category = JobCategory.objects.create(
+                app_config=self.app_config,
+                **self.default_category_values['en'])
 
         # check if we need a translated job_category
         if translated:
@@ -147,14 +161,19 @@ class JobsBaseTestCase(TransactionTestCase):
         return JobCategory.objects.language('en').get(pk=job_category.pk)
 
     def create_default_job_offer(self, translated=False):
-
-        job_offer = JobOffer.objects.create(
-            category=self.default_category,
-            app_config=self.app_config,
-            **self.default_job_values['en'])
+        # ensure that we always start with english, since it looks
+        # like there is some issues with handling active language
+        # between tests cases run
         with override('en'):
-            api.add_plugin(job_offer.content, 'TextPlugin', 'en',
-                           body=self.default_plugin_content['en'])
+            job_offer = JobOffer.objects.create(
+                category=self.default_category,
+                app_config=self.app_config,
+                **self.default_job_values['en'])
+            api.add_plugin(
+                job_offer.content,
+                'TextPlugin',
+                'en',
+                body=self.default_plugin_content['en'])
 
         # check if we need a translated job offer
         if translated:
