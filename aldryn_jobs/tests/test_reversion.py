@@ -45,13 +45,13 @@ class ReversionTestCase(JobsBaseTestCase):
                     plugin.save()
                 obj.save()
 
-    def revert_to(self, object_with_revision, revision_id):
+    def revert_to(self, object_with_revision, revision_number):
         """
-        Revert <object with revision> to <revision_id> number.
+        Revert <object with revision> to revision number.
         """
-        # since get_for_object returns a queryset - use qyeryset methods to
-        # get desired revision
-        version = reversion.get_for_object(object_with_revision).get(revision_id=revision_id)
+        # get by position, since reversion_id is not reliable,
+        version = list(reversed(
+            reversion.get_for_object(object_with_revision)))[revision_number - 1]
         version.revision.revert()
 
     def make_new_values(self, values_dict, replace_with):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import reversion
 from reversion.revisions import RegistrationError
-from importlib import import_module
+from django.utils.importlib import import_module
 
 from django import get_version
 from django.conf import settings
