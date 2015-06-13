@@ -9,8 +9,7 @@ from django.utils.timezone import now
 import cms
 from aldryn_apphooks_config.admin import BaseAppHookConfig
 from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
-from cms.admin.placeholderadmin import PlaceholderAdmin
-from cms.admin.placeholderadmin import FrontendEditableAdmin
+from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
@@ -145,8 +144,8 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
         return fieldsets
 
 
-class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdmin,
-                    TranslatableAdmin, PlaceholderAdmin):
+class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
+                    TranslatableAdmin):
     form = JobOfferAdminForm
     list_display = ['__unicode__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
