@@ -22,6 +22,7 @@ REQUIREMENTS = [
     'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
     'aldryn-reversion>=0.0.2',
+    'aldryn-categories',
     'unidecode',
     'django-multiupload>=0.3',
     'django-sortedm2m'
