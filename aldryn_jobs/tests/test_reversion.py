@@ -1,7 +1,6 @@
 import reversion
 import six
 from datetime import datetime, timedelta
-import time
 
 from django.db import transaction
 from django.contrib.auth.models import User

@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.test import TransactionTestCase
 from django.utils.timezone import get_current_timezone
@@ -111,6 +113,11 @@ class JobsBaseTestCase(TransactionTestCase):
         self.root_page = self.create_root_page()
         self.page = self.create_page()
 
+        self.staff_user_password = 'staff_pw'
+        self.staff_user = self.create_staff_user('staff', self.staff_user_password)
+        self.super_user_password = 'super_pw'
+        self.super_user = self.create_super_user('super', self.super_user_password)
+
     def create_root_page(self):
         root_page = api.create_page(
             'root page', self.template, self.language, published=True)
@@ -144,6 +151,24 @@ class JobsBaseTestCase(TransactionTestCase):
         super(JobsBaseTestCase, self).tearDown()
         self.app_config.delete()
         cache.clear()
+
+    def create_user(self, user_name, user_password, is_staff=False, is_superuser=False):
+        return User.objects.create(
+            username=user_name,
+            first_name='{0} first_name'.format(user_name),
+            last_name='{0} last_name'.format(user_name),
+            password=make_password(user_password),
+            is_staff=is_staff,
+            is_superuser=is_superuser
+        )
+
+    def create_staff_user(self, user_name, user_password):
+        staff_user = self.create_user(user_name, user_password, is_staff=True)
+        return staff_user
+
+    def create_super_user(self, user_name, user_password):
+        super_user = self.create_user(user_name, user_password, is_superuser=True)
+        return super_user
 
     def create_default_job_category(self, translated=False):
         # ensure that we always start with english, since it looks
