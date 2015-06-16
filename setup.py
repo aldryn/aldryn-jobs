@@ -22,6 +22,10 @@ REQUIREMENTS = [
     'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
     'aldryn-reversion>=0.0.2',
+    # aldryn categories has been added because of a migration dependency
+    # which sneaked somehow and we need it to be properly migrated
+    # also it would be used heavily in future (after a switch to this package
+    # instead of aldryn-jobs own categories).
     'aldryn-categories',
     'unidecode',
     'django-multiupload>=0.3',
@@ -38,10 +42,6 @@ if py27:
     REQUIREMENTS += [
         'Django<1.8,>1.5',
     ]
-
-DEPENDENCY_LINKS = [
-    'https://github.com/aldryn/aldryn-apphooks-config/archive/master.zip#egg=aldryn-apphooks-config-0.1.3'  # NOQA
-]
 
 CLASSIFIERS = [
     'Development Status :: 2 - Pre-Alpha',
@@ -67,7 +67,6 @@ setup(
     license='LICENSE.txt',
     platforms=['OS Independent'],
     install_requires=REQUIREMENTS,
-    dependency_links=DEPENDENCY_LINKS,
     classifiers=CLASSIFIERS,
     include_package_data=True,
     zip_safe=False,
