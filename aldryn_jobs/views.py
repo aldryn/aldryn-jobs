@@ -83,6 +83,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
         self.request = request
         self.namespace, self.config = get_app_instance(request)
         self.object = self.get_object()
+        self.set_language_changer(self.object)
         return super(JobOfferDetail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
