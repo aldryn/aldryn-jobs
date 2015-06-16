@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('aldryn_categories', '__latest__'),
+        ('aldryn_categories', '0003_auto_20140926_2347'),
         ('aldryn_jobs', '0007_auto_20150330_0545'),
     ]
 

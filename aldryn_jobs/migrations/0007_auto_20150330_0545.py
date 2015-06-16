@@ -8,7 +8,7 @@ import sortedm2m.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '__latest__'),
+        ('cms', '0003_auto_20140926_2347'),
         ('aldryn_jobs', '0006_auto_20150330_0111'),
     ]
 

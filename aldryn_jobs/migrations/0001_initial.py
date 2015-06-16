@@ -11,7 +11,7 @@ import djangocms_text_ckeditor.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '__latest__'),
+        ('cms', '0003_auto_20140926_2347'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
