@@ -8,8 +8,8 @@ from django.utils.timezone import now
 
 import cms
 from aldryn_apphooks_config.admin import BaseAppHookConfig
-from cms.admin.placeholderadmin import PlaceholderAdmin
-from cms.admin.placeholderadmin import FrontendEditableAdmin
+from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
+from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
@@ -70,7 +70,7 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
                               lang_code=self.lang_code, delete_application=True)
 
 
-class JobApplicationAdmin(admin.ModelAdmin):
+class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
     list_display = ['__unicode__', 'job_offer', 'created', 'is_rejected', 'rejection_date']
     list_filter = ['job_offer', 'is_rejected']
     readonly_fields = ['get_attachment_address']
@@ -123,7 +123,7 @@ class JobApplicationAdmin(admin.ModelAdmin):
     get_attachment_address.short_description = _('Attachments')
 
 
-class JobCategoryAdmin(TranslatableAdmin):
+class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
     form = JobCategoryAdminForm
     list_display = ['__unicode__', 'language_column', 'ordering']
     list_editable = ['ordering']
@@ -144,7 +144,8 @@ class JobCategoryAdmin(TranslatableAdmin):
         return fieldsets
 
 
-class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
+class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
+                    TranslatableAdmin):
     form = JobOfferAdminForm
     list_display = ['__unicode__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
@@ -197,7 +198,7 @@ class JobOfferAdmin(FrontendEditableAdmin, TranslatableAdmin, PlaceholderAdmin):
     send_newsletter_email.short_description = _("Send Job Newsletter")
 
 
-class JobNewsletterSignupAdmin(admin.ModelAdmin):
+class JobNewsletterSignupAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
     list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
     order_by = ['recipient']
 

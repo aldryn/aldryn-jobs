@@ -38,7 +38,7 @@ class JobOfferList(AppConfigMixin, ListView):
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
-        language = get_language_from_request(self.request)
+        language = get_language_from_request(self.request, check_path=True)
         return (
             JobOffer.objects.active()
                             .language(language)
@@ -53,7 +53,7 @@ class CategoryJobOfferList(JobOfferList):
 
     def get_queryset(self):
         qs = super(CategoryJobOfferList, self).get_queryset()
-        language = get_language_from_request(self.request)
+        language = get_language_from_request(self.request, check_path=True)
 
         category_slug = self.kwargs['category_slug']
         try:
@@ -91,7 +91,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
             queryset = self.get_queryset()
         slug = self.kwargs.get(self.slug_url_kwarg, None)
         slug_field = self.get_slug_field()
-        language = get_language_from_request(self.request)
+        language = get_language_from_request(self.request, check_path=True)
         queryset = (
             queryset.namespace(self.namespace)
                     .language(language)
@@ -135,7 +135,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
 
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
-        language = get_language_from_request(self.request)
+        language = get_language_from_request(self.request, check_path=True)
         return (
             JobOffer.objects.language(language)
                             .translated(language)

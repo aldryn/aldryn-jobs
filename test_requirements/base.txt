@@ -1,4 +1,6 @@
+https://github.com/aldryn/aldryn-apphook-reload/archive/develop.zip
 coverage
+django-appconf
 djangocms-helper
 pysqlite
 pytz

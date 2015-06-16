@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+import reversion
+from reversion.revisions import RegistrationError
+from django.utils.importlib import import_module
 
 from django import get_version
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -13,6 +17,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
 
+from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.models import AppHookConfig
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
@@ -32,13 +37,73 @@ from uuid import uuid4
 from .managers import NewsletterSignupManager, JobOffersManager
 from .utils import get_valid_filename
 
+strict_version = StrictVersion(get_version())
+
 
 def get_user_model_for_fields():
-    if StrictVersion(get_version()) < StrictVersion('1.6.0'):
-        from django.contrib.auth.models import User
-        return User
+    if strict_version < StrictVersion('1.7.0'):
+        return get_user_model()
     else:
-        return settings.AUTH_USER_MODEL
+        return getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
+# We should check if user model is registered, since we're following on that
+# relation for EventCoordinator model, if not - register it to
+# avoid RegistrationError when registering models that refer to it.
+user_model = get_user_model_for_fields()
+
+if strict_version < StrictVersion('1.7.0'):
+    # Prior to 1.7 it is pretty straight forward
+    revision_manager = reversion.default_revision_manager
+    if user_model not in revision_manager.get_registered_models():
+        reversion.register(user_model)
+else:
+    # otherwise it is a pain, but thanks to solution of getting model from
+    # https://github.com/django-oscar/django-oscar/commit/c479a1983f326a9b059e157f85c32d06a35728dd
+    # we can do almost the same thing from the different side.
+    from django.apps import apps
+    from django.apps.config import MODELS_MODULE_NAME
+    from django.core.exceptions import AppRegistryNotReady
+
+    def get_model(app_label, model_name):
+        """
+        Fetches a Django model using the app registry.
+        This doesn't require that an app with the given app label exists,
+        which makes it safe to call when the registry is being populated.
+        All other methods to access models might raise an exception about the
+        registry not being ready yet.
+        Raises LookupError if model isn't found.
+        """
+        try:
+            return apps.get_model(app_label, model_name)
+        except AppRegistryNotReady:
+            if apps.apps_ready and not apps.models_ready:
+                # If this function is called while `apps.populate()` is
+                # loading models, ensure that the module that defines the
+                # target model has been imported and try looking the model up
+                # in the app registry. This effectively emulates
+                # `from path.to.app.models import Model` where we use
+                # `Model = get_model('app', 'Model')` instead.
+                app_config = apps.get_app_config(app_label)
+                # `app_config.import_models()` cannot be used here because it
+                # would interfere with `apps.populate()`.
+                import_module('%s.%s' % (app_config.name, MODELS_MODULE_NAME))
+                # In order to account for case-insensitivity of model_name,
+                # look up the model through a private API of the app registry.
+                return apps.get_registered_model(app_label, model_name)
+            else:
+                # This must be a different case (e.g. the model really doesn't
+                # exist). We just re-raise the exception.
+                raise
+
+    # now get the real user model
+    model_app_name, model_model = user_model.split('.')
+    user_model_object = get_model(model_app_name, model_model)
+    # and try to register, if we have a registration error - that means that
+    # it has been registered already
+    try:
+        reversion.register(user_model_object)
+    except RegistrationError:
+        pass
 
 
 def default_jobs_attachment_upload_to(instance, filename):
@@ -66,11 +131,11 @@ JobApplicationFileField = partial(
     storage=jobs_attachment_storage
 )
 
-
+@version_controlled_content
 class JobsConfig(AppHookConfig):
     pass
 
-
+@version_controlled_content(follow=['supervisors', 'app_config'])
 class JobCategory(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
@@ -128,7 +193,7 @@ class JobCategory(TranslatableModel):
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
 
-
+@version_controlled_content(follow=['category', 'app_config'])
 class JobOffer(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
@@ -212,7 +277,7 @@ class JobOffer(TranslatableModel):
     def get_notification_emails(self):
         return self.category.get_notification_emails()
 
-
+@version_controlled_content(follow=['job_offer', 'app_config'])
 class JobApplication(models.Model):
     MALE = 'male'
     FEMALE = 'female'
@@ -258,12 +323,12 @@ def cleanup_attachments(sender, instance, **kwargs):
         if attachment:
             attachment.file.delete(False)
 
-
+@version_controlled_content(follow=['application'])
 class JobApplicationAttachment(models.Model):
     application = models.ForeignKey(JobApplication, related_name='attachments')
     file = JobApplicationFileField()
 
-
+@version_controlled_content
 class NewsletterSignup(models.Model):
     recipient = models.EmailField(_('Recipient'), unique=True)
     default_language = models.CharField(_('Language'), blank=True,
@@ -341,7 +406,7 @@ class NewsletterSignup(models.Model):
     def __unicode__(self):
         return unicode(self.recipient)
 
-
+@version_controlled_content(follow=['signup', 'user'])
 class NewsletterSignupUser(models.Model):
     signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
     user = models.ForeignKey(

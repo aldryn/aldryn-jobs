@@ -36,13 +36,30 @@ Add below apps to ``INSTALLED_APPS``: ::
     INSTALLED_APPS = [
         …
         'absolute',
-        'aldryn_common'
+        'aldryn_common',
+        'aldryn_boilerplates',
+        'aldryn_apphooks_config',
+        'aldryn_reversion',
+        'aldryn_categories',
         'aldryn_jobs',
         'emailit',
         'parler',
         'standard_form',
         …
     ]
+
+Add desired parler languages to settings (http://django-parler.readthedocs.org/en/latest/configuration.html),
+but please be sure to use same language codes as ``CMS_LANGUAGES`` does: ::
+
+    PARLER_LANGUAGES = {
+        1: (
+            {'code': 'en'},
+            {'code': 'de'},
+        ),
+        'default': {
+            'hide_untranslated': False,
+        }
+    }
 
 Configure ``aldryn-boilerplates`` (https://pypi.python.org/pypi/aldryn-boilerplates/).
 
