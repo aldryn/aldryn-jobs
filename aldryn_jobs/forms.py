@@ -238,6 +238,19 @@ class JobApplicationForm(forms.ModelForm):
 
 class NewsletterSignupForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        self.app_config = kwargs.pop('app_config')
+        super(NewsletterSignupForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        # obj_qs = NewsletterSignup.objects.filter(
+        #         recipient=self.data['recipient'],
+        #         app_config=self.app_config)
+        # if obj_qs.count() > 0:
+        #     # TODO: Handle multiple objects! rasie or hanle them properly
+        #     raise ValidationError("This email is already registered.", code='invalid')
+        return super(NewsletterSignupForm, self).clean()
+
     class Meta:
         model = NewsletterSignup
         fields = ['recipient']

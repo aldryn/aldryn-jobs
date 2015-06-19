@@ -5,8 +5,8 @@ from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
 from .models import (
-    JobListPlugin, JobNewsletterRegistrationPlugin, JobCategoriesPlugin
-)
+    JobListPlugin, JobNewsletterRegistrationPlugin, JobCategoriesPlugin,
+    JobsConfig)
 from .forms import NewsletterSignupForm, JobListPluginForm
 
 
@@ -38,10 +38,15 @@ class JobNewsletter(CMSPluginBase):
         # form with data. explicitly check that request POST has the right
         # data.
         request = context.get('request')
+        # FIXME: make namespace a unique thing, then we can rely on .get()
+        app_config = JobsConfig.objects.filter(namespace=instance.app_config.namespace)
+        if app_config:
+            app_config = app_config[0]
+
         if request is not None and request.POST.get('recipient'):
-            context['form'] = NewsletterSignupForm(request.POST)
+            context['form'] = NewsletterSignupForm(request.POST, app_config=app_config)
         else:
-            context['form'] = NewsletterSignupForm()
+            context['form'] = NewsletterSignupForm(app_config=app_config)
         return context
 
 

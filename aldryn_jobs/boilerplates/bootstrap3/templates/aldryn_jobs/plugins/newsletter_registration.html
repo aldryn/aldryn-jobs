@@ -4,7 +4,7 @@
     <p>{% trans 'Enter your e-mail to receive a job newsletter' context 'aldryn-jobs' %}</p>
     <div class="jobs-newsletter-registration-form">
         {# FIXME: actually without apphook config this is not working. #}
-        <form action="{% namespace_url 'register_newsletter' %}" method="post">
+        <form action="{% namespace_url 'register_newsletter' namespace=instance.app_config.namespace %}" method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="{% trans 'Subscribe' context 'aldryn-jobs' %}"/>

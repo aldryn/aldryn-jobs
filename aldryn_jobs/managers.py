@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
+from django.utils.translation import override
 from django.contrib.sites.models import get_current_site
 from emailit.api import send_mail
 
@@ -90,7 +91,12 @@ class NewsletterSignupManager(models.Manager):
         sent_emails = 0
         for recipient_record in self.recipient_list:
             kwargs = {'key': recipient_record.confirmation_key}
-            link = reverse('aldryn_jobs:unsubscribe_from_newsletter', kwargs=kwargs)
+            # prepare a link with respect to user language
+            with override(recipient_record.default_language):
+                link = reverse(
+                    '{0}:unsubscribe_from_newsletter'.format(
+                        recipient_record.app_config.namespace),
+                    kwargs=kwargs)
             unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
 
             context = {

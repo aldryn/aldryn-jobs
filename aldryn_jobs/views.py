@@ -4,6 +4,7 @@ from aldryn_apphooks_config.utils import get_app_instance
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.http import (
     Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
@@ -28,7 +29,7 @@ from .forms import (
 )
 from .models import (
     JobCategory, JobOffer, NewsletterSignup, JobNewsletterRegistrationPlugin,
-    NewsletterSignupUser,
+    NewsletterSignupUser, JobsConfig,
 )
 
 
@@ -388,48 +389,70 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
 class RegisterJobNewsletter(CreateView):
     form_class = NewsletterSignupForm
 
+    def dispatch(self, request, *args, **kwargs):
+        namespace = ''
+        resolver_match = getattr(self.request, 'resolver_match', None)
+        if resolver_match is not None:
+            namespace = getattr(resolver_match, 'namespace', '')
+
+        if len(namespace) < 1:
+            if self.request.current_page and self.request.current_page.application_namespace:
+                namespace = self.request.current_page.application_namespace
+
+        if len(namespace) < 1:
+            raise ImproperlyConfigured(
+                "Cant find name space, please either fix it or enable cms CurrentPage middleware")
+        # in memory thing, we need it for form processing etc.
+        # FIXME: unfortunately app config namespace is not unique, using only first match
+        app_config = JobsConfig.objects.filter(namespace=namespace)
+        if app_config:
+            app_config = app_config[0]
+        self.app_config = app_config
+
+        return super(RegisterJobNewsletter, self).dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         # TODO: add GET requests registration functionality
         # don't serve get requests, only plugin registration so far
-        return HttpResponsePermanentRedirect(reverse('aldryn_jobs:job-offer-list'))
+        return HttpResponsePermanentRedirect(
+            reverse('{0}:job-offer-list'.format(self.app_config.namespace)))
 
     def get_invalid_template_name(self):
         return 'aldryn_jobs/newsletter_invalid_email.html'
 
-    def post(self, request, *args, **kwargs):
-        recipient_from_post = self.request.POST.get('recipient')
-        # since we using a form and have a unique constraint on confirmation
-        # key we need to get instance before validating the form
-        try:
-            self.object = NewsletterSignup.objects.get(
-                recipient=recipient_from_post)
-        except NewsletterSignup.DoesNotExist:
-            self.object = None
-        return super(RegisterJobNewsletter, self).post(request, *args, **kwargs)
+    def get_form_kwargs(self):
+        kwargs = super(RegisterJobNewsletter, self).get_form_kwargs()
+        kwargs.update({'app_config': self.app_config})
+        return kwargs
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.confirmation_key = NewsletterSignup.objects.generate_random_key()
 
         # try to get language
-        if self.request.LANGUAGE_CODE:
+        if getattr(self.request, 'LANGUAGE_CODE', None) is not None:
             self.object.default_language = self.request.LANGUAGE_CODE
         else:
-            self.object.default_language = get_default_language()
+            self.object.default_language = get_language_from_request(self.request, check_path=True)
 
-        self.object.save()
         # populate object with other data
-        user = self.request.user
-        if user.is_authenticated():
+        self.object.app_config = self.app_config
+        user = self.request.user if self.request.user.is_authenticated() else None
+        if user is not None:
             # in memory only property, will be used just for confirmation email
             self.object.user = user
-            NewsletterSignupUser.objects.create(signup=self.object, user=user)
+        self.object.save()
+        signup_kwargs = {'signup': self.object}
+        if user:
+            signup_kwargs['user'] = user
+        NewsletterSignupUser.objects.create(**signup_kwargs)
 
-        self.object.send_newsletter_confirmation_email()
+        self.object.send_newsletter_confirmation_email(request=self.request)
         return super(RegisterJobNewsletter, self).form_valid(form)
 
     def form_invalid(self, form):
         context = self.get_context_data()
+        context['app_config'] = self.app_config
         # check if user needs a resend confirmation link
         recipient_email = form.data.get('recipient')
         recipient_object = NewsletterSignup.objects.filter(recipient=recipient_email)
@@ -437,8 +460,9 @@ class RegisterJobNewsletter(CreateView):
         context['resend_confirmation'] = None
         if recipient_email is not None and recipient_object:
             recipient_object = recipient_object[0]
-            context['resend_confirmation'] = reverse('aldryn_jobs:resend_confirmation_link', kwargs={
-                'key': recipient_object.confirmation_key})
+            context['resend_confirmation'] = reverse(
+                '{0}:resend_confirmation_link'.format(self.app_config.namespace),
+                kwargs={'key': recipient_object.confirmation_key})
         template_name = self.template_invalid_name if (
             hasattr(self, 'template_invalid_name')) else (
             self.get_invalid_template_name())
@@ -447,7 +471,7 @@ class RegisterJobNewsletter(CreateView):
                       context_instance=context_instance)
 
     def get_success_url(self):
-        return reverse('aldryn_jobs:newsletter_registration_notification')
+        return reverse('{0}:newsletter_registration_notification'.format(self.app_config.namespace))
 
 
 class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
