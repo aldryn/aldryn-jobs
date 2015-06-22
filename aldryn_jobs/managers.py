@@ -48,13 +48,18 @@ class NewsletterSignupManager(models.Manager):
         return self.filter(is_verified=True, is_disabled=False, **kwargs)
 
     def send_job_notifiation(self, recipients=None, job_list=None, current_domain=None):
+        """
+        Send job notification emails with respect to app configs. Recipients that are registered
+        with specific jobs config / namespace would get only job notifications with same jobs
+        config / namespace. This is applicable regardless of recipients kwarg is provided or not.
+        If recipients list provided (PKs only) NewsletterSignup records would be selected
+        and filtered with respect to active recipients (confirmed and not disabled.
+        If job_list provided (PKs only) job Offers would be selected. Note that job_list is
+        always provided when this method is used through admin actions.
+        Returns number of successfully sent emails.
+        """
         # avoid circular import
-        from .models import JobOffer
-
-        if not recipients:
-            self.recipient_list = self.active_recipients()
-        else:
-            self.recipient_list = recipients
+        from .models import JobOffer, NewsletterSignup
 
         # since this method can and should be also used as a management
         # command. check and warn user that this is required parameter
@@ -66,60 +71,75 @@ class NewsletterSignupManager(models.Manager):
             # with error msg.
             return -1
 
+        job_object_list = JobOffer.objects.filter(pk__in=job_list).select_related('app_config')
+        job_configs = set(job.app_config for job in job_object_list)
+
+        recipients_per_config = {}
+        if not recipients:
+            # get recipients based on selected job offers app configs
+            for config in job_configs:
+                 # TODO: prefetch_related related_user can be added here
+                recipients_per_config[config] = self.active_recipients(app_config=config)
+        else:
+            # otherwise get recipients with respect to job offer app configs.
+            recipients_qs = NewsletterSignup.objects.active_recipients(pk__in=recipients)
+            for config in job_configs:
+                found_recipients = recipients_qs.filter(app_config=config)
+                recipients_per_config[config] = found_recipients
+
         if current_domain is None:
             request = None
             current_domain = get_current_site(request).domain
 
-        job_object_list = JobOffer.objects.filter(pk__in=job_list)
-
         # TODO: get from settings if we need to send all translations or
         # translations for recipient.default_language (NewsletterSignup) only
         # build links for jobs for all translations
-        jobs = []
-        for job in job_object_list:
-            for job_translation in job.translations.all():
-                # email it appends site on pre mailing so we need to have 2 type
-                # of links, full with domain, and relative.
-                job_link = job.get_absolute_url(
-                    language=job_translation.language_code)
-                jobs.append({
-                    'job': job_translation,
-                    'link': job_link,
-                    'full_link': '{0}{1}'.format(current_domain, job_link),
-                })
-
         sent_emails = 0
-        for recipient_record in self.recipient_list:
-            kwargs = {'key': recipient_record.confirmation_key}
-            # prepare a link with respect to user language
-            with override(recipient_record.default_language):
-                link = reverse(
-                    '{0}:unsubscribe_from_newsletter'.format(
-                        recipient_record.app_config.namespace),
-                    kwargs=kwargs)
-            unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
+        for config, recipient_list in recipients_per_config.iteritems():
+            jobs = []
+            for job in job_object_list.filter(app_config=config):
+                for job_translation in job.translations.all():
+                    # email it appends site on pre mailing so we need to have 2 type
+                    # of links, full with domain, and relative.
+                    job_link = job.get_absolute_url(
+                        language=job_translation.language_code)
+                    jobs.append({
+                        'job': job_translation,
+                        'link': job_link,
+                        'full_link': '{0}{1}'.format(current_domain, job_link),
+                    })
 
-            context = {
-                'jobs': jobs,
-                'unsubscribe_link': link,
-                'unsubscribe_link_full': unsubscribe_link_full,
-            }
+            for recipient_record in recipient_list:
+                kwargs = {'key': recipient_record.confirmation_key}
+                # prepare a link with respect to user language
+                with override(recipient_record.default_language):
+                    link = reverse(
+                        '{0}:unsubscribe_from_newsletter'.format(
+                            recipient_record.app_config.namespace),
+                        kwargs=kwargs)
+                unsubscribe_link_full = '{0}{1}'.format(current_domain, link)
 
-            user = recipient_record.related_user.filter(signup__pk=recipient_record.pk)
-            if user:
-                user = user.get()
-                context['full_name'] = user.get_full_name()
+                context = {
+                    'jobs': jobs,
+                    'unsubscribe_link': link,
+                    'unsubscribe_link_full': unsubscribe_link_full,
+                }
 
-            sent_successfully = send_mail(
-                recipients=[recipient_record.recipient],
-                context=context,
-                language=recipient_record.default_language,
-                template_base='aldryn_jobs/emails/newsletter_job_offers')
+                user = recipient_record.related_user.filter(signup__pk=recipient_record.pk)
+                if user:
+                    user = user.get()
+                    context['full_name'] = user.get_full_name()
 
-            if sent_successfully:
-                sent_emails += 1
-            else:
-                # TODO: we can log or process failures.
-                pass
+                sent_successfully = send_mail(
+                    recipients=[recipient_record.recipient],
+                    context=context,
+                    language=recipient_record.default_language,
+                    template_base='aldryn_jobs/emails/newsletter_job_offers')
+
+                if sent_successfully:
+                    sent_emails += 1
+                else:
+                    # TODO: we can log or process failures.
+                    pass
 
         return sent_emails
