@@ -243,12 +243,13 @@ class NewsletterSignupForm(forms.ModelForm):
         super(NewsletterSignupForm, self).__init__(*args, **kwargs)
 
     def clean(self):
-        # obj_qs = NewsletterSignup.objects.filter(
-        #         recipient=self.data['recipient'],
-        #         app_config=self.app_config)
-        # if obj_qs.count() > 0:
-        #     # TODO: Handle multiple objects! rasie or hanle them properly
-        #     raise ValidationError("This email is already registered.", code='invalid')
+
+        obj_qs = NewsletterSignup.objects.filter(
+            recipient=self.data['recipient'],
+            app_config=self.app_config)
+        if obj_qs.count() > 0:
+            # TODO: Handle multiple objects! rasie or hanle them properly
+            raise ValidationError(_("This email is already registered."), code='invalid')
         return super(NewsletterSignupForm, self).clean()
 
     class Meta:
