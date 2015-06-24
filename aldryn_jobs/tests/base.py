@@ -126,17 +126,28 @@ class JobsBaseTestCase(TransactionTestCase):
         root_page.publish('de')
         return root_page.reload()
 
-    def create_page(self):
+    def create_page(self, title=None, slug=None, namespace=None):
+
+        if namespace is None:
+            namespace = self.app_config.namespace
+
+        if title is None:
+            title = 'Jobs'
+
+        if slug is None:
+            slug = 'jobs-app'
+
         page = api.create_page(
-            title='Jobs en',
-            slug='jobs-app-en',
+            title='{0} en'.format(title),
+            slug='{0}-en'.format(slug),
             template=self.template,
             language=self.language,
             published=True,
             parent=self.root_page,
             apphook='JobsApp',
-            apphook_namespace=self.app_config.namespace)
-        api.create_title('de', 'Jobs de', page, slug='jobs-app-de')
+            apphook_namespace=namespace)
+        api.create_title(
+            'de', '{0} de'.format(title), page, slug='{0}-de'.format(slug))
         page.publish('en')
         page.publish('de')
         # unfortunately aphook reload doesn't restart server fast,

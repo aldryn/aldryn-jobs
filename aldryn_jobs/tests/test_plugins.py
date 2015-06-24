@@ -6,12 +6,12 @@ from .base import JobsBaseTestCase
 from ..models import JobsConfig, NewsletterSignup
 
 
-class TestAppConfigPluginsBase(JobsBaseTestCase):
+class TestAppConfigPluginsMixin(object):
     plugin_to_test = 'TextPlugin'
     plugin_params = {}
 
     def setUp(self):
-        super(TestAppConfigPluginsBase, self).setUp()
+        super(TestAppConfigPluginsMixin, self).setUp()
         self.plugin_page = self.create_plugin_page()
         self.placeholder = self.plugin_page.placeholders.all()[0]
 
@@ -24,7 +24,7 @@ class TestAppConfigPluginsBase(JobsBaseTestCase):
         page.publish('de')
         return page.reload()
 
-    def create_plugin(self, page, language, app_config, **plugin_params):
+    def _create_plugin(self, page, language, app_config, **plugin_params):
         """
         Create plugin of type self.plugin_to_test and plugin_params in given language
         to a page placeholder.
@@ -39,8 +39,20 @@ class TestAppConfigPluginsBase(JobsBaseTestCase):
         page.publish(self.language)
         return plugin
 
+    def create_plugin(self, page, language, app_config, mail_to_group=None,
+                      **plugin_params):
+        plugin = self._create_plugin(
+            page, language, app_config, **plugin_params)
+        if mail_to_group is not None:
+            # we need to update plugin configuration model with correct group
+            # it is located under it's own manager
+            plugin.jobnewsletterregistrationplugin.mail_to_group.add(
+                mail_to_group)
+            plugin.save()
+        return plugin
 
-class TestNewsletterPlugin(TestAppConfigPluginsBase):
+
+class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
     plugin_to_test = 'JobNewsletter'
 
     def setUp(self):
@@ -53,18 +65,6 @@ class TestNewsletterPlugin(TestAppConfigPluginsBase):
             app_config=self.app_config,
             mail_to_group=self.default_group,
             **self.plugin_params)
-
-    def create_plugin(self, page, language, app_config, mail_to_group=None,
-                      **plugin_params):
-        plugin = super(TestNewsletterPlugin, self).create_plugin(
-            page, language, app_config, **plugin_params)
-        if mail_to_group is not None:
-            # we need to update plugin configuration model with correct group
-            # it is located under it's own manager
-            plugin.jobnewsletterregistrationplugin.mail_to_group.add(
-                mail_to_group)
-            plugin.save()
-        return plugin
 
     def test_newsletter_plugins_does_not_breaks_page(self):
         self.create_plugin(self.plugin_page, 'de', self.app_config,

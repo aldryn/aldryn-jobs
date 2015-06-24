@@ -464,10 +464,10 @@ class RegisterJobNewsletter(CreateView):
             # in memory only property, will be used just for confirmation email
             self.object.user = user
         self.object.save()
-        signup_kwargs = {'signup': self.object}
+
         if user:
-            signup_kwargs['user'] = user
-        NewsletterSignupUser.objects.create(**signup_kwargs)
+            NewsletterSignupUser.objects.create(
+                signup=self.object, user=user)
 
         self.object.send_newsletter_confirmation_email(request=self.request)
         return super(RegisterJobNewsletter, self).form_valid(form)
