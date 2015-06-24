@@ -186,7 +186,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
     messages = {
         "key_confirmed": {
             "level": messages.SUCCESS,
-            "text": _("You have confirmed {email}.")
+            "text": _('aldryn-jobs', "You have confirmed {email}.")
         }
     }
     form_class = NewsletterConfirmationForm
@@ -276,17 +276,34 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
     def after_confirmation(self, signup):
         """ Implement this for custom post-save operations """
-        # FIXME: does not distinct between plugin instances, and draft/published pages
-        all_groups = set(
+        # eventually we don't have abilities right now to track which plugin
+        # was used to register for newsletter, so we will use all matching
+        # plugins with filtering by language and app_config
+        plugins_base_qs = signup.app_config.jobnewsletterregistrationplugin_set.filter(
+            language=signup.default_language)
+        # also do not use draft settings, only plugins from public pages
+        # plugin page.pk should match page.get_public_object().pk
+        public_plugins = [plugin for plugin in plugins_base_qs if (
+            plugin.page.get_public_object() and
+            plugin.page.pk == plugin.page.get_public_object().pk)]
+
+        public_plugins_groups = set(
             [group for plugin in
-                JobNewsletterRegistrationPlugin.objects.all()
+                public_plugins
              for group in plugin.mail_to_group.all()]
         )
-        admin_recipients = set([user.email for group in all_groups
-                                for user in group.user_set.all()])
+        # eventually get emails of users from matching groups
+        admin_recipients = set(
+            [user.email for group in public_plugins_groups
+                for user in group.user_set.all()])
 
-        additional_recipients = getattr(settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS', [])
-        additional_recipients += getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', [])
+        # if we have something special from settings - also use those lists
+        # of addresses to notify about successful user registration
+        additional_recipients = getattr(
+            settings, 'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS',
+            [])
+        additional_recipients += getattr(
+            settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', [])
 
         if additional_recipients:
             admin_recipients.update(additional_recipients)
@@ -396,20 +413,24 @@ class RegisterJobNewsletter(CreateView):
             namespace = getattr(resolver_match, 'namespace', '')
 
         if len(namespace) < 1:
-            if self.request.current_page and self.request.current_page.application_namespace:
+            if (self.request.current_page and
+                    self.request.current_page.application_namespace):
                 namespace = self.request.current_page.application_namespace
 
         if len(namespace) < 1:
             raise ImproperlyConfigured(
-                "Cant find name space, please either fix it or enable cms CurrentPage middleware")
+                "Cant find name space, please either fix it "
+                "or enable cms CurrentPage middleware")
         # in memory thing, we need it for form processing etc.
-        # FIXME: unfortunately app config namespace is not unique, using only first match
+        # FIXME: unfortunately app config namespace is not unique,
+        # using only first match
         app_config = JobsConfig.objects.filter(namespace=namespace)
         if app_config:
             app_config = app_config[0]
         self.app_config = app_config
 
-        return super(RegisterJobNewsletter, self).dispatch(request, *args, **kwargs)
+        return super(RegisterJobNewsletter, self).dispatch(request,
+                                                           *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         # TODO: add GET requests registration functionality
@@ -433,7 +454,8 @@ class RegisterJobNewsletter(CreateView):
         if getattr(self.request, 'LANGUAGE_CODE', None) is not None:
             self.object.default_language = self.request.LANGUAGE_CODE
         else:
-            self.object.default_language = get_language_from_request(self.request, check_path=True)
+            self.object.default_language = get_language_from_request(
+                self.request, check_path=True)
 
         # populate object with other data
         self.object.app_config = self.app_config
@@ -455,13 +477,15 @@ class RegisterJobNewsletter(CreateView):
         context['app_config'] = self.app_config
         # check if user needs a resend confirmation link
         recipient_email = form.data.get('recipient')
-        recipient_object = NewsletterSignup.objects.filter(recipient=recipient_email)
+        recipient_object = NewsletterSignup.objects.filter(
+            recipient=recipient_email)
         # check for registered but not confirmed
         context['resend_confirmation'] = None
         if recipient_email is not None and recipient_object:
             recipient_object = recipient_object[0]
             context['resend_confirmation'] = reverse(
-                '{0}:resend_confirmation_link'.format(self.app_config.namespace),
+                '{0}:resend_confirmation_link'.format(
+                    self.app_config.namespace),
                 kwargs={'key': recipient_object.confirmation_key})
         template_name = self.template_invalid_name if (
             hasattr(self, 'template_invalid_name')) else (
@@ -471,7 +495,8 @@ class RegisterJobNewsletter(CreateView):
                       context_instance=context_instance)
 
     def get_success_url(self):
-        return reverse('{0}:newsletter_registration_notification'.format(self.app_config.namespace))
+        return reverse('{0}:newsletter_registration_notification'.format(
+            self.app_config.namespace))
 
 
 class ResendNewsletterConfirmation(ConfirmNewsletterSignup):

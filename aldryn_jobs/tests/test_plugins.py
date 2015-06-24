@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from cms import api
 
 from .base import JobsBaseTestCase
-from ..models import JobsConfig
+from ..models import JobsConfig, NewsletterSignup
 
 
 class TestAppConfigPluginsBase(JobsBaseTestCase):
@@ -45,7 +45,8 @@ class TestNewsletterPlugin(TestAppConfigPluginsBase):
 
     def setUp(self):
         super(TestNewsletterPlugin, self).setUp()
-        self.default_group = Group.objects.get_or_create(name='Newsletter signup notifications')[0]
+        self.default_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications')[0]
         self.create_plugin(
             page=self.plugin_page,
             language=self.language,
@@ -53,39 +54,144 @@ class TestNewsletterPlugin(TestAppConfigPluginsBase):
             mail_to_group=self.default_group,
             **self.plugin_params)
 
-    def create_plugin(self, page, language, app_config, mail_to_group=None, **plugin_params):
+    def create_plugin(self, page, language, app_config, mail_to_group=None,
+                      **plugin_params):
         plugin = super(TestNewsletterPlugin, self).create_plugin(
             page, language, app_config, **plugin_params)
         if mail_to_group is not None:
             # we need to update plugin configuration model with correct group
             # it is located under it's own manager
-            plugin.jobnewsletterregistrationplugin.mail_to_group.add(mail_to_group)
+            plugin.jobnewsletterregistrationplugin.mail_to_group.add(
+                mail_to_group)
             plugin.save()
         return plugin
 
     def test_newsletter_plugins_does_not_breaks_page(self):
-        with override(self.language):
-            page_url = self.plugin_page.get_absolute_url()
-        response = self.client.get(page_url)
-        self.assertEqual(response.status_code, 200)
+        self.create_plugin(self.plugin_page, 'de', self.app_config,
+                           mail_to_group=self.default_group)
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url)
+            self.assertEqual(response.status_code, 200)
 
-    def test_newsletter_plugins_does_not_break_page_on_other_language(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
-        with override('de'):
-            page_url = self.plugin_page.get_absolute_url()
-        response = self.client.get(page_url)
-        self.assertEqual(response.status_code, 200)
+    def test_newsletter_plugins_does_not_breaks_page_for_admin_user(self):
+        self.create_plugin(self.plugin_page, 'de', self.app_config,
+                           mail_to_group=self.default_group)
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url = '{0}?edit'.format(
+                    self.plugin_page.get_absolute_url())
 
-    def tets_newsletter_plugins_configured_with_different_groups(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+            login_result = self.client.login(
+                username=self.super_user, password=self.super_user_password)
+            self.assertEqual(login_result, True)
+
+            response = self.client.get(page_url)
+            self.assertEqual(response.status_code, 200)
+
+    def test_newsletter_plugins_configured_with_different_groups(self):
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(self.plugin_page, 'de', self.app_config,
+                           mail_to_group=other_group)
         placeholder = self.plugin_page.placeholders.all()[0]
 
         # test en plugin group equals to default_group
         plugin = placeholder.get_plugins().filter(language='en')[0]
-        self.assertEqual(plugin.mail_to_group, self.plugin_params['mail_to_group'])
+        self.assertEqual(
+            plugin.jobnewsletterregistrationplugin.mail_to_group.count(), 1)
+        self.assertEqual(
+            plugin.jobnewsletterregistrationplugin.mail_to_group.all()[0],
+            self.default_group)
 
         # test de plugin group
         plugin = placeholder.get_plugins().filter(language='de')[0]
-        self.assertEqual(plugin.mail_to_group, other_group)
+        self.assertEqual(
+            plugin.jobnewsletterregistrationplugin.mail_to_group.count(), 1)
+        self.assertEqual(
+            plugin.jobnewsletterregistrationplugin.mail_to_group.all()[0],
+            other_group)
+
+    def test_plugin_with_different_groups_does_not_breaks_page(self):
+        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
+        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url_en = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url_en)
+            self.assertEqual(response.status_code, 200)
+
+    def test_plugin_with_deleted_group_does_not_breaks_page(self):
+        self.default_group.delete()
+
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url_en = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url_en)
+            self.assertEqual(response.status_code, 200)
+
+    def test_plugin_does_not_breaks_page_if_configured_apphook_was_deleted(self):
+        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
+        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        # delete apphooked page
+        self.page.delete()
+
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url_en = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url_en)
+            self.assertEqual(response.status_code, 200)
+
+    def test_plugin_does_not_breaks_page_for_superuser_if_configured_apphook_was_deleted(self):
+        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
+        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        # delete apphooked page
+        self.page.delete()
+
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url_en = '{0}?edit'.format(
+                    self.plugin_page.get_absolute_url())
+
+            login_result = self.client.login(
+                username=self.super_user, password=self.super_user_password)
+            self.assertEqual(login_result, True)
+
+            response = self.client.get(page_url_en)
+            self.assertEqual(response.status_code, 200)
+
+    def test_plugin_does_not_displays_error_message_to_non_super_users(self):
+        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
+        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        # delete apphooked page
+        self.page.delete()
+
+        with override('en'):
+            page_url = self.plugin_page.get_absolute_url()
+
+        response = self.client.get(page_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'There is an error in plugin configuration: selected job config')
+
+    def test_plugin_displays_error_message_to_super_users(self):
+        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
+        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        # delete apphooked page
+        self.page.delete()
+
+        with override('en'):
+            page_url = self.plugin_page.get_absolute_url()
+
+        login_result = self.client.login(
+            username=self.super_user, password=self.super_user_password)
+        self.assertEqual(login_result, True)
+
+        response = self.client.get(page_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'There is an error in plugin configuration: selected job config')

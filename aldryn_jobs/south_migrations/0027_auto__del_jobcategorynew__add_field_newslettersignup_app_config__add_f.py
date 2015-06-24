@@ -8,6 +8,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # FIXME: Decide if we should delete those two tables
         # Deleting model 'JobCategoryNew'
         db.delete_table(u'aldryn_jobs_jobcategorynew')
 
@@ -31,7 +32,7 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Removing unique constraint on 'JobsConfig', fields ['namespace']
         db.delete_unique(u'aldryn_jobs_jobsconfig', ['namespace'])
-
+        # FIXME: Decide if we should delete those two tables
         # Adding model 'JobCategoryNew'
         db.create_table(u'aldryn_jobs_jobcategorynew', (
             ('ordering', self.gf('django.db.models.fields.IntegerField')(default=0)),
@@ -40,6 +41,7 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'aldryn_jobs', ['JobCategoryNew'])
 
+        # FIXME: Decide if we should delete those two tables
         # Adding M2M table for field supervisors on 'JobCategoryNew'
         m2m_table_name = db.shorten_name(u'aldryn_jobs_jobcategorynew_supervisors')
         db.create_table(m2m_table_name, (
@@ -107,7 +109,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'JobNewsletterRegistrationPlugin'},
             'app_config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['aldryn_jobs.JobsConfig']", 'null': 'True'}),
             u'cmsplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['cms.CMSPlugin']", 'unique': 'True', 'primary_key': 'True'}),
-            'mail_to_group': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False'})
+            'mail_to_group': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'})
         },
         u'aldryn_jobs.joboffer': {
             'Meta': {'ordering': "['category__ordering', 'category', '-created']", 'object_name': 'JobOffer'},

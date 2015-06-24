@@ -488,7 +488,12 @@ class JobCategoriesPlugin(BaseJobsPlugin):
 
 class JobNewsletterRegistrationPlugin(BaseJobsPlugin):
     mail_to_group = models.ManyToManyField(
-        Group, verbose_name=_('Signup notification to')
+        Group, verbose_name=_('Notification to'),
+        blank=True,
+        help_text=_(
+            'If user successfuly completed registration.<br/>'
+            'Notification would be sent to users from selected groups<br/>'
+            'Leave blank to disable notifications.<br/>')
     )
 
     def copy_relations(self, oldinstance):

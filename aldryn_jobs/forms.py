@@ -251,7 +251,7 @@ class NewsletterSignupForm(forms.ModelForm):
             app_config=self.app_config)
         if obj_qs.count() > 0:
             # TODO: Handle multiple objects! rasie or hanle them properly
-            raise ValidationError(_("This email is already registered."), code='invalid')
+            raise ValidationError(_('aldryn-jobs', "This email is already registered."), code='invalid')
         return super(NewsletterSignupForm, self).clean()
 
     class Meta:
@@ -367,7 +367,7 @@ class JobNewsletterRegistrationPluginForm(forms.ModelForm):
             reverse('{0}:register_newsletter'.format(data['app_config'].namespace))
         except NoReverseMatch:
             raise ValidationError(
-                _('Seems that selected Job config is not plugged to any page, '
+                _('aldryn-jobs', 'Seems that selected Job config is not plugged to any page, '
                   'or maybe that page is not published.'
                   'Please select Job config that is being used.'), code='invalid')
         return data
