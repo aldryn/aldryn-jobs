@@ -217,7 +217,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         # key we need to get instance before validating the form
         try:
             instance = NewsletterSignup.objects.get(
-                    confirmation_key=form_confirmation_key)
+                confirmation_key=form_confirmation_key,
+                is_verified=False)
         except NewsletterSignup.DoesNotExist:
             raise Http404()
         form = form_class(self.request.POST, instance=instance)
@@ -331,7 +332,7 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
     def get(self, *args, **kwargs):
         self.object = self.get_object()
         # if object is disabled - do not serve this page
-        if self.object.is_disabled:
+        if self.object.is_disabled or not self.object.is_verified:
             raise Http404()
         ctx = self.get_context_data()
         # populate form with key
@@ -345,8 +346,8 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
         # since we using a form and have a unique constraint on confirmation
         # key we need to get instance before validating the form
         try:
-            instance = NewsletterSignup.objects.get(
-                    confirmation_key=form_confirmation_key)
+            instance = NewsletterSignup.objects.active_recipients().get(
+                confirmation_key=form_confirmation_key)
         except NewsletterSignup.DoesNotExist:
             raise Http404()
 

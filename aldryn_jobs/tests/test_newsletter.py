@@ -4,11 +4,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Group
 from django.utils.translation import override
 
-from cms import api
-
 from .base import JobsBaseTestCase
 from .test_plugins import TestAppConfigPluginsMixin
-from ..models import JobsConfig, NewsletterSignup, NewsletterSignupUser
+from ..models import (JobsConfig, JobOffer, JobCategory, NewsletterSignup,
+    NewsletterSignupUser)
 
 
 class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
@@ -175,13 +174,339 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         self.assertTrue(signup.is_verified)
 
     def test_confirmation_of_confirmed_signup_raises_404(self):
-        pass
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        with override('en'):
+            confirmation_link = reverse(
+                '{0}:confirm_newsletter_email'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key}
+            )
+        response = self.client.get(confirmation_link)
+        self.assertEqual(response.status_code, 404)
+
+    def test_confirmation_of_confirmed_signup_raises_404_post(self):
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        with override('en'):
+            confirmation_link = reverse(
+                '{0}:confirm_newsletter_email'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key}
+            )
+        response = self.client.post(
+            confirmation_link, {'confirmation_key': signup.confirmation_key})
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        self.assertFalse(signup.is_disabled)
+        self.assertEqual(response.status_code, 404)
 
     def test_unsubscribe_link_disables_signup(self):
-        pass
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        with override('en'):
+            unsubscribe_link = reverse(
+                '{0}:unsubscribe_from_newsletter'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key}
+            )
+        # test get
+        response = self.client.get(unsubscribe_link)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Unsubscribe from newsletter')
+        # test post
+        response = self.client.post(
+            unsubscribe_link, {'confirmation_key': signup.confirmation_key})
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        self.assertTrue(signup.is_verified)
+        self.assertTrue(signup.is_disabled)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response, 'You will no longer receive jobs newsletter.')
+
+    def test_unsubscribe_of_disabled_signup_raises_404(self):
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            is_disabled=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        with override('en'):
+            unsubscribe_link = reverse(
+                '{0}:unsubscribe_from_newsletter'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key}
+            )
+        response = self.client.get(unsubscribe_link)
+        self.assertEqual(response.status_code, 404)
+
+    def test_unsubscribe_of_disabled_signup_raises_404_post(self):
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            is_disabled=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        with override('en'):
+            unsubscribe_link = reverse(
+                '{0}:unsubscribe_from_newsletter'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key}
+            )
+        response = self.client.post(
+            unsubscribe_link, {'confirmation_key': signup.confirmation_key})
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        self.assertTrue(signup.is_disabled)
+        self.assertEqual(response.status_code, 404)
+
+    def test_unsubscribe_of_not_verified_signup_raises_404_post(self):
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        with override('en'):
+            unsubscribe_link = reverse(
+                '{0}:unsubscribe_from_newsletter'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key}
+            )
+        response = self.client.post(
+            unsubscribe_link, {'confirmation_key': signup.confirmation_key})
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        self.assertFalse(signup.is_disabled)
+        self.assertFalse(signup.is_verified)
+        self.assertEqual(response.status_code, 404)
 
     def test_confirmation_letter_is_being_sent_to_user(self):
-        pass
+        with override('en'):
+            signup_url = reverse(
+                '{0}:register_newsletter'.format(self.app_config.namespace))
+        response = self.client.post(
+            signup_url,
+            {'recipient': 'initial@reicipent.com'},
+            follow=True)
+
+        self.assertEqual(NewsletterSignup.objects.count(), 1)
+        signup = NewsletterSignup.objects.all()[0]
+        self.assertEqual(len(mail.outbox), 1)
+
+        email = mail.outbox[0]
+        self.assertEqual(email.to[0], signup.recipient)
+        self.assertEqual(len(email.recipients()), 1)
+
+        with override(signup.default_language):
+            confirmation_link = reverse(
+                '{0}:confirm_newsletter_email'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key})
+
+        self.assertNotEqual(email.body.find(confirmation_link), -1)
+
+    def test_notification_letter_is_being_sent_admin_user(self):
+        # prepare staff user
+        self.staff_user.email = 'staff@email.com'
+        self.staff_user.groups.add(self.default_group)
+        self.staff_user.save()
+        # settings for whom to notify are taken from plugin settings and
+        # settings files, so to have something - we should create a plugin
+        # it should be on published page (after creation, which is done inside
+        # of self.create_plugin
+        self.create_plugin(
+            page=self.plugin_page,
+            language=self.language,
+            app_config=self.app_config,
+            mail_to_group=self.default_group,
+            **self.plugin_params)
+        # prepare user
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+        with override(signup.default_language):
+            confirmation_link = reverse(
+                '{0}:confirm_newsletter_email'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key})
+        response = self.client.post(
+            confirmation_link, {'confirmation_key': signup.confirmation_key})
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        self.assertTrue(signup.is_verified)
+        self.assertGreater(len(mail.outbox), 0)
+        email = mail.outbox[0]
+        self.assertIn(
+            self.staff_user.email, [out_mail.to[0] for out_mail in mail.outbox])
+        self.assertEqual(len(email.recipients()), 1)
+        notification_message = (
+            'New recipient "{0}" is added to job '
+            'newsletter mailing list.'.format(signup.recipient))
+        self.assertNotEqual(email.body.find(notification_message), -1)
+
+    def test_notification_is_using_settings_from_settings_py(self):
+        # prepare user
+        signup = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+        with override(signup.default_language):
+            confirmation_link = reverse(
+                '{0}:confirm_newsletter_email'.format(
+                    self.app_config.namespace),
+                kwargs={'key': signup.confirmation_key})
+        response = self.client.post(
+            confirmation_link, {'confirmation_key': signup.confirmation_key})
+        signup = NewsletterSignup.objects.get(pk=signup.pk)
+        self.assertTrue(signup.is_verified)
+        self.assertEqual(len(mail.outbox), 1)
+
+        email = mail.outbox[0]
+        self.assertEqual(email.to[0], 'default_admin@notification.em')
+        self.assertEqual(len(email.recipients()), 1)
 
     def test_send_newsletter_uses_app_config(self):
-        pass
+        # newsletter should distinguish between apphooks, and
+        # should not send newsletter to recipients if they have
+        # different app_config then job offer.
+
+        # setup another apphooked page, since reload takes some time
+        # we will setup apphook on the beginning of a test case
+        new_config = JobsConfig.objects.create(namespace='new_appconfig')
+        page = self.create_page(
+            title='Another apphooked jobs',
+            slug='another-apphooked-jobs',
+            namespace=new_config.namespace)
+
+        signup_default_namespace = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        signup_new_namespace = NewsletterSignup.objects.create(
+            recipient='new@reicipent.com',
+            is_verified=True,
+            default_language='en',
+            app_config=new_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        offer_default = self.create_default_job_offer(translated=True)
+        with override('en'):
+            category_new_config = JobCategory.objects.create(
+                app_config=new_config,
+                **self.make_new_values(self.category_values_raw['en'], 1)
+            )
+            offer_new_config = JobOffer.objects.create(
+                app_config=new_config,
+                category=category_new_config,
+                **self.make_new_values(self.offer_values_raw['en'], 1)
+            )
+
+        # send newsletter
+        NewsletterSignup.objects.send_job_notifiation(
+            job_list=[job.pk for job in (offer_default, offer_new_config)])
+
+        self.assertEqual(len(mail.outbox), 2)
+        email0 = mail.outbox[0]
+        email1 = mail.outbox[1]
+        self.assertEqual(email0.to[0], signup_default_namespace.recipient)
+        self.assertEqual(email1.to[0], signup_new_namespace.recipient)
+
+        # test that emails have correct unsubscribe links
+        with override(signup_default_namespace.default_language):
+            unsubscribe_link_default_namespace = reverse(
+                '{0}:unsubscribe_from_newsletter'.format(
+                    signup_default_namespace.app_config.namespace),
+                kwargs={'key': signup_default_namespace.confirmation_key}
+            )
+            offer_link_default_namespace = offer_default.get_absolute_url()
+
+        with override(signup_new_namespace.default_language):
+            unsubscribe_link_new_namespace = reverse(
+                '{0}:unsubscribe_from_newsletter'.format(
+                    signup_new_namespace.app_config.namespace),
+                kwargs={'key': signup_new_namespace.confirmation_key}
+            )
+            offer_link_new_namespace = offer_new_config.get_absolute_url()
+
+        # test unsubscribe links are present in the email
+        self.assertNotEqual(
+            email0.body.find(unsubscribe_link_default_namespace), -1)
+        self.assertNotEqual(
+            email1.body.find(unsubscribe_link_new_namespace), -1)
+
+        # test job offer links are present in the emails
+        self.assertNotEqual(
+            email0.body.find(offer_link_default_namespace), -1)
+        self.assertNotEqual(
+            email1.body.find(offer_link_new_namespace), -1)
+        # test that job links from different namespace are absent
+        self.assertEqual(
+            email0.body.find(offer_link_new_namespace), -1)
+        self.assertEqual(
+            email1.body.find(offer_link_default_namespace), -1)
+
+    def test_disabled_users_do_not_get_newsletter(self):
+        # setup another apphooked page, since reload takes some time
+        # we will setup apphook on the beginning of a test case
+        new_config = JobsConfig.objects.create(namespace='new_appconfig')
+        self.create_page(
+            title='Another apphooked jobs',
+            slug='another-apphooked-jobs',
+            namespace=new_config.namespace)
+
+        # prepare signups
+        signup_default_namespace = NewsletterSignup.objects.create(
+            recipient='initial@reicipent.com',
+            is_verified=True,
+            is_disabled=True,
+            default_language='en',
+            app_config=self.app_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+        signup_new_namespace = NewsletterSignup.objects.create(
+            recipient='new@reicipent.com',
+            is_verified=True,
+            is_disabled=True,
+            default_language='en',
+            app_config=new_config,
+            confirmation_key=NewsletterSignup.objects.generate_random_key())
+
+        # prepare job offer
+        offer_default = self.create_default_job_offer(translated=True)
+        with override('en'):
+            category_new_config = JobCategory.objects.create(
+                app_config=new_config,
+                **self.make_new_values(self.category_values_raw['en'], 1)
+            )
+            offer_new_config = JobOffer.objects.create(
+                app_config=new_config,
+                category=category_new_config,
+                **self.make_new_values(self.offer_values_raw['en'], 1)
+            )
+
+        # send newsletter
+        NewsletterSignup.objects.send_job_notifiation(
+            job_list=[job.pk for job in (offer_default, offer_new_config)])
+
+        self.assertEqual(len(mail.outbox), 0)
