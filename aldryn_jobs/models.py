@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.http import Http404
 import reversion
 from reversion.revisions import RegistrationError
 from django.utils.importlib import import_module
@@ -347,12 +348,16 @@ class NewsletterSignup(models.Model):
         kwargs = {'key': self.confirmation_key}
         with force_language(self.default_language):
             try:
-                return reverse(
+                url = reverse(
                     '{0}:confirm_newsletter_email'.format(self.app_config.namespace),
                     kwargs=kwargs)
             except NoReverseMatch:
-                return reverse(
-                    '{0}:confirm_newsletter_not_found'.format(self.app_config.namespace))
+                try:
+                    url = reverse(
+                        '{0}:confirm_newsletter_not_found'.format(self.app_config.namespace))
+                except NoReverseMatch:
+                    raise Http404()
+        return url
 
     def reset_confirmation(self):
         """ Reset the confirmation key.

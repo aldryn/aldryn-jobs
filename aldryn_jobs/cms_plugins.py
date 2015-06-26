@@ -40,28 +40,27 @@ class JobNewsletter(CMSPluginBase):
         # form with data. explicitly check that request POST has the right
         # data.
         request = context.get('request')
-        # FIXME: make namespace a unique thing, then we can rely on .get()
-        app_config = JobsConfig.objects.filter(namespace=instance.app_config.namespace)
-        if app_config:
-            app_config = app_config[0]
 
         # check if we have a valid app_config that is app hooked to a page.
         # so that we won't have a 500 error if page with that app hook
         # was deleted.
         try:
-            reverse('{0}:register_newsletter'.format(app_config.namespace))
-        except NoReverseMatch:
+            reverse('{0}:register_newsletter'.format(
+                instance.app_config.namespace))
+        except (NoReverseMatch, AttributeError):
             context['plugin_configuration_error'] = _(
-                'There is an error in plugin configuration: selected job config '
-                'is not available. Please switch to edit mode and change '
-                'plugin app_config settings to use valid config. '
+                'There is an error in plugin configuration: selected job '
+                'config is not available. Please switch to edit mode and '
+                'change plugin app_config settings to use valid config. '
                 'Also note that aldryn-jobs should be used at least once as an '
                 'apphook for that config.')
 
         if request is not None and request.POST.get('recipient'):
-            context['form'] = NewsletterSignupForm(request.POST, app_config=app_config)
+            context['form'] = NewsletterSignupForm(
+                request.POST, app_config=instance.app_config)
         else:
-            context['form'] = NewsletterSignupForm(app_config=app_config)
+            context['form'] = NewsletterSignupForm(
+                app_config=instance.app_config)
         return context
 
 

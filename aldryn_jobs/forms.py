@@ -250,8 +250,11 @@ class NewsletterSignupForm(forms.ModelForm):
             recipient=self.data['recipient'],
             app_config=self.app_config)
         if obj_qs.count() > 0:
-            # TODO: Handle multiple objects! rasie or hanle them properly
-            raise ValidationError(_('aldryn-jobs', "This email is already registered."), code='invalid')
+            # TODO: Handle multiple objects! rasie or handle them properly
+            raise ValidationError(
+                _('aldryn-jobs',
+                  "This email is already registered."),
+                code='invalid')
         return super(NewsletterSignupForm, self).clean()
 
     class Meta:
@@ -346,10 +349,12 @@ class JobNewsletterRegistrationPluginForm(forms.ModelForm):
     model = JobNewsletterRegistrationPlugin
 
     def __init__(self, *args, **kwargs):
-        super(JobNewsletterRegistrationPluginForm, self).__init__(*args, **kwargs)
-        # get available jobs configs, that have the same namespace as pages with namespaces.
-        # that will ensure that user wont select config that is not app hooked because that
-        # will lead to a 500 error until that config wont be used.
+        super(JobNewsletterRegistrationPluginForm, self).__init__(
+            *args, **kwargs)
+        # get available jobs configs, that have the same namespace as
+        # pages with namespaces. That will ensure that user wont select
+        # config that is not app hooked because that will lead to a 500
+        # error until that config wont be used.
         available_configs = JobsConfig.objects.filter(
             namespace__in=Page.objects.exclude(
                 application_namespace__isnull=True).values_list(
@@ -357,19 +362,23 @@ class JobNewsletterRegistrationPluginForm(forms.ModelForm):
         self.fields['app_config'].queryset = available_configs
 
     def clean(self):
-        # since namespace is not a unique thing we need to validate it additionally
-        # because it is possible that there is a page with same namespace as a jobs config
-        # but which is using other app_config, which also would lead to same 500 error.
-        # The easiest way is to try to reverse, in case of success that would mean
-        # that the app_config is correct and can be used.
+        # since namespace is not a unique thing we need to validate it
+        # additionally because it is possible that there is a page with same
+        # namespace as a jobs config but which is using other app_config,
+        # which also would lead to same 500 error. The easiest way is to try
+        # to reverse, in case of success that would mean that the app_config
+        # is correct and can be used.
         data = super(JobNewsletterRegistrationPluginForm, self).clean()
         try:
-            reverse('{0}:register_newsletter'.format(data['app_config'].namespace))
+            reverse('{0}:register_newsletter'.format(
+                data['app_config'].namespace))
         except NoReverseMatch:
             raise ValidationError(
-                _('aldryn-jobs', 'Seems that selected Job config is not plugged to any page, '
+                _('aldryn-jobs',
+                  'Seems that selected Job config is not plugged to any page, '
                   'or maybe that page is not published.'
-                  'Please select Job config that is being used.'), code='invalid')
+                  'Please select Job config that is being used.'),
+                code='invalid')
         return data
 
 

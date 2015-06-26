@@ -17,24 +17,29 @@ class TestAppConfigPluginsMixin(object):
 
     def create_plugin_page(self):
         page = api.create_page(
-            title="Jobs plugin page en", template=self.template, language=self.language,
-            parent=self.root_page, published=True)
-        api.create_title('de', 'Jobs plugin page de', page, slug='jobs-plugin-page-de')
+            title="Jobs plugin page en",
+            template=self.template,
+            language=self.language,
+            parent=self.root_page,
+            published=True)
+        api.create_title('de', 'Jobs plugin page de', page,
+                         slug='jobs-plugin-page-de')
         page.publish('en')
         page.publish('de')
         return page.reload()
 
     def _create_plugin(self, page, language, app_config, **plugin_params):
         """
-        Create plugin of type self.plugin_to_test and plugin_params in given language
-        to a page placeholder.
+        Create plugin of type self.plugin_to_test and plugin_params in
+        given language to a page placeholder.
         Assumes that page has that translation.
         """
         placeholder = page.placeholders.all()[0]
         api.add_plugin(
             placeholder, self.plugin_to_test, language,
             app_config=app_config, **plugin_params)
-        plugin = placeholder.get_plugins().filter(language=language)[0].get_plugin_instance()[0]
+        plugin = placeholder.get_plugins().filter(
+            language=language)[0].get_plugin_instance()[0]
         plugin.save()
         page.publish(self.language)
         return plugin
@@ -114,8 +119,10 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
             other_group)
 
     def test_plugin_with_different_groups_does_not_breaks_page(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
 
         for language_code in ('en', 'de'):
             with override(language_code):
@@ -133,8 +140,10 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_plugin_does_not_breaks_page_if_configured_apphook_was_deleted(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
 
         # delete apphooked page
         self.page.delete()
@@ -145,9 +154,11 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
             response = self.client.get(page_url_en)
             self.assertEqual(response.status_code, 200)
 
-    def test_plugin_does_not_breaks_page_for_superuser_if_configured_apphook_was_deleted(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+    def test_plugin_doesnt_breaks_page_for_su_if_configured_apphook_was_deleted(self):
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
 
         # delete apphooked page
         self.page.delete()
@@ -164,9 +175,47 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
             response = self.client.get(page_url_en)
             self.assertEqual(response.status_code, 200)
 
+    def test_plugin_does_not_breaks_page_if_job_config_was_deleted(self):
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        # delete JobConfig
+        self.app_config.delete()
+
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url_en = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url_en)
+            self.assertEqual(response.status_code, 200)
+
+    def test_plugin_doesnt_breaks_page_for_su_if_job_config_was_deleted(self):
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+
+        # delete JobConfig
+        self.app_config.delete()
+
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url_en = '{0}?edit'.format(
+                    self.plugin_page.get_absolute_url())
+
+            login_result = self.client.login(
+                username=self.super_user, password=self.super_user_password)
+            self.assertEqual(login_result, True)
+
+            response = self.client.get(page_url_en)
+            self.assertEqual(response.status_code, 200)
+
     def test_plugin_does_not_displays_error_message_to_non_super_users(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
 
         # delete apphooked page
         self.page.delete()
@@ -176,11 +225,15 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
 
         response = self.client.get(page_url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, 'There is an error in plugin configuration: selected job config')
+        self.assertNotContains(
+            response, 'There is an error in plugin '
+                      'configuration: selected job config')
 
     def test_plugin_displays_error_message_to_super_users(self):
-        other_group = Group.objects.get_or_create(name='Newsletter signup notifications DE')[0]
-        self.create_plugin(self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
+        other_group = Group.objects.get_or_create(
+            name='Newsletter signup notifications DE')[0]
+        self.create_plugin(
+            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
 
         # delete apphooked page
         self.page.delete()
@@ -194,4 +247,6 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
 
         response = self.client.get(page_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'There is an error in plugin configuration: selected job config')
+        self.assertContains(
+            response, 'There is an error in plugin '
+                      'configuration: selected job config')
