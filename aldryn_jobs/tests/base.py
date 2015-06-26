@@ -160,7 +160,9 @@ class JobsBaseTestCase(TransactionTestCase):
 
     def tearDown(self):
         super(JobsBaseTestCase, self).tearDown()
-        self.app_config.delete()
+        app_config = JobsConfig.objects.filter(pk=self.app_config.pk)
+        if app_config:
+            app_config.get().delete()
         cache.clear()
 
     def create_user(self, user_name, user_password, is_staff=False, is_superuser=False):
