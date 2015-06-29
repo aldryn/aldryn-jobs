@@ -8,12 +8,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # FIXME: Decide if we should delete those two tables
-        # Deleting model 'JobCategoryNew'
-        db.delete_table(u'aldryn_jobs_jobcategorynew')
-
-        # Removing M2M table for field supervisors on 'JobCategoryNew'
-        db.delete_table(db.shorten_name(u'aldryn_jobs_jobcategorynew_supervisors'))
 
         # Adding field 'NewsletterSignup.app_config'
         db.add_column(u'aldryn_jobs_newslettersignup', 'app_config',
@@ -32,24 +26,6 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Removing unique constraint on 'JobsConfig', fields ['namespace']
         db.delete_unique(u'aldryn_jobs_jobsconfig', ['namespace'])
-        # FIXME: Decide if we should delete those two tables
-        # Adding model 'JobCategoryNew'
-        db.create_table(u'aldryn_jobs_jobcategorynew', (
-            ('ordering', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('app_config', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['aldryn_jobs.JobsConfig'], null=True)),
-            (u'category_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['aldryn_categories.Category'], unique=True, primary_key=True)),
-        ))
-        db.send_create_signal(u'aldryn_jobs', ['JobCategoryNew'])
-
-        # FIXME: Decide if we should delete those two tables
-        # Adding M2M table for field supervisors on 'JobCategoryNew'
-        m2m_table_name = db.shorten_name(u'aldryn_jobs_jobcategorynew_supervisors')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('jobcategorynew', models.ForeignKey(orm[u'aldryn_jobs.jobcategorynew'], null=False)),
-            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['jobcategorynew_id', 'user_id'])
 
         # Deleting field 'NewsletterSignup.app_config'
         db.delete_column(u'aldryn_jobs_newslettersignup', 'app_config_id')
