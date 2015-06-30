@@ -3,12 +3,14 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 
+
 def create_default_namespaces(apps, schema_editor):
+    from aldryn_jobs.models import JobListPlugin
     JobsConfig = apps.get_model('aldryn_jobs', 'JobsConfig')
     models = [apps.get_model('aldryn_jobs', 'JobCategory'),
               apps.get_model('aldryn_jobs', 'JobOffer'),
               apps.get_model('aldryn_jobs', 'JobApplication'),
-              apps.get_model('aldryn_jobs', 'JobListPlugin'),]
+              JobListPlugin, ]
 
     ns, created = JobsConfig.objects.get_or_create(namespace='aldryn_jobs')
 
@@ -16,6 +18,7 @@ def create_default_namespaces(apps, schema_editor):
         for entry in model.objects.filter(app_config__isnull=True):
             entry.app_config = ns
             entry.save()
+
 
 def remove_namespaces(apps, schema_editor):
     JobsConfig = apps.get_model('aldryn_jobs', 'JobsConfig')
