@@ -53,21 +53,6 @@ class ReversionTestCase(JobsBaseTestCase):
             reversion.get_for_object(object_with_revision)))[revision_number - 1]
         version.revision.revert()
 
-    def make_new_values(self, values_dict, replace_with):
-        """
-        Replace formating symbol {0} with replace_with param.
-        modifies dates by + timedelta(days=int(replace_with))
-        Returns new dictionnary with same keys and replaced symbols.
-        """
-        new_dict = {}
-        for key, value in values_dict.items():
-            if key in ('publication_start', 'publication_end'):
-                new_val = value + timedelta(days=replace_with)
-            else:
-                new_val = value.format(replace_with)
-            new_dict[key] = new_val
-        return new_dict
-
     # Following tests does not covers translations!
     def test_revision_is_created_on_job_category_object_create(self):
         with transaction.atomic():

@@ -6,7 +6,7 @@ from django import forms, get_version
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, \
     NON_FIELD_ERRORS
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import pgettext_lazy as _, get_language
@@ -19,10 +19,12 @@ from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
 from unidecode import unidecode
 
+from cms.models import Page
+
 from .models import (
     JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
     NewsletterSignup, JobsConfig,
-    JobListPlugin)
+    JobListPlugin, JobNewsletterRegistrationPlugin)
 
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
@@ -238,6 +240,23 @@ class JobApplicationForm(forms.ModelForm):
 
 class NewsletterSignupForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        self.app_config = kwargs.pop('app_config')
+        super(NewsletterSignupForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+
+        obj_qs = NewsletterSignup.objects.filter(
+            recipient=self.data['recipient'],
+            app_config=self.app_config)
+        if obj_qs.count() > 0:
+            # TODO: Handle multiple objects! rasie or handle them properly
+            raise ValidationError(
+                _('aldryn-jobs',
+                  "This email is already registered."),
+                code='invalid')
+        return super(NewsletterSignupForm, self).clean()
+
     class Meta:
         model = NewsletterSignup
         fields = ['recipient']
@@ -323,6 +342,43 @@ class JobListPluginForm(forms.ModelForm):
                     )
                     if 'joboffers' in data:
                         data.pop('joboffers')
+        return data
+
+
+class JobNewsletterRegistrationPluginForm(forms.ModelForm):
+    model = JobNewsletterRegistrationPlugin
+
+    def __init__(self, *args, **kwargs):
+        super(JobNewsletterRegistrationPluginForm, self).__init__(
+            *args, **kwargs)
+        # get available jobs configs, that have the same namespace as
+        # pages with namespaces. That will ensure that user wont select
+        # config that is not app hooked because that will lead to a 500
+        # error until that config wont be used.
+        available_configs = JobsConfig.objects.filter(
+            namespace__in=Page.objects.exclude(
+                application_namespace__isnull=True).values_list(
+                'application_namespace', flat=True))
+        self.fields['app_config'].queryset = available_configs
+
+    def clean(self):
+        # since namespace is not a unique thing we need to validate it
+        # additionally because it is possible that there is a page with same
+        # namespace as a jobs config but which is using other app_config,
+        # which also would lead to same 500 error. The easiest way is to try
+        # to reverse, in case of success that would mean that the app_config
+        # is correct and can be used.
+        data = super(JobNewsletterRegistrationPluginForm, self).clean()
+        try:
+            reverse('{0}:register_newsletter'.format(
+                data['app_config'].namespace))
+        except NoReverseMatch:
+            raise ValidationError(
+                _('aldryn-jobs',
+                  'Seems that selected Job config is not plugged to any page, '
+                  'or maybe that page is not published.'
+                  'Please select Job config that is being used.'),
+                code='invalid')
         return data
 
 

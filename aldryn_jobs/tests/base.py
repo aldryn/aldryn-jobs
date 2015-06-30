@@ -126,17 +126,28 @@ class JobsBaseTestCase(TransactionTestCase):
         root_page.publish('de')
         return root_page.reload()
 
-    def create_page(self):
+    def create_page(self, title=None, slug=None, namespace=None):
+
+        if namespace is None:
+            namespace = self.app_config.namespace
+
+        if title is None:
+            title = 'Jobs'
+
+        if slug is None:
+            slug = 'jobs-app'
+
         page = api.create_page(
-            title='Jobs en',
-            slug='jobs-app-en',
+            title='{0} en'.format(title),
+            slug='{0}-en'.format(slug),
             template=self.template,
             language=self.language,
             published=True,
             parent=self.root_page,
             apphook='JobsApp',
-            apphook_namespace=self.app_config.namespace)
-        api.create_title('de', 'Jobs de', page, slug='jobs-app-de')
+            apphook_namespace=namespace)
+        api.create_title(
+            'de', '{0} de'.format(title), page, slug='{0}-de'.format(slug))
         page.publish('en')
         page.publish('de')
         # unfortunately aphook reload doesn't restart server fast,
@@ -149,7 +160,9 @@ class JobsBaseTestCase(TransactionTestCase):
 
     def tearDown(self):
         super(JobsBaseTestCase, self).tearDown()
-        self.app_config.delete()
+        app_config = JobsConfig.objects.filter(pk=self.app_config.pk)
+        if app_config:
+            app_config.get().delete()
         cache.clear()
 
     def create_user(self, user_name, user_password, is_staff=False, is_superuser=False):
@@ -208,3 +221,18 @@ class JobsBaseTestCase(TransactionTestCase):
                                body=self.default_plugin_content['de'])
 
         return JobOffer.objects.language('en').get(pk=job_offer.pk)
+
+    def make_new_values(self, values_dict, replace_with):
+        """
+        Replace formating symbol {0} with replace_with param.
+        modifies dates by + timedelta(days=int(replace_with))
+        Returns new dictionnary with same keys and replaced symbols.
+        """
+        new_dict = {}
+        for key, value in values_dict.items():
+            if key in ('publication_start', 'publication_end'):
+                new_val = value + timedelta(days=replace_with)
+            else:
+                new_val = value.format(replace_with)
+            new_dict[key] = new_val
+        return new_dict

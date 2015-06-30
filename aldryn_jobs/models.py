@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.http import Http404
 import reversion
 from reversion.revisions import RegistrationError
 from django.utils.importlib import import_module
@@ -339,15 +340,24 @@ class NewsletterSignup(models.Model):
     is_disabled = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=40, unique=True)
 
+    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'), null=True)
+
     objects = NewsletterSignupManager()
 
     def get_absolute_url(self):
         kwargs = {'key': self.confirmation_key}
         with force_language(self.default_language):
             try:
-                return reverse('aldryn_jobs:confirm_newsletter_email', kwargs=kwargs)
+                url = reverse(
+                    '{0}:confirm_newsletter_email'.format(self.app_config.namespace),
+                    kwargs=kwargs)
             except NoReverseMatch:
-                return reverse('aldryn_jobs:confirm_newsletter_not_found')
+                try:
+                    url = reverse(
+                        '{0}:confirm_newsletter_not_found'.format(self.app_config.namespace))
+                except NoReverseMatch:
+                    raise Http404()
+        return url
 
     def reset_confirmation(self):
         """ Reset the confirmation key.
@@ -390,6 +400,7 @@ class NewsletterSignup(models.Model):
         # build url
         send_mail(recipients=[self.recipient],
                   context=context,
+                  language=self.default_language,
                   template_base='aldryn_jobs/emails/newsletter_confirmation')
 
     def confirm(self):
@@ -404,7 +415,7 @@ class NewsletterSignup(models.Model):
         self.save(update_fields=['is_disabled', ])
 
     def __unicode__(self):
-        return unicode(self.recipient)
+        return u'{0} / {1}'.format(unicode(self.recipient), self.app_config)
 
 @version_controlled_content(follow=['signup', 'user'])
 class NewsletterSignupUser(models.Model):
@@ -480,11 +491,14 @@ class JobCategoriesPlugin(BaseJobsPlugin):
         )
 
 
-class JobNewsletterRegistrationPlugin(CMSPlugin):
-    # NOTE: does not need app_config in this one
-    # TODO: add configurable parameters for registration form plugin
+class JobNewsletterRegistrationPlugin(BaseJobsPlugin):
     mail_to_group = models.ManyToManyField(
-        Group, verbose_name=_('Signup notification to')
+        Group, verbose_name=_('Notification to'),
+        blank=True,
+        help_text=_(
+            'If user successfuly completed registration.<br/>'
+            'Notification would be sent to users from selected groups<br/>'
+            'Leave blank to disable notifications.<br/>')
     )
 
     def copy_relations(self, oldinstance):
