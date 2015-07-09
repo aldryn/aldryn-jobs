@@ -1,6 +1,6 @@
-==================
-Aldryn Jobs Add-On
-==================
+===========
+Aldryn Jobs
+===========
 
 .. image:: https://magnum.travis-ci.com/aldryn/aldryn-jobs.svg?token=2aLiyxMhwop2hnmajHuq&branch=master
     :target: https://magnum.travis-ci.com/aldryn/aldryn-jobs
@@ -12,6 +12,11 @@ This add-on lets you:
 
 - define translatable categories, which will appear in the menu
 - add categorized, translatable job offers
+
+
+IMPORTANT NOTE: ::
+
+    This repo is not ready for public use and is expected to undergo rapid change before its v1.0 release.
 
 
 Installation
