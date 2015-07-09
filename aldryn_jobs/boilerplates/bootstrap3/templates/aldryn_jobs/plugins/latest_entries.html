@@ -1,6 +1,11 @@
 {% load i18n %}
 
 <div class="aldryn aldryn-jobs aldryn-jobs-latest">
+{% if plugin_configuration_error %}
+    {% if request.user.is_staff or request.user.is_superuser %}
+        <p class="config-errors">{{ plugin_configuration_error }}</p>
+    {% endif %}
+{% else %}
     <p class="alert alert-info">
         {% blocktrans with total=instance.job_offers.count %}
             Showing {{ total }} Job Offers
@@ -19,4 +24,5 @@
             <div class="list-group-item">{% trans "No items available" %}</div>
         {% endfor %}
     </div>
+{% endif %}
 </div>
