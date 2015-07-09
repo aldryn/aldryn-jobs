@@ -1,5 +1,10 @@
 {% load i18n apphooks_config_tags %}
  <div class="aldryn aldryn-jobs aldryn-jobs-categories">
+{% if plugin_configuration_error %}
+    {% if request.user.is_staff or request.user.is_superuser %}
+        <p class="config-errors">{{ plugin_configuration_error }}</p>
+    {% endif %}
+{% else %}
     <ul class="list-unstyled">
         {% for category in instance.categories %}
             <li>
@@ -8,4 +13,5 @@
             </li>
         {% endfor %}
     </ul>
+{% endif %}
 </div>
