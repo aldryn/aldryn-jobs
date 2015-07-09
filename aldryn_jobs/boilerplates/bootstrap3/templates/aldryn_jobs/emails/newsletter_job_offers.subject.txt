@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans context 'aldryn-jobs' %}Jobs Newsletter{% endblocktrans %}
+{% blocktrans context "aldryn-jobs" %}Jobs Newsletter{% endblocktrans %}
