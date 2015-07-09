@@ -2,7 +2,7 @@
 
 {% regroup object_list by category as categories %}
 <ul class="jobs-items">
-	{% for category in categories %}
+    {% for category in categories %}
         <li class="jobs-category">
             <h2 class="jobs-category">
                 <a href="{{ category.grouper.get_absolute_url }}">{{ category.grouper.name }}</a>
