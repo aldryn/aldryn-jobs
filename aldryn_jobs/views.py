@@ -193,8 +193,8 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
 
     def get_template_names(self):
         return {
-            "GET": ["aldryn_jobs/newsletter_confirm.html"],
-            "POST": ["aldryn_jobs/newsletter_confirmed.html"],
+            "GET": ["aldryn_jobs/newsletter/confirm.html"],
+            "POST": ["aldryn_jobs/newsletter/confirmed.html"],
         }[self.request.method]
 
     def get(self, *args, **kwargs):
@@ -325,8 +325,8 @@ class UnsubscibeNewsletterSignup(TemplateResponseMixin, View):
 
     def get_template_names(self):
         return {
-            "GET": ["aldryn_jobs/newsletter_unsubscribe.html"],
-            "POST": ["aldryn_jobs/newsletter_unsubscribed.html"],
+            "GET": ["aldryn_jobs/newsletter/unsubscribe.html"],
+            "POST": ["aldryn_jobs/newsletter/unsubscribed.html"],
         }[self.request.method]
 
     def get(self, *args, **kwargs):
@@ -440,7 +440,7 @@ class RegisterJobNewsletter(CreateView):
             reverse('{0}:job-offer-list'.format(self.app_config.namespace)))
 
     def get_invalid_template_name(self):
-        return 'aldryn_jobs/newsletter_invalid_email.html'
+        return 'aldryn_jobs/newsletter/invalid_email.html'
 
     def get_form_kwargs(self):
         kwargs = super(RegisterJobNewsletter, self).get_form_kwargs()
@@ -505,8 +505,8 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
 
     def get_template_names(self):
         return {
-            "GET": ["aldryn_jobs/newsletter_resend_confirmation.html"],
-            "POST": ["aldryn_jobs/newsletter_confirmation_resent.html"],
+            "GET": ["aldryn_jobs/newsletter/resend_confirmation.html"],
+            "POST": ["aldryn_jobs/newsletter/confirmation_resent.html"],
         }[self.request.method]
 
     def post(self, *args, **kwargs):
@@ -531,4 +531,4 @@ class ResendNewsletterConfirmation(ConfirmNewsletterSignup):
 
 
 class SuccessRegistrationMessage(TemplateView):
-    template_name = 'aldryn_jobs/registered_for_newsletter.html'
+    template_name = 'aldryn_jobs/newsletter/registered.html'
