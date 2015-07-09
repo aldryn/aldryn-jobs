@@ -63,12 +63,14 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
         super(TestNewsletterPlugin, self).setUp()
         self.default_group = Group.objects.get_or_create(
             name='Newsletter signup notifications')[0]
-        self.create_plugin(
-            page=self.plugin_page,
-            language=self.language,
-            app_config=self.app_config,
-            mail_to_group=self.default_group,
-            **self.plugin_params)
+        # FIXME: seems that it is not relevant, most testcases create plugins
+        # by them self.
+        # self.create_plugin(
+        #     page=self.plugin_page,
+        #     language=self.language,
+        #     app_config=self.app_config,
+        #     mail_to_group=self.default_group,
+        #     **self.plugin_params)
 
     def test_newsletter_plugins_does_not_breaks_page(self):
         self.create_plugin(self.plugin_page, 'de', self.app_config,
@@ -249,3 +251,75 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
         self.assertContains(
             response, 'There is an error in plugin '
                       'configuration: selected job config')
+
+
+class TestJobCategoriesListPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
+    plugin_to_test = 'JobCategoriesList'
+
+    def create_plugin(self, page, language, app_config,
+                      **plugin_params):
+        plugin = self._create_plugin(
+            page, language, app_config, **plugin_params)
+        return plugin
+
+    def test_categories_list_plugins_does_not_breaks_page(self):
+        self.create_plugin(self.plugin_page, 'de', self.app_config)
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url)
+            self.assertEqual(response.status_code, 200)
+
+    def test_categories_list_plugins_does_not_breaks_page_for_admin_user(self):
+        self.create_plugin(self.plugin_page, 'de', self.app_config)
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url = '{0}?edit'.format(
+                    self.plugin_page.get_absolute_url())
+
+            login_result = self.client.login(
+                username=self.super_user, password=self.super_user_password)
+            self.assertEqual(login_result, True)
+
+            response = self.client.get(page_url)
+            self.assertEqual(response.status_code, 200)
+
+
+class TestJobListPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
+    plugin_to_test = 'JobList'
+
+    def create_plugin(self, page, language, app_config, joboffers=None,
+                      **plugin_params):
+        plugin = self._create_plugin(
+            page, language, app_config, **plugin_params)
+        if joboffers is not None:
+            # we need to update plugin configuration model with correct group
+            # it is located under it's own manager
+            plugin.joblistplugin.joboffers.add(
+                joboffers)
+            plugin.save()
+        return plugin
+
+    def test_job_list_plugins_does_not_breaks_page(self):
+        self.create_plugin(self.plugin_page, 'de', self.app_config,
+                           joboffers=self.create_default_job_offer())
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url = self.plugin_page.get_absolute_url()
+            response = self.client.get(page_url)
+            self.assertEqual(response.status_code, 200)
+
+    def test_job_list_plugins_does_not_breaks_page_for_admin_user(self):
+        self.create_plugin(self.plugin_page, 'de', self.app_config,
+                           joboffers=self.create_default_job_offer())
+        for language_code in ('en', 'de'):
+            with override(language_code):
+                page_url = '{0}?edit'.format(
+                    self.plugin_page.get_absolute_url())
+
+            login_result = self.client.login(
+                username=self.super_user, password=self.super_user_password)
+            self.assertEqual(login_result, True)
+
+            response = self.client.get(page_url)
+            self.assertEqual(response.status_code, 200)
