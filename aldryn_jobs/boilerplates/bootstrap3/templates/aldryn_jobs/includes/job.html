@@ -1,0 +1,12 @@
+{% load i18n cms_tags %}
+
+<article class="aldryn-jobs-article">
+    <h3>
+        <a href="{{ job_offer.get_absolute_url }}">
+            {% render_model job_offer "title" %}
+        </a>
+    </h3>
+    <div class="lead">
+        {% render_model job_offer "lead_in" "lead_in" safe %}
+    </div>
+</article>

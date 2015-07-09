@@ -26,3 +26,19 @@
         </p>
     </div>
 {% endblock %}
+
+
+{% block jobs_footer %}
+    <div class="aldryn-jobs-pager">
+        <ul class="pager">
+            <li>
+                <span class="pager-back">
+                    – <a href="{{ job_offer.get_absolute_url }}">
+                        {% trans "Back to Overview" %}
+                    </a> –
+                </span>
+            </li>
+        </ul>
+    </div>
+    {% static_placeholder "jobs_detail_footer" %}
+{% endblock jobs_footer %}
