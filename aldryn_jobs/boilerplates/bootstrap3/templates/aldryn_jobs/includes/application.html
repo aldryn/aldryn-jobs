@@ -1,6 +1,6 @@
 {% load i18n standard_form %}
 
-<form method="post" class="aldryn-jobs-form">
+<form class="aldryn-jobs-form" method="post">
     {% if form.non_field_errors %}
         <div class="alert alert-danger" role="alert">
             {% for error in form.non_field_errors %}
