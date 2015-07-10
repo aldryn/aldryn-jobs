@@ -7,10 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from aldryn_apphooks_config.models import AppHookConfig
 from cms.models.fields import PlaceholderField
-from parler.models import TranslatableModel, TranslatedFields
 
 
-class JobsConfig(TranslatableModel, AppHookConfig):
+class JobsConfig(AppHookConfig):
     # Job PHFs
     placeholder_jobs_top = PlaceholderField(
         'jobs_top', related_name='aldryn_jobs_top')
