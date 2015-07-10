@@ -16,8 +16,7 @@ from .forms import (
 from .models import (
     JobListPlugin,
     JobNewsletterRegistrationPlugin,
-    JobCategoriesPlugin,
-    JobsConfig
+    JobCategoriesPlugin
 )
 
 

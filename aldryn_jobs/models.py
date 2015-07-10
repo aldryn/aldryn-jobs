@@ -62,7 +62,7 @@ if strict_version < StrictVersion('1.7.0'):
         reversion.register(user_model)
 else:
     # otherwise it is a pain, but thanks to solution of getting model from
-    # https://github.com/django-oscar/django-oscar/commit/c479a1983f326a9b059e157f85c32d06a35728dd
+    # https://github.com/django-oscar/django-oscar/commit/c479a1983f326a9b059e157f85c32d06a35728dd  # NOQA
     # we can do almost the same thing from the different side.
     from django.apps import apps
     from django.apps.config import MODELS_MODULE_NAME
@@ -278,6 +278,7 @@ class JobOffer(TranslatableModel):
 @version_controlled_content(follow=['job_offer', 'app_config'])
 @python_2_unicode_compatible
 class JobApplication(models.Model):
+    # FIXME: Gender is not the same as salutation.
     MALE = 'male'
     FEMALE = 'female'
 
@@ -297,9 +298,9 @@ class JobApplication(models.Model):
     is_rejected = models.BooleanField(_('rejected?'), default=False)
     rejection_date = models.DateTimeField(_('rejection date'),
         null=True, blank=True)
-
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
         null=True)
+
 
     class Meta:
         ordering = ['-created']
@@ -346,12 +347,15 @@ class NewsletterSignup(models.Model):
         with force_language(self.default_language):
             try:
                 url = reverse(
-                    '{0}:confirm_newsletter_email'.format(self.app_config.namespace),
-                    kwargs=kwargs)
+                    '{0}:confirm_newsletter_email'.format(
+                        self.app_config.namespace),
+                    kwargs=kwargs
+                )
             except NoReverseMatch:
                 try:
                     url = reverse(
-                        '{0}:confirm_newsletter_not_found'.format(self.app_config.namespace))
+                        '{0}:confirm_newsletter_not_found'.format(
+                            self.app_config.namespace))
                 except NoReverseMatch:
                     raise Http404()
         return url
@@ -404,7 +408,8 @@ class NewsletterSignup(models.Model):
 
     def confirm(self):
         """
-        Confirms NewsletterSignup, excepts that is_verified is checked before calling this method.
+        Confirms NewsletterSignup, excepts that is_verified is checked before
+        calling this method.
         """
         self.is_verified = True
         self.save(update_fields=['is_verified', ])

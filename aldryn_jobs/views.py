@@ -269,7 +269,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         # eventually we don't have abilities right now to track which plugin
         # was used to register for newsletter, so we will use all matching
         # plugins with filtering by language and app_config
-        plugins_base_qs = signup.app_config.jobnewsletterregistrationplugin_set.filter(
+        plugins_base_qs = signup.app_config.jobnewsletterregistrationplugin_set.filter(  # NOQA
             language=signup.default_language)
         # also do not use draft settings, only plugins from public pages
         # plugin page.pk should match page.get_public_object().pk
@@ -438,7 +438,8 @@ class RegisterJobNewsletter(CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        self.object.confirmation_key = NewsletterSignup.objects.generate_random_key()
+        self.object.confirmation_key = \
+            NewsletterSignup.objects.generate_random_key()
 
         # try to get language
         if getattr(self.request, 'LANGUAGE_CODE', None) is not None:
@@ -449,7 +450,10 @@ class RegisterJobNewsletter(CreateView):
 
         # populate object with other data
         self.object.app_config = self.app_config
-        user = self.request.user if self.request.user.is_authenticated() else None
+        if self.request.user.is_authenticated():
+            user = self.request.user
+        else:
+            user = None
         if user is not None:
             # in memory only property, will be used just for confirmation email
             self.object.user = user

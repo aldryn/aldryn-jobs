@@ -33,7 +33,8 @@ from .models import (
     JobListPlugin, JobNewsletterRegistrationPlugin)
 
 
-SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
+SEND_ATTACHMENTS_WITH_EMAIL = getattr(
+    settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
 DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
 
 
@@ -57,7 +58,7 @@ class AutoSlugForm(TranslatableModelForm):
             raw_data = self.data.copy()
             # add to self.data in order to show generated slug in the
             # form in case of an error
-            raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug
+            raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug  # NOQA
 
             # We cannot modify self.data directly because it can be
             # Immutable QueryDict

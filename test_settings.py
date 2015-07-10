@@ -77,8 +77,9 @@ HELPER_SETTINGS = {
         ],
     },
     'ALDRYN_BOILERPLATE_NAME': 'legacy',
-    'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS': ['default_admin@notification.em'],
-    # add aldryn_apphook_reload so that pages would be restored on apphook reload.
+    'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS': ['default_admin@notification.em'],  # NOQA
+    # add aldryn_apphook_reload so that pages would be restored on apphook
+    # reload.
     'MIDDLEWARE_CLASSES': [
         'aldryn_apphook_reload.middleware.ApphookReloadMiddleware',
         'django.middleware.http.ConditionalGetMiddleware',
@@ -96,7 +97,7 @@ HELPER_SETTINGS = {
     ],
     'STATICFILES_FINDERS': [
         'django.contrib.staticfiles.finders.FileSystemFinder',
-        # important! place right before django.contrib.staticfiles.finders.AppDirectoriesFinder
+        # important! place right before django.contrib.staticfiles.finders.AppDirectoriesFinder  # NOQA
         'aldryn_boilerplates.staticfile_finders.AppDirectoriesFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     ],
@@ -116,13 +117,14 @@ HELPER_SETTINGS = {
     ),
     'TEMPLATE_LOADERS': (
         'django.template.loaders.filesystem.Loader',
-        # important! place right before django.template.loaders.app_directories.Loader
+        # important! place right before django.template.loaders.app_directories.Loader  # NOQA
         'aldryn_boilerplates.template_loaders.AppDirectoriesLoader',
         'django.template.loaders.app_directories.Loader',
         'django.template.loaders.eggs.Loader'
     )
     # 'EMAIL_BACKEND': 'django.core.mail.backends.locmem.EmailBackend',
 }
+
 
 def run():
     from djangocms_helper import runner

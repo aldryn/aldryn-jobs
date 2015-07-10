@@ -1,9 +1,10 @@
 # The develop branch of aldryn-apphook-reload is required for Py3 compatibility
 https://github.com/aldryn/aldryn-apphook-reload/archive/develop.zip
-coverage
+coverage>=3.7.1
 django-appconf
-djangocms-helper
+djangocms-helper>=0.7
 django-filer
+docopt
 flake8
 pyflakes
 pytz

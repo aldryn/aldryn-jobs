@@ -5,7 +5,7 @@ import os
 import django
 
 
-cmd = 'coverage run `which djangocms-helper` aldryn_jobs test --cms --extra-settings=test_settings'
+cmd = 'coverage run `which djangocms-helper` aldryn_jobs test --cms --extra-settings=test_settings'  # NOQA
 
 if django.VERSION[:2] < (1, 6):
     cmd += ' --runner=discover_runner.DiscoverRunner'
