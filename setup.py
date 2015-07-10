@@ -3,15 +3,6 @@ import sys
 from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
-py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
-py27 = sys.version_info < (2, 8, 0) and sys.version_info >= (2, 7, 0)
-
-if not py26 and not py27:
-    raise ValueError(
-        "Aldryn Events currently support only python >= 2.6.5"
-    )
-
-
 REQUIREMENTS = [
     'South<1.1,>=1.0.2',
     'aldryn-apphooks-config>=0.1.3',
@@ -33,15 +24,11 @@ REQUIREMENTS = [
     'django-sortedm2m',
 ]
 
+py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
 if py26:
     REQUIREMENTS += [
         'Django<1.7,>1.5',
         'ordereddict',
-    ]
-
-if py27:
-    REQUIREMENTS += [
-        'Django<1.8,>1.5',
     ]
 
 CLASSIFIERS = [

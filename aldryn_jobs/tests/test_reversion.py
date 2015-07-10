@@ -1,6 +1,5 @@
 import reversion
 import six
-from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.contrib.auth.models import User
@@ -8,10 +7,12 @@ from parler.utils.context import switch_language
 
 from aldryn_reversion.core import create_revision_with_placeholders
 
-from ..models import (JobCategory, JobOffer, JobApplication, NewsletterSignup,
-NewsletterSignupUser, JobApplicationAttachment)
+from ..models import (
+    JobCategory, JobOffer, JobApplication, NewsletterSignup,
+    NewsletterSignupUser
+)
 
-from .base import JobsBaseTestCase, tz_datetime
+from .base import JobsBaseTestCase
 
 
 class ReversionTestCase(JobsBaseTestCase):
@@ -21,12 +22,15 @@ class ReversionTestCase(JobsBaseTestCase):
      * revisions are reverted (reversions and self test)
      * not translated fields are changed when new revision is created
      * not translated fields are being reverted correctly
-     * translated fields are changed on save with revision (latest change should be shown)
+     * translated fields are changed on save with revision (latest change
+       should be shown)
      * translated fields are reverted correctly
-     * placeholder fields are reverted with correct plugins (according to revision)
-     * [TBD] placeholder fields for translated objects should serve correct plugins for translation
-     * [TBD] placeholder fields for translated objects should server correct plugins for translation
-       after revision revert.
+     * placeholder fields are reverted with correct plugins (according
+       to revision)
+     * [TBD] placeholder fields for translated objects should serve correct
+       plugins for translation
+     * [TBD] placeholder fields for translated objects should server correct
+       plugins for translation after revision revert.
     """
 
     def create_revision(self, obj, content=None, **kwargs):
@@ -36,9 +40,11 @@ class ReversionTestCase(JobsBaseTestCase):
                 for property, value in six.iteritems(kwargs):
                     setattr(obj, property, value)
                 if content:
-                    # get correct plugin for language. do not update the same one.
+                    # get correct plugin for language. do not update the same
+                    # one.
                     language = obj.get_current_language()
-                    plugins = obj.content.get_plugins().filter(language=language)
+                    plugins = obj.content.get_plugins().filter(
+                        language=language)
                     plugin = plugins[0].get_plugin_instance()[0]
                     plugin.body = content
                     plugin.save()
@@ -50,7 +56,8 @@ class ReversionTestCase(JobsBaseTestCase):
         """
         # get by position, since reversion_id is not reliable,
         version = list(reversed(
-            reversion.get_for_object(object_with_revision)))[revision_number - 1]
+            reversion.get_for_object(
+                object_with_revision)))[revision_number - 1]
         version.revision.revert()
 
     # Following tests does not covers translations!
@@ -76,7 +83,8 @@ class ReversionTestCase(JobsBaseTestCase):
             app_config=self.app_config,
             **self.category_values_raw['en'])
         self.assertEqual(len(reversion.get_for_object(category)), 0)
-        new_values_en_1 = self.make_new_values(self.category_values_raw['en'], 1)
+        new_values_en_1 = self.make_new_values(
+            self.category_values_raw['en'], 1)
         self.create_revision(category, **new_values_en_1)
         self.assertEqual(len(reversion.get_for_object(category)), 1)
 
@@ -84,7 +92,8 @@ class ReversionTestCase(JobsBaseTestCase):
         job_offer = self.create_default_job_offer()
         self.assertEqual(len(reversion.get_for_object(job_offer)), 0)
 
-        new_values_en_1 = self.make_new_values(self.default_job_values['en'], 1)
+        new_values_en_1 = self.make_new_values(
+            self.default_job_values['en'], 1)
         self.create_revision(job_offer, **new_values_en_1)
         self.assertEqual(len(reversion.get_for_object(job_offer)), 1)
 
@@ -92,7 +101,8 @@ class ReversionTestCase(JobsBaseTestCase):
         category = JobCategory.objects.create(
             app_config=self.app_config,
             **self.category_values_raw['en'])
-        new_values_en_1 = self.make_new_values(self.category_values_raw['en'], 1)
+        new_values_en_1 = self.make_new_values(
+            self.category_values_raw['en'], 1)
         # revision 1
         self.create_revision(category, **new_values_en_1)
         for prop in new_values_en_1.keys():
@@ -133,11 +143,13 @@ class ReversionTestCase(JobsBaseTestCase):
             app_config=self.app_config,
             **self.category_values_raw['en'])
         # revision 1
-        new_values_en_1 = self.make_new_values(self.category_values_raw['en'], 1)
+        new_values_en_1 = self.make_new_values(
+            self.category_values_raw['en'], 1)
         self.create_revision(category, **new_values_en_1)
 
         # revision 2
-        new_values_en_2 = self.make_new_values(self.category_values_raw['en'], 2)
+        new_values_en_2 = self.make_new_values(
+            self.category_values_raw['en'], 2)
         self.create_revision(category, **new_values_en_2)
 
         for prop in new_values_en_2.keys():
@@ -196,11 +208,13 @@ class ReversionTestCase(JobsBaseTestCase):
             **self.category_values_raw['en'])
 
         # revision 1
-        new_values_en_1 = self.make_new_values(self.category_values_raw['en'], 1)
+        new_values_en_1 = self.make_new_values(
+            self.category_values_raw['en'], 1)
         self.create_revision(category, **new_values_en_1)
 
         # revision 2
-        new_values_en_2 = self.make_new_values(self.category_values_raw['en'], 2)
+        new_values_en_2 = self.make_new_values(
+            self.category_values_raw['en'], 2)
         self.create_revision(category, **new_values_en_2)
 
         # revert to 1
@@ -274,7 +288,8 @@ class ReversionTestCase(JobsBaseTestCase):
         with transaction.atomic():
             with reversion.create_revision():
                 language = job_offer.get_current_language()
-                plugins = job_offer.content.get_plugins().filter(language=language)
+                plugins = job_offer.content.get_plugins().filter(
+                    language=language)
                 plugin = plugins[0].get_plugin_instance()[0]
                 plugin.body = content_en_2
                 plugin.save()
@@ -294,7 +309,7 @@ class ReversionTestCase(JobsBaseTestCase):
         self.assertContains(response, content_en_1)
         self.assertNotContains(response, content_en_2)
 
-    def test_category_revert_revision_contains_correct_values_for_diverged_translations(self):
+    def test_category_revert_revision_correct_for_diverged_translations(self):
         category = self.default_category
         self.assertEqual(len(reversion.get_for_object(category)), 0)
         # revision 1: en 1, de 0
@@ -314,7 +329,8 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 4: en 2, de 2
         with switch_language(category, 'en'):
-            new_values_4 = self.make_new_values(self.category_values_raw['en'], 2)
+            new_values_4 = self.make_new_values(
+                self.category_values_raw['en'], 2)
             self.create_revision(category, **new_values_4)
 
         # revert to 3: en 1, de 2
@@ -330,7 +346,7 @@ class ReversionTestCase(JobsBaseTestCase):
             for prop in new_values_3.keys():
                 self.assertEqual(getattr(category, prop), new_values_3[prop])
 
-    def test_offer_revert_revision_contains_correct_values_for_diverged_translations(self):
+    def test_offer_revert_revision_correct_for_diverged_translations(self):
         offer = self.create_default_job_offer(translated=True)
         self.assertEqual(len(reversion.get_for_object(offer)), 0)
         initial_values = {
@@ -371,7 +387,8 @@ class ReversionTestCase(JobsBaseTestCase):
         with switch_language(offer, 'en'):
             for prop in new_values_en_1.keys():
                 self.assertEqual(getattr(offer, prop), new_values_en_1[prop])
-            # test untranslated fields, should be the same as atm of reverted revision
+            # test untranslated fields, should be the same as atm of reverted
+            # revision
             for prop in initial_values.keys():
                 self.assertEqual(getattr(offer, prop), initial_values[prop])
 
@@ -379,11 +396,12 @@ class ReversionTestCase(JobsBaseTestCase):
         with switch_language(offer, 'de'):
             for prop in new_values_de_2.keys():
                 self.assertEqual(getattr(offer, prop), new_values_de_2[prop])
-            # test untranslated fields shouldn't be changed regardless of language
+            # test untranslated fields shouldn't be changed regardless of
+            # language
             for prop in initial_values.keys():
                 self.assertEqual(getattr(offer, prop), initial_values[prop])
 
-    def test_offer_revert_revision_serves_correct_values_for_diverged_translations(self):
+    def test_offer_revert_revision_serves_for_diverged_translations(self):
         offer = self.create_default_job_offer(translated=True)
         self.assertEqual(len(reversion.get_for_object(offer)), 0)
 
@@ -403,7 +421,7 @@ class ReversionTestCase(JobsBaseTestCase):
         new_values_de_2 = self.make_new_values(self.offer_values_raw['de'], 2)
         content_de_2 = self.plugin_values_raw['de'].format(2)
         with switch_language(offer, 'de'):
-            self.create_revision(offer, content=content_de_2,  **new_values_de_2)
+            self.create_revision(offer, content=content_de_2, **new_values_de_2)
 
         # revision 4: en 2, de 2
         content_en_2 = self.plugin_values_raw['en'].format(2)
@@ -649,7 +667,8 @@ class ReversionTestCase(JobsBaseTestCase):
             username='test_user', first_name='First_name',
             last_name='Last_name')
 
-        signup_user = NewsletterSignupUser.objects.create(signup=signup, user=user)
+        signup_user = NewsletterSignupUser.objects.create(
+            signup=signup, user=user)
         self.assertEqual(len(reversion.get_for_object(signup_user)), 0)
         signup_2 = NewsletterSignup.objects.create(
             **self.make_new_values(self.signup_values_raw, 1))
@@ -664,7 +683,8 @@ class ReversionTestCase(JobsBaseTestCase):
             username='test_user', first_name='First_name',
             last_name='Last_name')
 
-        signup_user = NewsletterSignupUser.objects.create(signup=signup, user=user)
+        signup_user = NewsletterSignupUser.objects.create(
+            signup=signup, user=user)
         signup_1 = NewsletterSignup.objects.create(
             **self.make_new_values(self.signup_values_raw, 1))
 
@@ -688,7 +708,8 @@ class ReversionTestCase(JobsBaseTestCase):
             last_name='Last_name')
 
         # revision 1
-        signup_user = NewsletterSignupUser.objects.create(signup=signup, user=user)
+        signup_user = NewsletterSignupUser.objects.create(
+            signup=signup, user=user)
         signup_1 = NewsletterSignup.objects.create(
             **self.make_new_values(self.signup_values_raw, 1))
         self.create_revision(signup_user, signup=signup_1)

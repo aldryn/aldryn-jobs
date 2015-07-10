@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-from aldryn_apphooks_config.mixins import AppConfigMixin
-from aldryn_apphooks_config.utils import get_app_instance
+
+from __future__ import unicode_literals
+
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
-from django.http import (
-    Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-)
-from django.shortcuts import redirect, render, render_to_response
+from django.http import Http404, HttpResponsePermanentRedirect
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.utils.translation import (
-    pgettext_lazy as _, get_language_from_request
+    ugettext_lazy as _, get_language_from_request
 )
 from django.views.generic import (
     CreateView, DetailView, ListView, TemplateView, View
 )
 from django.views.generic.base import TemplateResponseMixin
 
-from cms.utils.i18n import get_default_language
+from aldryn_apphooks_config.mixins import AppConfigMixin
+from aldryn_apphooks_config.utils import get_app_instance
 from emailit.api import send_mail
 from menus.utils import set_language_changer
 
@@ -28,7 +28,7 @@ from .forms import (
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
 )
 from .models import (
-    JobCategory, JobOffer, NewsletterSignup, JobNewsletterRegistrationPlugin,
+    JobCategory, JobOffer, NewsletterSignup,
     NewsletterSignupUser, JobsConfig,
 )
 
@@ -51,19 +51,15 @@ class JobOfferList(AppConfigMixin, ListView):
 
 
 class CategoryJobOfferList(JobOfferList):
-
     def get_queryset(self):
         qs = super(CategoryJobOfferList, self).get_queryset()
         language = get_language_from_request(self.request, check_path=True)
 
         category_slug = self.kwargs['category_slug']
         try:
-            self.category = (
-                JobCategory.objects.language(language)
-                                   .translated(language, slug=category_slug)
-                                   .namespace(self.namespace)
-                                   .get()
-            )
+            self.category = JobCategory.objects.language(language).translated(
+                language, slug=category_slug
+            ).namespace(self.namespace).get()
         except JobCategory.DoesNotExist:
             raise Http404
 
@@ -107,9 +103,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
         finally:
             if (not job_offer or (not job_offer.get_active() and
                                   not self.request.user.is_staff)):
-                raise Http404(_(
-                    'aldryn-jobs', 'Offer is not longer valid.'
-                ))
+                raise Http404(_("Offer is not longer valid."))
         return job_offer
 
     def get_form_class(self):
@@ -137,11 +131,9 @@ class JobOfferDetail(AppConfigMixin, DetailView):
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
         language = get_language_from_request(self.request, check_path=True)
-        return (
-            JobOffer.objects.language(language)
-                            .translated(language)
-                            .select_related('category')
-        )
+        return JobOffer.objects.language(language).translated(
+            language
+        ).select_related('category')
 
     def set_language_changer(self, job_offer):
         """Translate the slug while changing the language."""
@@ -155,10 +147,8 @@ class JobOfferDetail(AppConfigMixin, DetailView):
     def post(self, *args, **kwargs):
         """Handles application for the job."""
         if not self.object.can_apply:
-            messages.success(
-                self.request,
-                _('aldryn-jobs', 'You can\'t apply for this job.')
-            )
+            messages.success(self.request,
+                _("You can't apply for this job."))
             return redirect(self.object.get_absolute_url())
 
         form_class = self.get_form_class()
@@ -166,10 +156,9 @@ class JobOfferDetail(AppConfigMixin, DetailView):
 
         if self.form.is_valid():
             self.form.save()
-            msg = (
-                _('aldryn-jobs', 'You have successfully applied for %(job)s.')
-                % {'job': self.object.title}
-            )
+            msg = _("You have successfully applied for %(job)s.") % {
+                'job': self.object.title
+            }
             messages.success(self.request, msg)
             return redirect(self.object.get_absolute_url())
         else:
@@ -186,7 +175,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
     messages = {
         "key_confirmed": {
             "level": messages.SUCCESS,
-            "text": _('aldryn-jobs', "You have confirmed {email}.")
+            "text": _("You have confirmed {email}.")
         }
     }
     form_class = NewsletterConfirmationForm
@@ -280,7 +269,7 @@ class ConfirmNewsletterSignup(TemplateResponseMixin, View):
         # eventually we don't have abilities right now to track which plugin
         # was used to register for newsletter, so we will use all matching
         # plugins with filtering by language and app_config
-        plugins_base_qs = signup.app_config.jobnewsletterregistrationplugin_set.filter(
+        plugins_base_qs = signup.app_config.jobnewsletterregistrationplugin_set.filter(  # NOQA
             language=signup.default_language)
         # also do not use draft settings, only plugins from public pages
         # plugin page.pk should match page.get_public_object().pk
@@ -449,7 +438,8 @@ class RegisterJobNewsletter(CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        self.object.confirmation_key = NewsletterSignup.objects.generate_random_key()
+        self.object.confirmation_key = \
+            NewsletterSignup.objects.generate_random_key()
 
         # try to get language
         if getattr(self.request, 'LANGUAGE_CODE', None) is not None:
@@ -460,7 +450,10 @@ class RegisterJobNewsletter(CreateView):
 
         # populate object with other data
         self.object.app_config = self.app_config
-        user = self.request.user if self.request.user.is_authenticated() else None
+        if self.request.user.is_authenticated():
+            user = self.request.user
+        else:
+            user = None
         if user is not None:
             # in memory only property, will be used just for confirmation email
             self.object.user = user

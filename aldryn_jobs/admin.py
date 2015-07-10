@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.sites.models import get_current_site
-from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
-import cms
 from aldryn_apphooks_config.admin import BaseAppHookConfig
 from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
+from cms import __version__ as cms_version
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
+
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
 from .models import (
@@ -23,9 +27,11 @@ from .models import (
 
 def _send_rejection_email(modeladmin, request, queryset, lang_code='',
                           delete_application=False):
-    # 1. send rejection email - this should be refactored to use djangos "bulk" mail
+    # 1. send rejection email - this should be refactored to use djangos "bulk"
+    #    mail
     #
-    # Info: Using mass rejection on many JobApplications can lead to a timeout, since SMTPs are not known to be fast
+    # Info: Using mass rejection on many JobApplications can lead to a timeout,
+    # since SMTPs are not known to be fast
 
     for application in queryset:
         context = {'job_application': application, }
@@ -37,10 +43,12 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
     qs_count = queryset.count()
     if not delete_application:
         queryset.update(is_rejected=True, rejection_date=now())
-        success_msg = _("Successfully sent %(count)s rejection email(s).") % {'count': qs_count, }
+        success_msg = _("Successfully sent {0} rejection email(s).").format(
+            qs_count)
     else:
         queryset.delete()
-        success_msg = _("Successfully deleted %(count)s application(s) and sent rejection email.") % { 'count': qs_count, }
+        success_msg = _("Successfully deleted {0} application(s) and sent "
+                        "rejection email.").format(qs_count)
 
     # 3. inform user with success message
     modeladmin.message_user(request, success_msg)
@@ -52,7 +60,7 @@ class SendRejectionEmail(object):
         super(SendRejectionEmail, self).__init__()
         self.lang_code = lang_code.upper()
         self.name = 'send_rejection_email_{0}'.format(self.lang_code)
-        self.title = _("Send rejection e-mail %s" % self.lang_code)
+        self.title = _("Send rejection e-mail {0}").format(self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
@@ -63,7 +71,8 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
     def __init__(self, lang_code=''):
         super(SendRejectionEmailAndDelete, self).__init__(lang_code)
         self.name = 'send_rejection_and_delete_{0}'.format(self.lang_code)
-        self.title = _("Send rejection e-mail and delete application %s" % self.lang_code)
+        self.title = _("Send rejection e-mail and delete "
+                       "application {0}").format(self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
@@ -71,7 +80,8 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
 
 
 class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
-    list_display = ['__unicode__', 'job_offer', 'created', 'is_rejected', 'rejection_date']
+    list_display = ['__str__', 'job_offer', 'created', 'is_rejected',
+                    'rejection_date']
     list_filter = ['job_offer', 'is_rejected']
     readonly_fields = ['get_attachment_address']
     raw_id_fields = ['job_offer']
@@ -98,7 +108,8 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
                 send_rejection_email.name,
                 send_rejection_email.title
             )
-            send_rejection_and_delete = SendRejectionEmailAndDelete(lang_code=lang_code)
+            send_rejection_and_delete = SendRejectionEmailAndDelete(
+                lang_code=lang_code)
             actions[send_rejection_and_delete.name] = (
                 send_rejection_and_delete,
                 send_rejection_and_delete.name,
@@ -107,17 +118,19 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
         return actions
 
     def has_add_permission(self, request):
-        # Don't allow creation of "new" applications via admin-backend until it's properly implemented
+        # Don't allow creation of "new" applications via admin-backend until
+        # it's properly implemented
         return False
 
     def get_attachment_address(self, instance):
-        attachment_link = u'<a href="%(address)s">%(address)s</a>'
+        attachment_link = '<a href="{address}">{address}</a>'
         attachments = []
 
         for attachment in instance.attachments.all():
             if attachment:
-                attachments.append(attachment_link % dict(address=attachment.file.url))
-        return mark_safe('<br>'.join(attachments)) if attachments else u'-'
+                attachments.append(
+                    attachment_link.format(address=attachment.file.url))
+        return mark_safe('<br>'.join(attachments)) if attachments else '-'
 
     get_attachment_address.alow_tags = True
     get_attachment_address.short_description = _('Attachments')
@@ -125,7 +138,7 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
 
 class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__unicode__', 'language_column', 'ordering']
+    list_display = ['__str__', 'language_column', 'ordering']
     list_editable = ['ordering']
     filter_horizontal = ['supervisors']
 
@@ -147,7 +160,7 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
 class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
                     TranslatableAdmin):
     form = JobOfferAdminForm
-    list_display = ['__unicode__', 'language_column']
+    list_display = ['__str__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
     actions = ['send_newsletter_email']
 
@@ -164,7 +177,7 @@ class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
             })
         ]
 
-        if LooseVersion(cms.__version__) < LooseVersion('3.0'):
+        if LooseVersion(cms_version) < LooseVersion('3.0'):
             content_fieldset = {
                 'classes': ['plugin-holder', 'plugin-holder-nopage'],
                 'fields': ['content']
@@ -188,18 +201,21 @@ class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
         if jobs_sent == 1:
             message_bit = _("1 job was")
         else:
-            message_bit = _('%s jobs were') % jobs_sent
+            message_bit = _('{0} jobs were').format(jobs_sent)
         if sent_emails > 0:
             self.message_user(request,
-                              _('%s successfully sent in the newsletter.') % message_bit)
+                _("{0} successfully sent in the newsletter.").format(
+                    message_bit))
         else:
             self.message_user(request,
-                              _('Seems there was some error. Please contact administrator'))
+                _('Seems there was some error. Please contact administrator'))
     send_newsletter_email.short_description = _("Send Job Newsletter")
 
 
-class JobNewsletterSignupAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
-    list_display = ['recipient', 'default_language', 'signup_date', 'is_verified', 'is_disabled']
+class JobNewsletterSignupAdmin(VersionedPlaceholderAdminMixin,
+                               admin.ModelAdmin):
+    list_display = ['recipient', 'default_language', 'signup_date',
+                    'is_verified', 'is_disabled']
     order_by = ['recipient']
 
 

@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-from aldryn_apphooks_config.utils import get_app_instance
+
+from __future__ import unicode_literals
+
 from django.core.urlresolvers import NoReverseMatch
 from django.utils.translation import ugettext_lazy as _
 
 from cms.menu_bases import CMSAttachMenu
 from cms.utils import get_language_from_request
-
 from menus.base import NavigationNode
 from menus.menu_pool import menu_pool
 
-from aldryn_jobs.models import JobCategory
-from aldryn_jobs.models import JobOffer
+from .models import JobCategory
+from .models import JobOffer
 
 
 class JobCategoryMenu(CMSAttachMenu):

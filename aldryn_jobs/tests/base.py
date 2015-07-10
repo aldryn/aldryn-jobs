@@ -9,8 +9,6 @@ from django.utils.timezone import get_current_timezone
 from django.utils.translation import override
 
 from cms import api
-from cms.middleware.toolbar import ToolbarMiddleware
-from cms.utils.i18n import force_language
 from cms.utils import get_cms_setting
 
 from ..models import JobsConfig, JobCategory, JobOffer
@@ -37,12 +35,14 @@ class JobsBaseTestCase(TransactionTestCase):
         'en': {
             'title': 'Default job offer en',
             'slug': 'default-job-offer-en',
-            'lead_in': '<p>Default job for default people! <br/> Apply now!</p>',
+            'lead_in': '<p>Default job for default people! <br/>'
+                       'Apply now!</p>',
         },
         'de': {
             'title': 'Default job offer de',
             'slug': 'default-job-offer-de',
-            'lead_in': '<p>Default job for default people! Now in German! <br/> Apply now!</p>',
+            'lead_in': '<p>Default job for default people! Now in German! <br/>'
+                       'Apply now!</p>',
         },
     }
     default_plugin_content = {
@@ -79,7 +79,8 @@ class JobsBaseTestCase(TransactionTestCase):
         'publication_start': datetime.now(tz=get_current_timezone()),
     }
     default_publication_end = {
-        'publication_end': datetime.now(tz=get_current_timezone()) + timedelta(days=1),
+        'publication_end': datetime.now(
+            tz=get_current_timezone()) + timedelta(days=1),
     }
     application_default_values = {
         'first_name': 'Default_first_name',
@@ -109,14 +110,17 @@ class JobsBaseTestCase(TransactionTestCase):
         self.app_config = JobsConfig.objects.create(
             namespace='jobs_test_namespace'
         )
-        self.default_category = self.create_default_job_category(translated=True)
+        self.default_category = self.create_default_job_category(
+            translated=True)
         self.root_page = self.create_root_page()
         self.page = self.create_page()
 
         self.staff_user_password = 'staff_pw'
-        self.staff_user = self.create_staff_user('staff', self.staff_user_password)
+        self.staff_user = self.create_staff_user(
+            'staff', self.staff_user_password)
         self.super_user_password = 'super_pw'
-        self.super_user = self.create_super_user('super', self.super_user_password)
+        self.super_user = self.create_super_user(
+            'super', self.super_user_password)
 
     def create_root_page(self):
         root_page = api.create_page(
@@ -165,7 +169,8 @@ class JobsBaseTestCase(TransactionTestCase):
             app_config.get().delete()
         cache.clear()
 
-    def create_user(self, user_name, user_password, is_staff=False, is_superuser=False):
+    def create_user(self, user_name, user_password, is_staff=False,
+                    is_superuser=False):
         return User.objects.create(
             username=user_name,
             first_name='{0} first_name'.format(user_name),
@@ -180,7 +185,8 @@ class JobsBaseTestCase(TransactionTestCase):
         return staff_user
 
     def create_super_user(self, user_name, user_password):
-        super_user = self.create_user(user_name, user_password, is_superuser=True)
+        super_user = self.create_user(user_name, user_password,
+                                      is_superuser=True)
         return super_user
 
     def create_default_job_category(self, translated=False):
@@ -194,7 +200,8 @@ class JobsBaseTestCase(TransactionTestCase):
 
         # check if we need a translated job_category
         if translated:
-            job_category.create_translation('de', **self.default_category_values['de'])
+            job_category.create_translation(
+                'de', **self.default_category_values['de'])
 
         return JobCategory.objects.language('en').get(pk=job_category.pk)
 

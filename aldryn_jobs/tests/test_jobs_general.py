@@ -22,7 +22,8 @@ class JobsAddTest(TestCase, BaseCMSTestCase):
     def setUp(self):
         self.template = get_cms_setting('TEMPLATES')[0][0]
         self.language = settings.LANGUAGES[0][0]
-        self.page = api.create_page('page', self.template, self.language, published=True)
+        self.page = api.create_page(
+            'page', self.template, self.language, published=True)
         self.placeholder = self.page.placeholders.all()[0]
         self.superuser = self.create_superuser()
         self.category = self.create_category()
@@ -31,7 +32,8 @@ class JobsAddTest(TestCase, BaseCMSTestCase):
         return JobCategory.objects.create(name=name)
 
     def create_superuser(self):
-        return User.objects.create_superuser(self.su_username, 'email@example.com', self.su_password)
+        return User.objects.create_superuser(
+            self.su_username, 'email@example.com', self.su_password)
 
     def test_create_job_category(self):
         """
@@ -83,7 +85,8 @@ class JobsGeneralTests(CMSTestCase):
 
         # create translations for all languages
         for language, _ in settings.LANGUAGES[1:]:
-            api.create_title(language, self.root_page.get_slug(), self.root_page)
+            api.create_title(
+                language, self.root_page.get_slug(), self.root_page)
             self.root_page.publish(language)
 
     def test_response_code_if_no_jobs_apphooks_created(self):
@@ -150,15 +153,19 @@ class JobApphookTest(JobsBaseTestCase):
             response = self.client.get(apphook_url_with_toolbar)
             self.assertEqual(response.status_code, 200)
 
-    def test_apphooked_pages_are_available_if_there_is_jobs_and_categories(self):
-        job_offer = self.create_default_job_offer(translated=True)
+    def test_apphooked_pages_are_available_for_jobs_and_categories(self):
+        self.create_default_job_offer(translated=True)
 
         for apphook_url in self.apphook_urls:
             response = self.client.get(apphook_url)
             self.assertEqual(response.status_code, 200)
 
-    def test_apphooked_pages_are_available_if_there_is_jobs_and_categories_for_super_user(self):
-        job_offer = self.create_default_job_offer(translated=True)
+    def test_apphooked_pages_are_available_for_super_user(self):
+        """
+        Test apphooked pages are available if there is jobs and categories for
+        super user
+        """
+        self.create_default_job_offer(translated=True)
 
         login_result = self.client.login(
             username=self.super_user, password=self.super_user_password)

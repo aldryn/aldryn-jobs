@@ -3,7 +3,6 @@ from django.contrib.auth.models import Group
 from cms import api
 
 from .base import JobsBaseTestCase
-from ..models import JobsConfig, NewsletterSignup
 
 
 class TestAppConfigPluginsMixin(object):
@@ -139,7 +138,7 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
             response = self.client.get(page_url_en)
             self.assertEqual(response.status_code, 200)
 
-    def test_plugin_does_not_breaks_page_if_configured_apphook_was_deleted(self):
+    def test_plugin_doesnt_break_page_if_configured_apphook_was_deleted(self):
         other_group = Group.objects.get_or_create(
             name='Newsletter signup notifications DE')[0]
         self.create_plugin(
@@ -154,7 +153,7 @@ class TestNewsletterPlugin(TestAppConfigPluginsMixin, JobsBaseTestCase):
             response = self.client.get(page_url_en)
             self.assertEqual(response.status_code, 200)
 
-    def test_plugin_doesnt_breaks_page_for_su_if_configured_apphook_was_deleted(self):
+    def test_plugin_doesnt_break_page_for_su_if_apphook_was_deleted(self):
         other_group = Group.objects.get_or_create(
             name='Newsletter signup notifications DE')[0]
         self.create_plugin(
