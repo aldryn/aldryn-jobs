@@ -3,18 +3,10 @@ import sys
 from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
-py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
-py27 = sys.version_info < (2, 8, 0) and sys.version_info >= (2, 7, 0)
-
-if not py26 and not py27:
-    raise ValueError(
-        "Aldryn Jobs currently supports only python >= 2.6.5"
-    )
-
-
 REQUIREMENTS = [
     'South<1.1,>=1.0.2',
     'aldryn-apphooks-config>=0.1.3',
+    'django-bootstrap3',
     'django-emailit',
     'django-parler',
     'django-standard-form',
@@ -29,28 +21,28 @@ REQUIREMENTS = [
     'aldryn-categories',
     'unidecode',
     'django-multiupload>=0.3',
-    'django-sortedm2m'
+    'django-sortedm2m',
 ]
 
+py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
 if py26:
     REQUIREMENTS += [
         'Django<1.7,>1.5',
         'ordereddict',
     ]
 
-if py27:
-    REQUIREMENTS += [
-        'Django<1.8,>1.5',
-    ]
-
 CLASSIFIERS = [
-    'Development Status :: 2 - Pre-Alpha',
+    'Development Status :: 4 - Beta',
     'Environment :: Web Environment',
     'Framework :: Django',
+    'Framework :: Django :: 1.6',
+    'Framework :: Django :: 1.7',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
     'Topic :: Software Development :: Libraries :: Application Frameworks',
@@ -68,6 +60,7 @@ setup(
     platforms=['OS Independent'],
     install_requires=REQUIREMENTS,
     classifiers=CLASSIFIERS,
+    long_description=open('README.rst').read(),
     include_package_data=True,
     zip_safe=False,
 )

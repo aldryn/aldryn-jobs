@@ -1,5 +1,7 @@
 language: python
 
+sudo: false
+
 env:
   - TOXENV=py26-dj16-cms30-sqlite
   - TOXENV=py26-dj16-cms31-sqlite
@@ -14,11 +16,7 @@ env:
 #  - TOXENV=py27-dj17-cms30-postgres
 #  - TOXENV=py27-dj17-cms31-mysql
 #  - TOXENV=py27-dj17-cms31-postgres
-  - TOXENV=pep8
-
-matrix:
-  allow_failures:
-    - env: TOXENV=pep8
+  - TOXENV=flake8
 
 install:
   - pip install tox

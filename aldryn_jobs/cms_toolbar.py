@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse, resolve, Resolver404
 from django.utils.translation import (
@@ -23,7 +26,7 @@ def get_joboffer_from_path(path, language, current_url=None):
     if current_url is None:
         try:
             current_url = resolve(path)
-        except Resolver404 as e:
+        except Resolver404:
             raise ImproperlyConfigured(
                 "Could not resolve path to obtain current url for"
                 " populating cms menu")

@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% load i18n cms_tags %}
+
+{% block extend_breadcrumb %}
+    {{ block.super }}
+    {% block jobs_breadcrumb %}{% endblock jobs_breadcrumb %}
+{% endblock extend_breadcrumb %}
 
 {% block content %}
-<div class="app app-jobs">
-	{% block content_jobs %}{% endblock %}
-</div>
-{% endblock %}
+{% endblock content %}

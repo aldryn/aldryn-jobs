@@ -1,0 +1,21 @@
+{% load i18n bootstrap3 %}
+
+<form class="aldryn-jobs-form" method="post">
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <fieldset>
+        <legend>{% trans "Apply for this job" %}</legend>
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+        {% endbuttons %}
+    </fieldset>
+</form>

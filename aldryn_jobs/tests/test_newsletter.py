@@ -26,7 +26,8 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
 
     def test_signup_user_is_created(self):
         with override('en'):
-            signup_url = reverse('{0}:register_newsletter'.format(self.app_config.namespace))
+            signup_url = reverse('{0}:register_newsletter'.format(
+                self.app_config.namespace))
         response = self.client.post(
             signup_url,
             {'recipient': 'initial@reicipent.com'},
@@ -44,8 +45,9 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
 
     def test_signup_user_created_disabled_and_not_confirmed(self):
         with override('en'):
-            signup_url = reverse('{0}:register_newsletter'.format(self.app_config.namespace))
-        response = self.client.post(
+            signup_url = reverse('{0}:register_newsletter'.format(
+                self.app_config.namespace))
+        self.client.post(
             signup_url,
             {'recipient': 'initial@reicipent.com'},
             follow=True)
@@ -61,14 +63,15 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         }
         test_user_object = self.create_user(**test_user)
         with override('en'):
-            signup_url = reverse('{0}:register_newsletter'.format(self.app_config.namespace))
+            signup_url = reverse('{0}:register_newsletter'.format(
+                self.app_config.namespace))
 
         login_result = self.client.login(
             username=test_user['user_name'],
             password=test_user['user_password'])
         self.assertEqual(login_result, True)
 
-        response = self.client.post(
+        self.client.post(
             signup_url,
             {'recipient': 'initial@reicipent.com'},
             follow=True)
@@ -86,7 +89,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         with override('de'):
             signup_url = reverse(
                 '{0}:register_newsletter'.format(self.app_config.namespace))
-        response = self.client.post(
+        self.client.post(
             signup_url,
             {'recipient': 'initial@reicipent.com'},
             follow=True)
@@ -97,7 +100,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         with override('en'):
             signup_url = reverse(
                 '{0}:register_newsletter'.format(self.app_config.namespace))
-        response = self.client.post(
+        self.client.post(
             signup_url,
             {'recipient': 'different_language@reicipent.com'},
             follow=True)
@@ -118,7 +121,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         with override('en'):
             signup_url = reverse(
                 '{0}:register_newsletter'.format(self.app_config.namespace))
-        response = self.client.post(
+        self.client.post(
             signup_url,
             {'recipient': 'initial@reicipent.com'},
             follow=True)
@@ -130,7 +133,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         with override('en'):
             signup_url = reverse(
                 '{0}:register_newsletter'.format(new_config.namespace))
-        response = self.client.post(
+        self.client.post(
             signup_url,
             {'recipient': 'different_apphook@reicipent.com'},
             follow=True)
@@ -301,7 +304,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         with override('en'):
             signup_url = reverse(
                 '{0}:register_newsletter'.format(self.app_config.namespace))
-        response = self.client.post(
+        self.client.post(
             signup_url,
             {'recipient': 'initial@reicipent.com'},
             follow=True)
@@ -348,7 +351,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                 '{0}:confirm_newsletter_email'.format(
                     self.app_config.namespace),
                 kwargs={'key': signup.confirmation_key})
-        response = self.client.post(
+        self.client.post(
             confirmation_link, {'confirmation_key': signup.confirmation_key})
         signup = NewsletterSignup.objects.get(pk=signup.pk)
         self.assertTrue(signup.is_verified)
@@ -374,7 +377,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                 '{0}:confirm_newsletter_email'.format(
                     self.app_config.namespace),
                 kwargs={'key': signup.confirmation_key})
-        response = self.client.post(
+        self.client.post(
             confirmation_link, {'confirmation_key': signup.confirmation_key})
         signup = NewsletterSignup.objects.get(pk=signup.pk)
         self.assertTrue(signup.is_verified)
@@ -392,7 +395,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         # setup another apphooked page, since reload takes some time
         # we will setup apphook on the beginning of a test case
         new_config = JobsConfig.objects.create(namespace='new_appconfig')
-        page = self.create_page(
+        self.create_page(
             title='Another apphooked jobs',
             slug='another-apphooked-jobs',
             namespace=new_config.namespace)
@@ -477,14 +480,16 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
             namespace=new_config.namespace)
 
         # prepare signups
-        signup_default_namespace = NewsletterSignup.objects.create(
+        # signup_default_namespace
+        NewsletterSignup.objects.create(
             recipient='initial@reicipent.com',
             is_verified=True,
             is_disabled=True,
             default_language='en',
             app_config=self.app_config,
             confirmation_key=NewsletterSignup.objects.generate_random_key())
-        signup_new_namespace = NewsletterSignup.objects.create(
+        # signup_new_namespace
+        NewsletterSignup.objects.create(
             recipient='new@reicipent.com',
             is_verified=True,
             is_disabled=True,

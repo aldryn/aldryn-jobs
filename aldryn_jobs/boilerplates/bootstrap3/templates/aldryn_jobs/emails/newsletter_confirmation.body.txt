@@ -1,10 +1,10 @@
 {% load i18n %}
 
 {% block content %}
-{% if full_name %}{% blocktrans context 'aldryn-jobs' %}Dear {{ full_name }}.{% endblocktrans %}
-{% else %}{% blocktrans context 'aldryn-jobs' %}Dear User.{% endblocktrans %}
+{% if full_name %}{% blocktrans context "aldryn-jobs" %}Dear {{ full_name }}.{% endblocktrans %}
+{% else %}{% blocktrans context "aldryn-jobs" %}Dear User.{% endblocktrans %}
 {% endif %}
-{% blocktrans context 'aldryn-jobs' %}
+{% blocktrans context "aldryn-jobs" %}
 You have registered for the job newsletter. Thank you for your interest in the vacancies at our site.
 Please confirm your email address using the link below:
 {% endblocktrans %}

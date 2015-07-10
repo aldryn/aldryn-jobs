@@ -1,22 +1,24 @@
-{% extends 'emailit/base_email.body.html' %}
+{% extends "emailit/base_email.body.html" %}
 {% load i18n html_filter_tags %}
 
 {% block content %}
-<p>{% if full_name %}
-        {% blocktrans context 'aldryn-jobs' %}Dear {{ full_name }}.{% endblocktrans %}
-    {% else %}
-        {% blocktrans context 'aldryn-jobs' %}Dear User.{% endblocktrans %}
-    {% endif %}
-</p>
-<p>{% blocktrans context 'aldryn-jobs' %}Here is a the list of new and available jobs:{% endblocktrans %}</p>
-<ul>
-{% for object in jobs%}
-    <li><a href="{{ object.link }}">{{ object.job.title}}</a></li>
-{% endfor %}
-</ul>
-<p>{% blocktrans context 'aldryn-jobs' %}
-    To unsubscribe form job newsletter please click this links and hit unsubscribe button:
-    {% endblocktrans %}
-</p>
-<p><a href="{{ unsubscribe_link }}">{% trans 'unsubscribe' context 'aldryn-jobs' %}</a></p>
+    <p>
+        {% if full_name %}
+            {% blocktrans context "aldryn-jobs" %}Dear {{ full_name }}.{% endblocktrans %}
+        {% else %}
+            {% blocktrans context "aldryn-jobs" %}Dear User.{% endblocktrans %}
+        {% endif %}
+    </p>
+    <p>{% blocktrans context "aldryn-jobs" %}Here is a the list of new and available jobs:{% endblocktrans %}</p>
+    <ul>
+        {% for object in jobs%}
+            <li><a href="{{ object.link }}">{{ object.job.title}}</a></li>
+        {% endfor %}
+    </ul>
+    <p>
+        {% blocktrans context "aldryn-jobs" %}
+            To unsubscribe form job newsletter please click this links and hit unsubscribe button:
+        {% endblocktrans %}
+    </p>
+    <p><a href="{{ unsubscribe_link }}">{% trans "unsubscribe" context "aldryn-jobs" %}</a></p>
 {% endblock %}

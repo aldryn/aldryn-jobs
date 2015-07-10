@@ -1,12 +1,22 @@
 {% load i18n %}
 
-<div class="plugin plugin-jobs">
-    <p>{% blocktrans with total=instance.job_offers.count %}Showing {{ total }} Job Offers{% endblocktrans %}
-	<ul class="jobs-latest-entries">
-	{% for job in instance.job_offers %}
-		<li><p><a href="{{ job.get_absolute_url }}">{{ job }}</a></p></li>
-	{% empty %}
-		<li class="jobs-empty"><p>{% trans "There are currently no job openings." %}</p></li>
-	{% endfor %}
-	</ul>
+<div class="aldryn aldryn-jobs aldryn-jobs-latest">
+    <p class="alert alert-info">
+        {% blocktrans with total=instance.job_offers.count %}
+            Showing {{ total }} Job Offers
+        {% endblocktrans %}
+    </p>
+
+    <div class="list-group">
+        {% for job in instance.job_offers %}
+            <a href="{{ job.get_absolute_url }}" class="list-group-item">
+                {{ job }}
+                {% if job.start %}
+                    <span>{{ job.start|date }}</span>
+                {% endif %}
+            </a>
+        {% empty %}
+            <div class="list-group-item">{% trans "No items available" %}</div>
+        {% endfor %}
+    </div>
 </div>

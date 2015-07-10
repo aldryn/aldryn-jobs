@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from aldryn_jobs.models import JobsConfig
+
+from __future__ import unicode_literals
+
 from django.utils.translation import ugettext_lazy as _
 
+from aldryn_jobs.models import JobsConfig
 from aldryn_apphooks_config.app_base import CMSConfigApp
-from cms.app_base import CMSApp
 from cms.apphook_pool import apphook_pool
 
 from .menu import JobCategoryMenu

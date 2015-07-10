@@ -17,6 +17,9 @@ which includes information on installation and getting started.
 It also contains `documentation for content editors and end-users
 <http://aldryn-jobs.readthedocs.org/en/latest/user/index.html>`_.
 
+IMPORTANT NOTE: ::
+
+    This repo is not ready for public use and is expected to undergo rapid change before its v1.0       release.
 
 ************
 Contributing
