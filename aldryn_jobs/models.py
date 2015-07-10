@@ -301,7 +301,6 @@ class JobApplication(models.Model):
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
         null=True)
 
-
     class Meta:
         ordering = ['-created']
 

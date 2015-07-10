@@ -4,7 +4,5 @@ coverage>=3.7.1
 django-appconf
 djangocms-helper>=0.7
 django-filer
-docopt
 flake8
-pyflakes
 pytz
