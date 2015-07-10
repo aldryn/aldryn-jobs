@@ -18,9 +18,9 @@ env:
 #  - TOXENV=py27-dj17-cms31-postgres
   - TOXENV=pep8
 
-matrix:
-  allow_failures:
-    - env: TOXENV=pep8
+# matrix:
+#   allow_failures:
+#     - env: TOXENV=pep8
 
 install:
   - pip install tox
