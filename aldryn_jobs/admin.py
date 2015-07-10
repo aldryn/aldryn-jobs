@@ -43,11 +43,11 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
     qs_count = queryset.count()
     if not delete_application:
         queryset.update(is_rejected=True, rejection_date=now())
-        success_msg = _("Successfully sent {0}s rejection email(s).").format(
+        success_msg = _("Successfully sent {0} rejection email(s).").format(
             qs_count)
     else:
         queryset.delete()
-        success_msg = _("Successfully deleted {0}s application(s) and sent "
+        success_msg = _("Successfully deleted {0} application(s) and sent "
                         "rejection email.").format(qs_count)
 
     # 3. inform user with success message
@@ -60,7 +60,7 @@ class SendRejectionEmail(object):
         super(SendRejectionEmail, self).__init__()
         self.lang_code = lang_code.upper()
         self.name = 'send_rejection_email_{0}'.format(self.lang_code)
-        self.title = _("Send rejection e-mail %{0}").format(self.lang_code)
+        self.title = _("Send rejection e-mail {0}").format(self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
@@ -123,13 +123,13 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
         return False
 
     def get_attachment_address(self, instance):
-        attachment_link = '<a href="%(address)s">%(address)s</a>'
+        attachment_link = '<a href="{address}">{address}</a>'
         attachments = []
 
         for attachment in instance.attachments.all():
             if attachment:
                 attachments.append(
-                    attachment_link % dict(address=attachment.file.url))
+                    attachment_link.format(address=attachment.file.url))
         return mark_safe('<br>'.join(attachments)) if attachments else '-'
 
     get_attachment_address.alow_tags = True
