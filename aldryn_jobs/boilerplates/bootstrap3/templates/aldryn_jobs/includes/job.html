@@ -1,6 +1,7 @@
 {% load i18n cms_tags %}
 
-<article class="aldryn-jobs-article">
+<article class="aldryn-jobs-article
+    {% if user.is_staff and not object.get_active %} jobs-article-inactive{% endif %}">
     {% block jobs_headline %}
         <h3>
             {% if not detail_view %}
@@ -37,7 +38,7 @@
 
     {% block jobs_application %}
         {% if detail_view and job_offer.can_apply %}
-            {% include "aldryn_jobs/includes/jobs_application.html" %}
+            {% include "aldryn_jobs/includes/application.html" %}
         {% endif %}
     {% endblock %}
 </article>
