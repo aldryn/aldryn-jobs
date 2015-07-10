@@ -1,9 +1,10 @@
-{% extends 'emailit/base_email.body.html' %}
+{% extends "emailit/base_email.body.html" %}
 {% load i18n %}
 
 {% block content %}
-<p>{% blocktrans context 'aldryn-jobs' %}
-    New recipient "{{ new_recipient }}" is added to job newsletter mailing list.
-    {% endblocktrans %}
-</p>
+    <p>
+        {% blocktrans context "aldryn-jobs" %}
+            New recipient "{{ new_recipient }}" is added to job newsletter mailing list.
+        {% endblocktrans %}
+    </p>
 {% endblock %}

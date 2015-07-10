@@ -1,21 +1,44 @@
 {% extends "aldryn_jobs/base.html" %}
-{% load i18n apphooks_config_tags cms_tags %}
+{% load i18n cms_tags apphooks_config_tags %}
 
 {% block content_jobs %}
-<div class="jobs-detail {% if user.is_staff and not object.get_active %}jobs-not-active{% endif %}">
-	{% block jobs_title %}
-        <h2>
-            {% render_model object "title" %}
-            {% if user.is_staff and not object.get_active %}
-            <span class="small text-warning"> (inactive)</span>
-            {% endif %}
-        </h2>
-    {% endblock %}
-	<div class="jobs-lead">{% render_model object "lead_in" "lead_in" "" safe %}</div>
-	<div class="jobs-content">{% render_placeholder object.content %}</div>
+    <div class="jobs-detail
+        {% if user.is_staff and not object.get_active %} jobs-not-active{% endif %}">
+        {% block jobs_title %}
+            <h2>
+                {% render_model object "title" %}
+                {% if user.is_staff and not object.get_active %}
+                    <span class="small text-warning">{% trans "(inactive)" %}</span>
+                {% endif %}
+            </h2>
+        {% endblock %}
+        <div class="jobs-lead">
+            {% render_model object "lead_in" "lead_in" "" safe %}
+        </div>
+        <div class="jobs-content">
+            {% render_placeholder object.content %}
+        </div>
 
-	{% include "aldryn_jobs/includes/jobs_application.html" %}
+        {% include "aldryn_jobs/includes/jobs_application.html" %}
 
-	<p class="jobs-back"><a href="{% namespace_url 'job-offer-list' %}">{% trans "Back" %}</a></p>
-</div>
+        <p class="jobs-back">
+            <a href="{% namespace_url 'job-offer-list' %}">{% trans "Back" %}</a>
+        </p>
+    </div>
 {% endblock %}
+
+
+{% block jobs_footer %}
+    <div class="aldryn-jobs-pager">
+        <ul class="pager">
+            <li>
+                <span class="pager-back">
+                    – <a href="{{ job_offer.get_absolute_url }}">
+                        {% trans "Back to Overview" %}
+                    </a> –
+                </span>
+            </li>
+        </ul>
+    </div>
+    {% static_placeholder "jobs_detail_footer" %}
+{% endblock jobs_footer %}
