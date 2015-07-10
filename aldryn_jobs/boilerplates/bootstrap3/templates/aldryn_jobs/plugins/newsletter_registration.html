@@ -1,4 +1,4 @@
-{% load i18n cms_tags standard_form apphooks_config_tags %}
+{% load i18n cms_tags bootstrap3 apphooks_config_tags %}
 
 <div class="aldryn aldryn-jobs aldryn-jobs-newsletter">
     {% if plugin_configuration_error %}
@@ -13,8 +13,11 @@
         <form action="{% namespace_url 'register_newsletter' namespace=instance.app_config.namespace %}" method="post">
             <fieldset>
                 {% csrf_token %}
-                {% standard_form form %}
-                {% standard_submit %}
+                {% bootstrap_form_errors form %}
+                {% bootstrap_form form %}
+                {% buttons %}
+                    <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+                {% endbuttons %}
             </fieldset>
         </form>
     {% endif %}
