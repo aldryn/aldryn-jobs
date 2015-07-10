@@ -428,7 +428,7 @@ class NewsletterSignupUser(models.Model):
         return self.user.get_full_name()
 
     def __str__(self):
-        return 'link to user {0} '.format(self.get_full_name())
+        return 'link to user {0}'.format(self.get_full_name())
 
 
 class BaseJobsPlugin(CMSPlugin):
@@ -441,9 +441,7 @@ class BaseJobsPlugin(CMSPlugin):
 
 @python_2_unicode_compatible
 class JobListPlugin(BaseJobsPlugin):
-
     """ Store job list for JobListPlugin. """
-
     joboffers = SortedManyToManyField(JobOffer, blank=True, null=True,
         help_text=_("Select Job Offers to show or don't select any to show "
                     "last job offers."))
