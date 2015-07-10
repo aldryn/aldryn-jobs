@@ -16,7 +16,7 @@ env:
 #  - TOXENV=py27-dj17-cms30-postgres
 #  - TOXENV=py27-dj17-cms31-mysql
 #  - TOXENV=py27-dj17-cms31-postgres
-  - TOXENV=pep8
+  - TOXENV=flake8
 
 # matrix:
 #   allow_failures:
