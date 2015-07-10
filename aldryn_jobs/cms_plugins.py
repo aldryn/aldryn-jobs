@@ -1,14 +1,24 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
+from .forms import (
+    NewsletterSignupForm,
+    JobListPluginForm,
+    JobNewsletterRegistrationPluginForm,
+)
 from .models import (
-    JobListPlugin, JobNewsletterRegistrationPlugin, JobCategoriesPlugin,
-    JobsConfig)
-from .forms import NewsletterSignupForm, JobListPluginForm, JobNewsletterRegistrationPluginForm
+    JobListPlugin,
+    JobNewsletterRegistrationPlugin,
+    JobCategoriesPlugin,
+    JobsConfig
+)
 
 
 class JobCategoriesList(CMSPluginBase):
@@ -35,15 +45,14 @@ class JobNewsletter(CMSPluginBase):
     cache = False
 
     def render(self, context, instance, placeholder):
-        context = super(JobNewsletter, self).render(context, instance, placeholder)
-        # if there is data for form (i.e validation errors) render that
-        # form with data. explicitly check that request POST has the right
-        # data.
+        context = super(JobNewsletter, self).render(
+            context, instance, placeholder)
+        # if there is data for form (i.e validation errors) render that form
+        # with data. explicitly check that request POST has the right data.
         request = context.get('request')
 
-        # check if we have a valid app_config that is app hooked to a page.
-        # so that we won't have a 500 error if page with that app hook
-        # was deleted.
+        # check if we have a valid app_config that is app hooked to a page. so
+        # that we won't have a 500 error if page with that app hook was deleted.
         try:
             reverse('{0}:register_newsletter'.format(
                 instance.app_config.namespace))

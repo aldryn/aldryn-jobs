@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
-from aldryn_apphooks_config.managers.parler import \
-    AppHookConfigTranslatableManager, AppHookConfigTranslatableQueryset
 
+from __future__ import unicode_literals
+
+from django.contrib.sites.models import get_current_site
+from django.core.urlresolvers import reverse
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from django.db import models
-from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.utils.translation import override
-from django.contrib.sites.models import get_current_site
+
+from aldryn_apphooks_config.managers.parler import (
+    AppHookConfigTranslatableManager,
+    AppHookConfigTranslatableQueryset
+)
 from emailit.api import send_mail
 
 
 class JobOffersQuerySet(AppHookConfigTranslatableQueryset):
-
     def active(self):
         now = timezone.now()
         return self.filter(
@@ -24,7 +28,6 @@ class JobOffersQuerySet(AppHookConfigTranslatableQueryset):
 
 
 class JobOffersManager(AppHookConfigTranslatableManager):
-
     def get_queryset(self):
         return JobOffersQuerySet(self.model, using=self.db)
 
@@ -35,7 +38,6 @@ class JobOffersManager(AppHookConfigTranslatableManager):
 
 
 class NewsletterSignupManager(models.Manager):
-
     def generate_random_key(self):
         for trial in range(3):
             new_key = get_random_string()
@@ -47,16 +49,18 @@ class NewsletterSignupManager(models.Manager):
     def active_recipients(self, **kwargs):
         return self.filter(is_verified=True, is_disabled=False, **kwargs)
 
-    def send_job_notifiation(self, recipients=None, job_list=None, current_domain=None):
+    def send_job_notifiation(self, recipients=None, job_list=None,
+                             current_domain=None):
         """
-        Send job notification emails with respect to app configs. Recipients that are registered
-        with specific jobs config / namespace would get only job notifications with same jobs
-        config / namespace. This is applicable regardless of recipients kwarg is provided or not.
-        If recipients list provided (PKs only) NewsletterSignup records would be selected
-        and filtered with respect to active recipients (confirmed and not disabled.
-        If job_list provided (PKs only) job Offers would be selected. Note that job_list is
-        always provided when this method is used through admin actions.
-        Returns number of successfully sent emails.
+        Send job notification emails with respect to app configs. Recipients
+        that are registered with specific jobs config / namespace would get only
+        job notifications with same jobs config / namespace. This is applicable
+        regardless of recipients kwarg is provided or not. If recipients list
+        provided (PKs only) NewsletterSignup records would be selected and
+        filtered with respect to active recipients (confirmed and not disabled.
+        If job_list provided (PKs only) job Offers would be selected. Note that
+        job_list is always provided when this method is used through admin
+        actions. Returns number of successfully sent emails.
         """
         # avoid circular import
         from .models import JobOffer, NewsletterSignup
@@ -66,23 +70,28 @@ class NewsletterSignupManager(models.Manager):
         # right now it does not makes a lot of sense but in future someone
         # will just change logic here
         if job_list is None:
+            # TODO: We probably shouldn't just print to console, who would ever
+            # see it?
             print "Can't send jobs newsletter without job list to be sent."
             # also prevent from hard failures and message admin
             # with error msg.
             return -1
 
-        job_object_list = JobOffer.objects.filter(pk__in=job_list).select_related('app_config')
+        job_object_list = JobOffer.objects.filter(
+            pk__in=job_list).select_related('app_config')
         job_configs = set(job.app_config for job in job_object_list)
 
         recipients_per_config = {}
         if not recipients:
             # get recipients based on selected job offers app configs
             for config in job_configs:
-                 # TODO: prefetch_related related_user can be added here
-                recipients_per_config[config] = self.active_recipients(app_config=config)
+                # TODO: prefetch_related related_user can be added here
+                recipients_per_config[config] = self.active_recipients(
+                    app_config=config)
         else:
             # otherwise get recipients with respect to job offer app configs.
-            recipients_qs = NewsletterSignup.objects.active_recipients(pk__in=recipients)
+            recipients_qs = NewsletterSignup.objects.active_recipients(
+                pk__in=recipients)
             for config in job_configs:
                 found_recipients = recipients_qs.filter(app_config=config)
                 recipients_per_config[config] = found_recipients
@@ -99,8 +108,8 @@ class NewsletterSignupManager(models.Manager):
             jobs = []
             for job in job_object_list.filter(app_config=config):
                 for job_translation in job.translations.all():
-                    # email it appends site on pre mailing so we need to have 2 type
-                    # of links, full with domain, and relative.
+                    # email it appends site on pre mailing so we need to have 2
+                    # type of links, full with domain, and relative.
                     job_link = job.get_absolute_url(
                         language=job_translation.language_code)
                     jobs.append({
@@ -125,7 +134,8 @@ class NewsletterSignupManager(models.Manager):
                     'unsubscribe_link_full': unsubscribe_link_full,
                 }
 
-                user = recipient_record.related_user.filter(signup__pk=recipient_record.pk)
+                user = recipient_record.related_user.filter(
+                    signup__pk=recipient_record.pk)
                 if user:
                     user = user.get()
                     context['full_name'] = user.get_full_name()

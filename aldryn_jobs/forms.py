@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import os
-import cms
 
 from django import forms, get_version
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist, ValidationError, \
-    NON_FIELD_ERRORS
+from django.core.exceptions import (
+    NON_FIELD_ERRORS,
+    ObjectDoesNotExist,
+    ValidationError,
+)
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
@@ -13,13 +18,14 @@ from django.utils.translation import pgettext_lazy as _, get_language
 
 from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
+from cms import __version__ as cms_version
+from cms.models import Page
 from distutils.version import LooseVersion, StrictVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
 from unidecode import unidecode
 
-from cms.models import Page
 
 from .models import (
     JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
@@ -29,6 +35,7 @@ from .models import (
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
 DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
+
 
 class AutoSlugForm(TranslatableModelForm):
 
@@ -76,8 +83,8 @@ class AutoSlugForm(TranslatableModelForm):
             language_code = get_language()
 
         conflicts = (
-            self._meta.model.objects.language(language_code)
-                              .translated(language_code, slug=slug)
+            self._meta.model.objects.language(language_code).translated(
+                language_code, slug=slug)
         )
         if self.is_edit_action():
             conflicts = conflicts.exclude(pk=self.instance.pk)
@@ -117,7 +124,6 @@ class JobCategoryAdminForm(AutoSlugForm):
         fields = ['name', 'slug', 'supervisors', 'app_config']
 
 
-
 class JobOfferAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
@@ -136,7 +142,7 @@ class JobOfferAdminForm(AutoSlugForm):
             'publication_end'
         ]
 
-        if LooseVersion(cms.__version__) < LooseVersion('3.0'):
+        if LooseVersion(cms_version) < LooseVersion('3.0'):
             fields.append('content')
 
     def __init__(self, *args, **kwargs):
@@ -164,7 +170,8 @@ class JobApplicationForm(forms.ModelForm):
     attachments = MultiFileField(
         max_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT', 5),
         min_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT', 0),
-        max_file_size=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024*1024*5),
+        max_file_size=getattr(settings,
+            'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024 * 1024 * 5),
         required=False
     )
 
@@ -222,7 +229,8 @@ class JobApplicationForm(forms.ModelForm):
         }
         # make admin change form url available
         if hasattr(self, 'request'):
-            context['admin_change_form_url'] = self.request.build_absolute_uri(admin_change_form)
+            context['admin_change_form_url'] = self.request.build_absolute_uri(
+                admin_change_form)
 
         kwargs = {}
         if SEND_ATTACHMENTS_WITH_EMAIL:
@@ -232,7 +240,8 @@ class JobApplicationForm(forms.ModelForm):
                 for attachment in attachments:
                     attachment.file.seek(0)
                     kwargs['attachments'].append(
-                        (os.path.split(attachment.file.name)[1], attachment.file.read(),))
+                        (os.path.split(
+                            attachment.file.name)[1], attachment.file.read(),))
         send_mail(recipients=recipients,
                   context=context,
                   template_base='aldryn_jobs/emails/notification', **kwargs)
@@ -318,8 +327,8 @@ class JobListPluginForm(forms.ModelForm):
         for field, error_list in error.items():
             if field not in self.errors:
                 if field != NON_FIELD_ERRORS and field not in self.fields:
-                    raise ValueError(
-                        "'%s' has no field named '%s'." % (self.__class__.__name__, field))
+                    raise ValueError("'%s' has no field named '%s'." % (
+                        self.__class__.__name__, field))
                 self._errors[field] = self.error_class()
             self._errors[field].extend(error_list.messages)
             if field in self.cleaned_data:

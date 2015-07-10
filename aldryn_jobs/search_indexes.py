@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.template import RequestContext
 
 from aldryn_search.utils import get_index_base, strip_tags
 
-from aldryn_jobs.models import JobOffer
+from .models import JobOffer
 
 
 class JobOffersIndex(get_index_base()):
@@ -32,8 +35,9 @@ class JobOffersIndex(get_index_base()):
         plugins = obj.content.cmsplugin_set.filter(language=language)
         for base_plugin in plugins:
             instance, plugin_type = base_plugin.get_plugin_instance()
-            if not instance is None:
-                plugin_content = strip_tags(instance.render_plugin(context=RequestContext(request)))
+            if instance is not None:
+                plugin_content = strip_tags(instance.render_plugin(
+                    context=RequestContext(request)))
                 text_bits.append(plugin_content)
 
         return ' '.join(text_bits)
