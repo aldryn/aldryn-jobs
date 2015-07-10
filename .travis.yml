@@ -1,5 +1,7 @@
 language: python
 
+sudo: false
+
 env:
   - TOXENV=py26-dj16-cms30-sqlite
   - TOXENV=py26-dj16-cms31-sqlite
