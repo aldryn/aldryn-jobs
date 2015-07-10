@@ -14,7 +14,7 @@
         <ul class="pager">
             <li>
                 <span class="pager-back">
-                    – <a href="{{ job_offer.get_absolute_url }}">
+                    – <a href="{% namespace_url 'job-offer-list' %}">
                         {% trans "Back to Overview" %}
                     </a> –
                 </span>
