@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import sys
 from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
@@ -23,6 +23,13 @@ REQUIREMENTS = [
     'django-multiupload>=0.3',
     'django-sortedm2m',
 ]
+
+py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
+if py26:
+    REQUIREMENTS += [
+        'Django<1.7,>1.5',
+        'ordereddict',
+    ]
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
