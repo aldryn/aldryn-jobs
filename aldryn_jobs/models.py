@@ -390,8 +390,10 @@ class NewsletterSignup(models.Model):
             context['full_name'] = user.get_full_name()
 
         # get site domain
-        full_link = '{0}{1}'.format(get_current_site(request).domain,
-                                    self.get_absolute_url())
+        full_link = '{0}{1}'.format(
+            get_current_site(request).domain,
+            self.get_absolute_url()
+        )
         context['link'] = self.get_absolute_url()
         context['full_link'] = full_link
         # build url
