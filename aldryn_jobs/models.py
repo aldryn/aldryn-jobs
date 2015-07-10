@@ -14,7 +14,7 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.http import Http404
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.importlib import import_module
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -142,6 +142,7 @@ class JobsConfig(AppHookConfig):
 
 
 @version_controlled_content(follow=['supervisors', 'app_config'])
+@python_2_unicode_compatible
 class JobCategory(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(_('Name'), max_length=255),
@@ -170,7 +171,7 @@ class JobCategory(TranslatableModel):
         verbose_name_plural = _('Job categories')
         ordering = ['ordering']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.safe_translation_getter('name', str(self.pk))
 
     def get_absolute_url(self, language=None):
@@ -198,6 +199,7 @@ class JobCategory(TranslatableModel):
 
 
 @version_controlled_content(follow=['category', 'app_config'])
+@python_2_unicode_compatible
 class JobOffer(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
@@ -230,7 +232,7 @@ class JobOffer(TranslatableModel):
         verbose_name_plural = _('Job offers')
         ordering = ['category__ordering', 'category', '-created']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.safe_translation_getter('title', str(self.pk))
 
     def get_absolute_url(self, language=None):
@@ -274,6 +276,7 @@ class JobOffer(TranslatableModel):
 
 
 @version_controlled_content(follow=['job_offer', 'app_config'])
+@python_2_unicode_compatible
 class JobApplication(models.Model):
     MALE = 'male'
     FEMALE = 'female'
@@ -301,7 +304,7 @@ class JobApplication(models.Model):
     class Meta:
         ordering = ['-created']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.get_full_name()
 
     def get_full_name(self):
@@ -323,6 +326,7 @@ class JobApplicationAttachment(models.Model):
 
 
 @version_controlled_content
+@python_2_unicode_compatible
 class NewsletterSignup(models.Model):
     recipient = models.EmailField(_('recipient'), unique=True)
     default_language = models.CharField(_('language'), blank=True,
@@ -407,11 +411,12 @@ class NewsletterSignup(models.Model):
         self.is_disabled = True
         self.save(update_fields=['is_disabled', ])
 
-    def __unicode__(self):
-        return '{0} / {1}'.format(unicode(self.recipient), self.app_config)
+    def __str__(self):
+        return '{0} / {1}'.format(self.recipient, self.app_config)
 
 
 @version_controlled_content(follow=['signup', 'user'])
+@python_2_unicode_compatible
 class NewsletterSignupUser(models.Model):
     signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
     user = models.ForeignKey(get_user_model_for_fields(),
@@ -420,8 +425,8 @@ class NewsletterSignupUser(models.Model):
     def get_full_name(self):
         return self.user.get_full_name()
 
-    def __unicode__(self):
-        return unicode('link to user {0} '.format(self.get_full_name()))
+    def __str__(self):
+        return 'link to user {0} '.format(self.get_full_name())
 
 
 class BaseJobsPlugin(CMSPlugin):
@@ -432,6 +437,7 @@ class BaseJobsPlugin(CMSPlugin):
         abstract = True
 
 
+@python_2_unicode_compatible
 class JobListPlugin(BaseJobsPlugin):
 
     """ Store job list for JobListPlugin. """
@@ -458,7 +464,7 @@ class JobListPlugin(BaseJobsPlugin):
                             .active()
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return force_text(self.pk)
 
     def copy_relations(self, oldinstance):

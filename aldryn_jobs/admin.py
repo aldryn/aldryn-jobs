@@ -82,7 +82,7 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
 
 
 class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
-    list_display = ['__unicode__', 'job_offer', 'created', 'is_rejected',
+    list_display = ['__str__', 'job_offer', 'created', 'is_rejected',
                     'rejection_date']
     list_filter = ['job_offer', 'is_rejected']
     readonly_fields = ['get_attachment_address']
@@ -140,7 +140,7 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
 
 class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__unicode__', 'language_column', 'ordering']
+    list_display = ['__str__', 'language_column', 'ordering']
     list_editable = ['ordering']
     filter_horizontal = ['supervisors']
 
@@ -162,7 +162,7 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
 class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
                     TranslatableAdmin):
     form = JobOfferAdminForm
-    list_display = ['__unicode__', 'language_column']
+    list_display = ['__str__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
     actions = ['send_newsletter_email']
 
