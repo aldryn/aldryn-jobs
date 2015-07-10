@@ -43,13 +43,12 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
     qs_count = queryset.count()
     if not delete_application:
         queryset.update(is_rejected=True, rejection_date=now())
-        success_msg = _("Successfully sent %(count)s rejection email(s).") % {
-            'count': qs_count,
-        }
+        success_msg = _("Successfully sent {0}s rejection email(s).").format(
+            qs_count)
     else:
         queryset.delete()
-        success_msg = _("Successfully deleted %(count)s application(s) and "
-                        "sent rejection email.") % {'count': qs_count, }
+        success_msg = _("Successfully deleted {0}s application(s) and sent "
+                        "rejection email.").format(qs_count)
 
     # 3. inform user with success message
     modeladmin.message_user(request, success_msg)
@@ -61,7 +60,7 @@ class SendRejectionEmail(object):
         super(SendRejectionEmail, self).__init__()
         self.lang_code = lang_code.upper()
         self.name = 'send_rejection_email_{0}'.format(self.lang_code)
-        self.title = _("Send rejection e-mail %s" % self.lang_code)
+        self.title = _("Send rejection e-mail %{0}").format(self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
@@ -72,9 +71,8 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
     def __init__(self, lang_code=''):
         super(SendRejectionEmailAndDelete, self).__init__(lang_code)
         self.name = 'send_rejection_and_delete_{0}'.format(self.lang_code)
-        self.title = _("Send rejection e-mail and delete application %s") % (
-            self.lang_code,
-        )
+        self.title = _("Send rejection e-mail and delete "
+                       "application {0}").format(self.lang_code)
 
     def __call__(self, modeladmin, request, queryset, *args, **kwargs):
         _send_rejection_email(modeladmin, request, queryset,
@@ -179,7 +177,7 @@ class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
             })
         ]
 
-        if LooseVersion(cms.__version__) < LooseVersion('3.0'):
+        if LooseVersion(cms_version) < LooseVersion('3.0'):
             content_fieldset = {
                 'classes': ['plugin-holder', 'plugin-holder-nopage'],
                 'fields': ['content']
@@ -203,10 +201,11 @@ class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
         if jobs_sent == 1:
             message_bit = _("1 job was")
         else:
-            message_bit = _('%s jobs were') % jobs_sent
+            message_bit = _('{0} jobs were').format(jobs_sent)
         if sent_emails > 0:
             self.message_user(request,
-                _('%s successfully sent in the newsletter.') % message_bit)
+                _("{0} successfully sent in the newsletter.").format(
+                    message_bit))
         else:
             self.message_user(request,
                 _('Seems there was some error. Please contact administrator'))
