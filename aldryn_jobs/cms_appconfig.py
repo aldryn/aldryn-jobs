@@ -10,7 +10,7 @@ from cms.models.fields import PlaceholderField
 from parler.models import TranslatableModel, TranslatedFields
 
 
-class EventsConfig(TranslatableModel, AppHookConfig):
+class JobsConfig(TranslatableModel, AppHookConfig):
     # Job PHFs
     placeholder_jobs_top = PlaceholderField(
         'jobs_top', related_name='aldryn_jobs_top')
