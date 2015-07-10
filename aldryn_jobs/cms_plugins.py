@@ -17,6 +17,7 @@ from .models import (
     JobListPlugin,
     JobNewsletterRegistrationPlugin,
     JobCategoriesPlugin,
+    JobOffer,
 )
 from .utils import namespace_is_apphooked
 
@@ -56,6 +57,17 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
     module = "Jobs"
     name = _('Job List')
     render_template = 'aldryn_jobs/plugins/latest_entries.html'
+
+    def render(self, context, instance, placeholder):
+        namespace = (instance.app_config.namespace if instance.app_config
+                     else '')
+        if namespace =='':
+            vacancies = JobOffer.objects.none()
+        else:
+            vacancies = instance.job_offers(namespace)
+        context['vacancies'] = vacancies
+        context['vacancies_count'] = vacancies.count()
+        return context
 
 
 class JobNewsletter(NameSpaceCheckMixin, CMSPluginBase):

@@ -442,7 +442,7 @@ class JobListPlugin(BaseJobsPlugin):
                     "last job offers. Note that Job Offers form different "
                     "app config would be ignored."))
 
-    def job_offers(self):
+    def job_offers(self, namespace):
         """
         Return the selected JobOffer for JobListPlugin.
 
@@ -450,7 +450,7 @@ class JobListPlugin(BaseJobsPlugin):
         and language.
         """
         if self.joboffers.exists():
-            return self.joboffers.all()
+            return self.joboffers.namespace(namespace).active()
 
         return (
             JobOffer.objects.filter(category__app_config=self.app_config)
