@@ -2,6 +2,7 @@
 {% load i18n cms_tags %}
 
 {% block jobs_content %}
+    {% render_placeholder view.config.placeholder_jobs_list_top %}
     {% static_placeholder "jobs_list_top" %}
     <div class="aldryn-jobs-list">
         {% regroup object_list by category as categories %}
@@ -15,5 +16,5 @@
             <p class="well">{% trans "No items available" %}</p>
         {% endfor %}
     </div>
-    {% static_placeholder "jobs_list_bottom" %}
+    {% render_placeholder view.config.placeholder_jobs_list_bottom %}
 {% endblock %}

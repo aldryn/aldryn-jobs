@@ -8,7 +8,7 @@
             </div>
         {% endif %}
     {% else %}
-        {% static_placeholder "jobs_newsletter_registration" %}
+        {% render_placeholder view.config.placeholder_jobs_newsletter_registration %}
 
         <form action="{% namespace_url 'register_newsletter' namespace=instance.app_config.namespace %}" method="post">
             <fieldset>
