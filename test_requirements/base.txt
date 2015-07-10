@@ -3,6 +3,7 @@ https://github.com/aldryn/aldryn-apphook-reload/archive/develop.zip
 coverage
 django-appconf
 djangocms-helper
-pytz
 django-filer
 flake8
+pyflakes
+pytz
