@@ -13,6 +13,7 @@ if not py26 and not py27:
 
 
 REQUIREMENTS = [
+    'Django>=1.6,<1.8',
     'South<1.1,>=1.0.2',
     'aldryn-apphooks-config>=0.1.3',
     'django-emailit',
