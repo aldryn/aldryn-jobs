@@ -72,7 +72,7 @@ class NewsletterSignupManager(models.Manager):
         if job_list is None:
             # TODO: We probably shouldn't just print to console, who would ever
             # see it?
-            print "Can't send jobs newsletter without job list to be sent."
+            print("Can't send jobs newsletter without job list to be sent.")
             # also prevent from hard failures and message admin
             # with error msg.
             return -1
@@ -104,7 +104,7 @@ class NewsletterSignupManager(models.Manager):
         # translations for recipient.default_language (NewsletterSignup) only
         # build links for jobs for all translations
         sent_emails = 0
-        for config, recipient_list in recipients_per_config.iteritems():
+        for config, recipient_list in recipients_per_config.items():
             jobs = []
             for job in job_object_list.filter(app_config=config):
                 for job_translation in job.translations.all():
