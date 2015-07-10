@@ -7,16 +7,16 @@
         {% endblocktrans %}
     </p>
 
-    <ul class="list-unstyled">
+    <div class="list-group">
         {% for job in instance.job_offers %}
-            <li>
-                <a href="{{ job.get_absolute_url }}">{{ job }}</a>
+            <a href="{{ job.get_absolute_url }}" class="list-group-item">
+                {{ job }}
                 {% if job.start %}
-                    <span class="date"> {{ job.start|date }}</span>
+                    <span>{{ job.start|date }}</span>
                 {% endif %}
-            </li>
+            </a>
         {% empty %}
-            <li class="well">{% trans "No items available" %}</li>
+            <div class="list-group-item">{% trans "No items available" %}</div>
         {% endfor %}
-    </ul>
+    </div>
 </div>

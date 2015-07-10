@@ -1,14 +1,14 @@
 {% load i18n apphooks_config_tags %}
 
 <div class="aldryn aldryn-jobs aldryn-jobs-categories">
-    <ul class="list-unstyled">
+    <div class="list-group">
         {% for category in instance.categories %}
-            <li>
-                <a href="{% namespace_url "category-job-offer-list" category.slug namespace=instance.app_config.namespace %}">{{ category.name }}</a>
+            <a href="{% namespace_url "category-job-offer-list" category.slug namespace=instance.app_config.namespace %}" class="list-group-item">
+                {{ category.name }}
                 <span class="badge pull-right">{{ category.count }}</span>
-            </li>
+            </a>
         {% empty %}
-            <li class="well">{% trans "No items available" %}</li>
+            <div class="list-group-item">{% trans "No items available" %}</div>
         {% endfor %}
-    </ul>
+    </div>
 </div>
