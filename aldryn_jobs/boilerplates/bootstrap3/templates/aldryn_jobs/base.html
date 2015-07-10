@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% load i18n cms_tags %}
+
+{% block extend_breadcrumb %}
+    {{ block.super }}
+    {% block jobs_breadcrumb %}{% endblock jobs_breadcrumb %}
+{% endblock extend_breadcrumb %}
 
 {% block content %}
-    <div class="container">
-        <div class="aldryn aldryn-jobs">
-            {% block jobs_title %}{% endblock %}
-            {% block jobs_content %}{% endblock %}
-            {% block jobs_footer %}{% endblock %}
-        </div>
-    </div>
-{% endblock %}
+{% endblock content %}
