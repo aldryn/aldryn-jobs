@@ -30,7 +30,7 @@ REQUIREMENTS = [
     'aldryn-categories',
     'unidecode',
     'django-multiupload>=0.3',
-    'django-sortedm2m'
+    'django-sortedm2m',
 ]
 
 if py26:
@@ -45,13 +45,17 @@ if py27:
     ]
 
 CLASSIFIERS = [
-    'Development Status :: 2 - Pre-Alpha',
+    'Development Status :: 4 - Beta',
     'Environment :: Web Environment',
     'Framework :: Django',
+    'Framework :: Django :: 1.6',
+    'Framework :: Django :: 1.7',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
     'Topic :: Software Development :: Libraries :: Application Frameworks',
@@ -69,6 +73,7 @@ setup(
     platforms=['OS Independent'],
     install_requires=REQUIREMENTS,
     classifiers=CLASSIFIERS,
+    long_description=open('README.rst').read(),
     include_package_data=True,
     zip_safe=False,
 )
