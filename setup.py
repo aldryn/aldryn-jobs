@@ -15,6 +15,7 @@ if not py26 and not py27:
 REQUIREMENTS = [
     'South<1.1,>=1.0.2',
     'aldryn-apphooks-config>=0.1.3',
+    'django-bootstrap3',
     'django-emailit',
     'django-parler',
     'django-standard-form',

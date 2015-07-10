@@ -1,4 +1,4 @@
-{% load i18n standard_form %}
+{% load i18n bootstrap3 %}
 
 <form class="aldryn-jobs-form" method="post">
     {% if form.non_field_errors %}
@@ -12,7 +12,10 @@
     <fieldset>
         <legend>{% trans "Apply for this job" %}</legend>
         {% csrf_token %}
-        {% standard_form form %}
-        {% standard_submit %}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+        {% endbuttons %}
     </fieldset>
 </form>
