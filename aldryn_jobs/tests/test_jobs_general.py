@@ -9,67 +9,59 @@ from cms import api
 from cms.utils import get_cms_setting
 from cms.test_utils.testcases import BaseCMSTestCase, CMSTestCase
 
-from ..cms_plugins import JobList
 from ..models import JobCategory, JobOffer
 
 from .base import JobsBaseTestCase
 
 
-class JobsAddTest(TestCase, BaseCMSTestCase):
-    su_username = 'user'
-    su_password = 'pass'
-
-    def setUp(self):
-        self.template = get_cms_setting('TEMPLATES')[0][0]
-        self.language = settings.LANGUAGES[0][0]
-        self.page = api.create_page(
-            'page', self.template, self.language, published=True)
-        self.placeholder = self.page.placeholders.all()[0]
-        self.superuser = self.create_superuser()
-        self.category = self.create_category()
-
-    def create_category(self, name='Administration'):
-        return JobCategory.objects.create(name=name)
-
-    def create_superuser(self):
-        return User.objects.create_superuser(
-            self.su_username, 'email@example.com', self.su_password)
+class JobsAddTest(JobsBaseTestCase):
 
     def test_create_job_category(self):
         """
-        We can create a new job category
+        Check if We can create a new job category.
         """
-        self.assertEqual(self.category.name, 'Administration')
-        self.assertEqual(JobCategory.objects.all()[0], self.category)
+        category_name = 'Administration'
+        new_category = JobCategory.objects.create(name=category_name,
+                                                  app_config=self.app_config)
+        self.assertEqual(new_category.name, 'Administration')
+        self.assertEqual(JobCategory.objects.filter(
+            pk=new_category.pk).count(), 1)
+        self.assertEqual(
+            JobCategory.objects.get(pk=new_category.pk).name, category_name)
 
     def test_create_job_offer(self):
         """
-        We can create a new job offer
+        Check if We can create a new job offer.
         """
         title = 'Programmer'
-        offer = JobOffer.objects.create(title=title, category=self.category)
+        offer = JobOffer.objects.create(
+            title=title, category=self.default_category,
+            app_config=self.app_config)
         self.assertEqual(offer.title, title)
         self.assertEqual(JobOffer.objects.all()[0], offer)
 
-    def test_create_job_offer_with_category(self):
+    def test_category_relation_to_job_offer(self):
         """
-        We can add a job offer with a category
+        Check if We can access a job offer through a category.
         """
         title = 'Senior'
-        offer = JobOffer.objects.create(title=title, category=self.category)
-        offer.save()
-        self.assertIn(offer, self.category.jobs.all())
+        offer = JobOffer.objects.create(
+            title=title, category=self.default_category,
+            app_config=self.app_config)
+        self.assertIn(offer, self.default_category.jobs.all())
 
     def test_add_offer_list_plugin_api(self):
         """
         We add an offer to the Plugin and look it up
         """
         title = 'Manager'
-        JobOffer.objects.create(title=title, category=self.category)
-        api.add_plugin(self.placeholder, JobList, self.language)
+        JobOffer.objects.create(title=title, category=self.default_category,
+                                app_config=self.app_config)
+        placeholder = self.page.placeholders.all()[0]
+        api.add_plugin(placeholder, 'JobList', self.language)
         self.page.publish(self.language)
-
-        url = self.page.get_absolute_url()
+        with override(self.language):
+            url = self.page.get_absolute_url()
         response = self.client.get(url)
         self.assertContains(response, title)
 
