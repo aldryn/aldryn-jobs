@@ -8,7 +8,7 @@ py27 = sys.version_info < (2, 8, 0) and sys.version_info >= (2, 7, 0)
 
 if not py26 and not py27:
     raise ValueError(
-        "Aldryn Events currently support only python >= 2.6.5"
+        "Aldryn Jobs currently supports only python >= 2.6.5"
     )
 
 
