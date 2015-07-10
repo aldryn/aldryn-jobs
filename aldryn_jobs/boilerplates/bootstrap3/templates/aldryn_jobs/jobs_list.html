@@ -1,15 +1,19 @@
-{% extends "aldryn_jobs/base.html" %}
+{% extends "aldryn_jobs/two_column.html" %}
 {% load i18n cms_tags %}
 
 {% block jobs_content %}
     {% static_placeholder "jobs_list_top" %}
-    {% regroup object_list by category as categories %}
-    <article class="aldryn-jobs-list">
+    <div class="aldryn-jobs-list">
+        {% regroup object_list by category as categories %}
         {% for category in categories %}
-            {% include "aldryn_jobs/includes/category.html" with include_jobs="true" %}
+            {% for job_offer in category.list %}
+                {% include "aldryn_jobs/includes/job.html" %}
+            {% empty %}
+                <p class="well">{% trans "No items available" %}</p>
+            {% endfor %}
         {% empty %}
             <p class="well">{% trans "No items available" %}</p>
         {% endfor %}
-    </article>
+    </div>
     {% static_placeholder "jobs_list_bottom" %}
 {% endblock %}

@@ -1,20 +1,21 @@
-{% load i18n apphooks_config_tags %}
+{% load i18n cms_tags standard_form apphooks_config_tags %}
 
-<div class="plugin plugin-job-newsletter-registration">
+<div class="aldryn aldryn-jobs aldryn-jobs-newsletter">
     {% if plugin_configuration_error %}
         {% if request.user.is_staff or request.user.is_superuser %}
-            <p class="config-errors">{{ plugin_configuration_error }}</p>
+            <div class="alert alert-danger" role="alert">
+                <p class="config-errors">{{ plugin_configuration_error }}</p>
+            </div>
         {% endif %}
     {% else %}
-        <h2>{% trans "Job Newsletter" context "aldryn-jobs" %}</h2>
-        <p>{% trans "Enter your e-mail to receive a job newsletter" context "aldryn-jobs" %}</p>
+        {% static_placeholder "jobs_newsletter_registration" %}
 
-        <div class="jobs-newsletter-registration-form">
-            <form action="{% namespace_url 'register_newsletter' namespace=instance.app_config.namespace %}" method="post">
+        <form action="{% namespace_url 'register_newsletter' namespace=instance.app_config.namespace %}" method="post">
+            <fieldset>
                 {% csrf_token %}
-                {{ form.as_p }}
-                <input type="submit" value="{% trans 'Subscribe' context 'aldryn-jobs' %}">
-            </form>
-        </div>
+                {% standard_form form %}
+                {% standard_submit %}
+            </fieldset>
+        </form>
     {% endif %}
 </div>
