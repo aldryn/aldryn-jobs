@@ -1,14 +1,10 @@
-===========
+###########
 Aldryn Jobs
-===========
+###########
 
-.. image:: https://magnum.travis-ci.com/aldryn/aldryn-jobs.svg?token=2aLiyxMhwop2hnmajHuq&branch=master
-    :target: https://magnum.travis-ci.com/aldryn/aldryn-jobs
+|PyPI Version| |Build Status| |Coverage Status| |codeclimate| |requires_io|
 
-.. image:: https://img.shields.io/coveralls/aldryn/aldryn-jobs.svg
-  :target: https://coveralls.io/r/aldryn/aldryn-jobs
-
-This add-on lets you:
+Aldryn Jobs is an Addon that lets you:
 
 - define translatable categories, which will appear in the menu
 - add categorized, translatable job offers
@@ -123,3 +119,16 @@ Sending Emails
 Please refer to django-emailit_ documentation for info on installation.
 
 .. _django-emailit : http://github.com/divio/django-emailit
+
+.. |PyPI Version| image:: http://img.shields.io/pypi/v/aldryn-jobs.svg
+   :target: https://pypi.python.org/pypi/aldryn-jobs
+.. |Build Status| image:: http://img.shields.io/travis/aldryn/aldryn-jobs/master.svg
+   :target: https://travis-ci.org/aldryn/aldryn-jobs
+.. |Coverage Status| image:: http://img.shields.io/coveralls/aldryn/aldryn-jobs/master.svg
+   :target: https://coveralls.io/r/aldryn/aldryn-jobs?branch=master
+.. |codeclimate| image:: https://codeclimate.com/github/aldryn/aldryn-jobs/badges/gpa.svg
+   :target: https://codeclimate.com/github/aldryn/aldryn-jobs
+   :alt: Code Climate
+.. |requires_io| image:: https://requires.io/github/aldryn/aldryn-jobs/requirements.svg?branch=master
+   :target: https://requires.io/github/aldryn/aldryn-jobs/requirements/?branch=master
+   :alt: Requirements Status
