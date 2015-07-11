@@ -3,20 +3,28 @@ language: python
 sudo: false
 
 env:
-  - TOXENV=py26-dj16-cms30-sqlite
-  - TOXENV=py26-dj16-cms31-sqlite
-  - TOXENV=py26-dj17-cms30-sqlite
-  - TOXENV=py26-dj17-cms31-sqlite
-  - TOXENV=py27-dj16-cms30-sqlite
-  - TOXENV=py27-dj16-cms31-sqlite
-  - TOXENV=py27-dj17-cms30-sqlite
+  - TOXENV=flake8
+  - TOXENV=py34-dj17-cms31-sqlite
+  - TOXENV=py34-dj17-cms30-sqlite
+  - TOXENV=py34-dj16-cms31-sqlite
+  - TOXENV=py34-dj16-cms30-sqlite
+  - TOXENV=py33-dj17-cms31-sqlite
+  - TOXENV=py33-dj17-cms30-sqlite
+  - TOXENV=py33-dj16-cms31-sqlite
+  - TOXENV=py33-dj16-cms30-sqlite
   - TOXENV=py27-dj17-cms31-sqlite
+  - TOXENV=py27-dj17-cms30-sqlite
+  - TOXENV=py27-dj16-cms31-sqlite
+  - TOXENV=py27-dj16-cms30-sqlite
+  - TOXENV=py26-dj17-cms31-sqlite
+  - TOXENV=py26-dj17-cms30-sqlite
+  - TOXENV=py26-dj16-cms31-sqlite
+  - TOXENV=py26-dj16-cms30-sqlite
 # databases are not used yet, no appropriate setup...
 #  - TOXENV=py27-dj17-cms30-mysql
 #  - TOXENV=py27-dj17-cms30-postgres
 #  - TOXENV=py27-dj17-cms31-mysql
 #  - TOXENV=py27-dj17-cms31-postgres
-  - TOXENV=flake8
 
 install:
   - pip install tox
