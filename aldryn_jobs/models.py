@@ -298,8 +298,6 @@ class JobApplication(models.Model):
     is_rejected = models.BooleanField(_('rejected?'), default=False)
     rejection_date = models.DateTimeField(_('rejection date'),
         null=True, blank=True)
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True)
 
     class Meta:
         ordering = ['-created']
