@@ -56,7 +56,7 @@ class JobOfferMenu(CMSAttachMenu):
         nodes = []
         offers = (
             JobOffer.objects.active()
-                            .namespace(app_namespace)
+                            .filter(category__app_config__namespace=app_namespace)
                             .language(current_language)
                             .translated(current_language)
         )

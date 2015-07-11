@@ -15,9 +15,10 @@ from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableQueryset
 )
 from emailit.api import send_mail
+from parler.managers import TranslatableManager, TranslatableQuerySet
 
 
-class JobOffersQuerySet(AppHookConfigTranslatableQueryset):
+class JobOffersQuerySet(TranslatableQuerySet):
     def active(self):
         now = timezone.now()
         return self.filter(
@@ -27,7 +28,7 @@ class JobOffersQuerySet(AppHookConfigTranslatableQueryset):
         )
 
 
-class JobOffersManager(AppHookConfigTranslatableManager):
+class JobOffersManager(TranslatableManager):
     def get_queryset(self):
         return JobOffersQuerySet(self.model, using=self.db)
 
@@ -79,7 +80,7 @@ class NewsletterSignupManager(models.Manager):
 
         job_object_list = JobOffer.objects.filter(
             pk__in=job_list).select_related('app_config')
-        job_configs = set(job.app_config for job in job_object_list)
+        job_configs = set(job.category.app_config for job in job_object_list)
 
         recipients_per_config = {}
         if not recipients:
@@ -106,7 +107,7 @@ class NewsletterSignupManager(models.Manager):
         sent_emails = 0
         for config, recipient_list in recipients_per_config.items():
             jobs = []
-            for job in job_object_list.filter(app_config=config):
+            for job in job_object_list.filter(category__app_config=config):
                 for job_translation in job.translations.all():
                     # email it appends site on pre mailing so we need to have 2
                     # type of links, full with domain, and relative.

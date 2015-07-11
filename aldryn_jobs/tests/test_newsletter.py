@@ -421,7 +421,6 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                 **self.make_new_values(self.category_values_raw['en'], 1)
             )
             offer_new_config = JobOffer.objects.create(
-                app_config=new_config,
                 category=category_new_config,
                 **self.make_new_values(self.offer_values_raw['en'], 1)
             )
@@ -505,7 +504,6 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                 **self.make_new_values(self.category_values_raw['en'], 1)
             )
             offer_new_config = JobOffer.objects.create(
-                app_config=new_config,
                 category=category_new_config,
                 **self.make_new_values(self.offer_values_raw['en'], 1)
             )
