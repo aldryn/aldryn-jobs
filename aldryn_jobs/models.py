@@ -154,7 +154,8 @@ class JobCategory(TranslatableModel):
 
     supervisors = models.ManyToManyField(
         get_user_model_for_fields(), verbose_name=_('Supervisors'),
-        related_name='job_offer_categories',  # FIXME: This is mis-named should be "job_categories"?
+        # FIXME: This is mis-named should be "job_categories"?
+        related_name='job_offer_categories',
         help_text=_('Those people will be notified via e-mail when new '
                     'application arrives.'),
         blank=True
@@ -239,7 +240,8 @@ class JobOffer(TranslatableModel):
         category_slug = self.category.safe_translation_getter(
             'slug', language_code=language
         )
-        namespace = getattr(self.category.app_config, "namespace", "aldryn_jobs")
+        namespace = getattr(
+            self.category.app_config, "namespace", "aldryn_jobs")
         with force_language(language):
             try:
                 # FIXME: does not looks correct return category url here

@@ -153,11 +153,6 @@ class JobOfferAdminForm(AutoSlugForm):
             return "{0} / {1}".format(obj.category.app_config, obj)
         self.fields['category'].label_from_instance = label_from_instance
 
-    def clean(self):
-        cleaned_data = super(JobOfferAdminForm, self).clean()
-        category = cleaned_data.get('category')
-        return cleaned_data
-
 
 class JobApplicationForm(forms.ModelForm):
     attachments = MultiFileField(

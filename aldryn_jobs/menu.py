@@ -55,10 +55,11 @@ class JobOfferMenu(CMSAttachMenu):
         current_language = get_language_from_request(request)
         nodes = []
         offers = (
-            JobOffer.objects.active()
-                            .filter(category__app_config__namespace=app_namespace)
-                            .language(current_language)
-                            .translated(current_language)
+            JobOffer.objects
+                    .active()
+                    .filter(category__app_config__namespace=app_namespace)
+                    .language(current_language)
+                    .translated(current_language)
         )
         for job_offer in offers:
             try:

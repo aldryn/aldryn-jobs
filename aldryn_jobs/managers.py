@@ -10,10 +10,6 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import override
 
-from aldryn_apphooks_config.managers.parler import (
-    AppHookConfigTranslatableManager,
-    AppHookConfigTranslatableQueryset
-)
 from emailit.api import send_mail
 from parler.managers import TranslatableManager, TranslatableQuerySet
 
