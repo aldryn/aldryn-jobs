@@ -138,7 +138,6 @@ class JobOfferAdminForm(AutoSlugForm):
             'category',
             'is_active',
             'can_apply',
-            'app_config',
             'publication_start',
             'publication_end'
         ]
@@ -151,20 +150,8 @@ class JobOfferAdminForm(AutoSlugForm):
 
         # small monkey patch to show better label for categories
         def label_from_instance(obj):
-            return "{0} / {1}".format(obj.app_config, obj)
+            return "{0} / {1}".format(obj.category.app_config, obj)
         self.fields['category'].label_from_instance = label_from_instance
-
-    def clean(self):
-        cleaned_data = super(JobOfferAdminForm, self).clean()
-        category = cleaned_data.get('category')
-        app_config = cleaned_data.get('app_config')
-        if category and category.app_config != app_config:
-            self.append_to_errors(
-                'category',
-                _('aldryn-jobs', 'Category app_config must be the same '
-                                 'selected for Job Offer')
-            )
-        return cleaned_data
 
 
 class JobApplicationForm(forms.ModelForm):

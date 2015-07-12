@@ -154,6 +154,7 @@ class JobCategory(TranslatableModel):
 
     supervisors = models.ManyToManyField(
         get_user_model_for_fields(), verbose_name=_('Supervisors'),
+        # FIXME: This is mis-named should be "job_categories"?
         related_name='job_offer_categories',
         help_text=_('Those people will be notified via e-mail when new '
                     'application arrives.'),
@@ -198,7 +199,7 @@ class JobCategory(TranslatableModel):
         return self.supervisors.values_list('email', flat=True)
 
 
-@version_controlled_content(follow=['category', 'app_config'])
+@version_controlled_content(follow=['category'])
 @python_2_unicode_compatible
 class JobOffer(TranslatableModel):
     translations = TranslatedFields(
@@ -222,8 +223,6 @@ class JobOffer(TranslatableModel):
         null=True, blank=True)
     can_apply = models.BooleanField(_('Viewer can apply for the job'),
         default=True)
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True)
 
     objects = JobOffersManager()
 
@@ -241,10 +240,8 @@ class JobOffer(TranslatableModel):
         category_slug = self.category.safe_translation_getter(
             'slug', language_code=language
         )
-        if self.app_config_id:
-            namespace = self.app_config.namespace
-        else:
-            namespace = 'aldryn_jobs'
+        namespace = getattr(
+            self.category.app_config, "namespace", "aldryn_jobs")
         with force_language(language):
             try:
                 # FIXME: does not looks correct return category url here
@@ -257,7 +254,7 @@ class JobOffer(TranslatableModel):
                 return reverse(
                     '{0}:job-offer-detail'.format(namespace),
                     kwargs=kwargs,
-                    current_app=self.app_config.namespace
+                    current_app=self.category.app_config.namespace
                 )
             except NoReverseMatch:
                 # FIXME: this is wrong, if have some problem in reverse
@@ -275,7 +272,7 @@ class JobOffer(TranslatableModel):
         return self.category.get_notification_emails()
 
 
-@version_controlled_content(follow=['job_offer', 'app_config'])
+@version_controlled_content(follow=['job_offer'])
 @python_2_unicode_compatible
 class JobApplication(models.Model):
     # FIXME: Gender is not the same as salutation.
@@ -298,8 +295,6 @@ class JobApplication(models.Model):
     is_rejected = models.BooleanField(_('rejected?'), default=False)
     rejection_date = models.DateTimeField(_('rejection date'),
         null=True, blank=True)
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True)
 
     class Meta:
         ordering = ['-created']
@@ -460,9 +455,8 @@ class JobListPlugin(BaseJobsPlugin):
         if self.joboffers.exists():
             return self.joboffers.all()
 
-        namespace = self.app_config and self.app_config.namespace
         return (
-            JobOffer.objects.namespace(namespace)
+            JobOffer.objects.filter(category__app_config=self.app_config)
                             .language(self.language)
                             .translated(self.language)
                             .active()
