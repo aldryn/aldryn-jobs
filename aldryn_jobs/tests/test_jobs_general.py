@@ -21,8 +21,7 @@ class JobsAddTest(JobsBaseTestCase):
         Check if We can create a new job category.
         """
         category_name = 'Administration'
-        new_category = JobCategory.objects.create(name=category_name,
-                                                  app_config=self.app_config)
+        new_category = JobCategory.objects.create(name=category_name)
         self.assertEqual(new_category.name, 'Administration')
         self.assertEqual(JobCategory.objects.filter(
             pk=new_category.pk).count(), 1)
@@ -35,8 +34,7 @@ class JobsAddTest(JobsBaseTestCase):
         """
         title = 'Programmer'
         offer = JobOffer.objects.create(
-            title=title, category=self.default_category,
-            app_config=self.app_config)
+            title=title, category=self.default_category)
         self.assertEqual(offer.title, title)
         self.assertEqual(JobOffer.objects.all()[0], offer)
 
@@ -46,8 +44,7 @@ class JobsAddTest(JobsBaseTestCase):
         """
         title = 'Senior'
         offer = JobOffer.objects.create(
-            title=title, category=self.default_category,
-            app_config=self.app_config)
+            title=title, category=self.default_category)
         self.assertIn(offer, self.default_category.jobs.all())
 
     def test_add_offer_list_plugin_api(self):
@@ -55,8 +52,7 @@ class JobsAddTest(JobsBaseTestCase):
         We add an offer to the Plugin and look it up
         """
         title = 'Manager'
-        JobOffer.objects.create(title=title, category=self.default_category,
-                                app_config=self.app_config)
+        JobOffer.objects.create(title=title, category=self.default_category)
         placeholder = self.page.placeholders.all()[0]
         api.add_plugin(placeholder, 'JobList', self.language)
         self.page.publish(self.language)
