@@ -204,7 +204,7 @@ class JobApphookTest(JobsBaseTestCase):
     def test_jobs_config_placeholders_are_usable(self):
         # make sure default config is apphooked to a page.
         # FIXME: until migrations are not enabled and ensured to work with
-        # tests - this wont test the default adryn_events namespace =(
+        # tests - this won't test the default namespace =(
         # though this test is (or at least it should be) pretty useful.
         default_config = JobsConfig.objects.get_or_create(
             namespace='aldryn_jobs')[0]
@@ -251,7 +251,7 @@ class JobApphookTest(JobsBaseTestCase):
                 # their uniqueness
                 plugins_content[cfg].append(plugin_text)
 
-        # test EventsConfig placeholder content if it is attached to a page
+        # test <config> placeholder content if it is attached to a page
         skipped = []
         for cfg in configs:
             if not namespace_is_apphooked(cfg.namespace):
