@@ -432,7 +432,8 @@ class NewsletterSignupUser(models.Model):
 
 class BaseJobsPlugin(CMSPlugin):
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True)
+        null=True, help_text=_(
+            'Select appropriate add-on configuration for this plugin.'))
 
     class Meta:
         abstract = True
@@ -443,7 +444,8 @@ class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
     joboffers = SortedManyToManyField(JobOffer, blank=True, null=True,
         help_text=_("Select Job Offers to show or don't select any to show "
-                    "last job offers."))
+                    "last job offers. Note that Job Offers form different "
+                    "app config would be ignored."))
 
     def job_offers(self):
         """

@@ -24,6 +24,18 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
             mail_to_group=self.default_group,
             **self.plugin_params)
 
+    def create_plugin(self, page, language, app_config, mail_to_group=None,
+                      **plugin_params):
+        plugin = self._create_plugin(
+            page, language, app_config, **plugin_params)
+        if mail_to_group is not None:
+            # we need to update plugin configuration model with correct group
+            # it is located under it's own manager
+            plugin.jobnewsletterregistrationplugin.mail_to_group.add(
+                mail_to_group)
+            plugin.save()
+        return plugin
+
     def test_signup_user_is_created(self):
         with override('en'):
             signup_url = reverse('{0}:register_newsletter'.format(

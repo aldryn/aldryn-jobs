@@ -11,6 +11,9 @@ from .views import (
     ResendNewsletterConfirmation
 )
 
+# default view (root url) which is pointing to ^$ url
+DEFAULT_VIEW = 'job-offer-list'
+
 urlpatterns = patterns(
     '',
 
