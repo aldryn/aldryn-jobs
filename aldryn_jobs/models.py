@@ -21,7 +21,6 @@ from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
 
 from aldryn_reversion.core import version_controlled_content
-from aldryn_apphooks_config.models import AppHookConfig
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
 )
@@ -38,6 +37,7 @@ from reversion.revisions import RegistrationError
 from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
+from .cms_appconfig import JobsConfig
 from .managers import NewsletterSignupManager, JobOffersManager
 from .utils import get_valid_filename
 
@@ -134,11 +134,6 @@ JobApplicationFileField = partial(
     upload_to=jobs_attachment_upload_to,
     storage=jobs_attachment_storage
 )
-
-
-@version_controlled_content
-class JobsConfig(AppHookConfig):
-    pass
 
 
 @version_controlled_content(follow=['supervisors', 'app_config'])

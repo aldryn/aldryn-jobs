@@ -5,7 +5,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-17">
-                {% static_placeholder "jobs_top" %}
+                {% render_placeholder view.config.placeholder_jobs_top %}
                 <div class="aldryn aldryn-jobs">
                     {% block jobs_title %}{% endblock %}
                     {% block jobs_content %}{% endblock %}
@@ -14,7 +14,7 @@
             </div>
             <div class="col-md-7 aldryn-jobs aldryn-jobs-sidebar">
                 {% block jobs_sidebar %}{% endblock %}
-                {% static_placeholder "jobs_sidebar" %}
+                {% render_placeholder view.config.placeholder_jobs_sidebar %}
             </div>
         </div>
     </div>
