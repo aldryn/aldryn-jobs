@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import os
 
-from django import forms, get_version
+from django import forms
 from django.conf import settings
 from django.core.exceptions import (
     ObjectDoesNotExist,
@@ -20,7 +20,7 @@ from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
 from cms import __version__ as cms_version
 from cms.models import Page
-from distutils.version import LooseVersion, StrictVersion
+from distutils.version import LooseVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm

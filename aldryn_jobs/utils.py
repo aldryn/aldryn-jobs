@@ -24,7 +24,6 @@ def get_valid_filename(s):
         return "%s" % (filename,)
 
 
-
 def namespace_is_apphooked(namespace):
     # avoid circular import
     from .urls import DEFAULT_VIEW

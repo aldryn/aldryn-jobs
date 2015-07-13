@@ -1,13 +1,11 @@
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.test import TestCase
 
 from django.utils.translation import override
 from parler.utils.context import switch_language
 
 from cms import api
 from cms.utils import get_cms_setting
-from cms.test_utils.testcases import BaseCMSTestCase, CMSTestCase
+from cms.test_utils.testcases import CMSTestCase
 
 from ..models import JobCategory, JobOffer
 
