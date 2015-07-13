@@ -170,7 +170,7 @@ class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
                 'fields': ['title', 'slug', 'lead_in']
             }),
             (_('Options'), {
-                'fields': ['category', 'is_active', 'can_apply',]
+                'fields': ['category', 'is_active', 'can_apply']
             }),
             (_('Publication period'), {
                 'fields': ['publication_start', 'publication_end']

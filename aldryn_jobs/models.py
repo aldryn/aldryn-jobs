@@ -21,7 +21,6 @@ from django.utils.translation import ugettext_lazy as _
 from djangocms_text_ckeditor.fields import HTMLField
 
 from aldryn_reversion.core import version_controlled_content
-from aldryn_apphooks_config.models import AppHookConfig
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
 )
@@ -38,6 +37,7 @@ from reversion.revisions import RegistrationError
 from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
+from .cms_appconfig import JobsConfig
 from .managers import NewsletterSignupManager, JobOffersManager
 from .utils import get_valid_filename
 
@@ -134,11 +134,6 @@ JobApplicationFileField = partial(
     upload_to=jobs_attachment_upload_to,
     storage=jobs_attachment_storage
 )
-
-
-@version_controlled_content
-class JobsConfig(AppHookConfig):
-    pass
 
 
 @version_controlled_content(follow=['supervisors', 'app_config'])
@@ -432,7 +427,8 @@ class NewsletterSignupUser(models.Model):
 
 class BaseJobsPlugin(CMSPlugin):
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True)
+        null=True, help_text=_(
+            'Select appropriate add-on configuration for this plugin.'))
 
     class Meta:
         abstract = True
@@ -443,7 +439,8 @@ class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
     joboffers = SortedManyToManyField(JobOffer, blank=True, null=True,
         help_text=_("Select Job Offers to show or don't select any to show "
-                    "last job offers."))
+                    "last job offers. Note that Job Offers form different "
+                    "app config would be ignored."))
 
     def job_offers(self):
         """

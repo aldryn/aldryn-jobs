@@ -1,75 +1,66 @@
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.test import TestCase
+from django.core.urlresolvers import reverse
 
 from django.utils.translation import override
 from parler.utils.context import switch_language
 
 from cms import api
+from cms.models import Placeholder
 from cms.utils import get_cms_setting
-from cms.test_utils.testcases import BaseCMSTestCase, CMSTestCase
+from cms.utils.i18n import force_language
+from cms.test_utils.testcases import CMSTestCase
 
-from ..cms_plugins import JobList
 from ..models import JobCategory, JobOffer
+from ..cms_appconfig import JobsConfig
+from ..utils import namespace_is_apphooked
 
-from .base import JobsBaseTestCase
+from .base import JobsBaseTestCase, tz_datetime
 
 
-class JobsAddTest(TestCase, BaseCMSTestCase):
-    su_username = 'user'
-    su_password = 'pass'
-
-    def setUp(self):
-        self.template = get_cms_setting('TEMPLATES')[0][0]
-        self.language = settings.LANGUAGES[0][0]
-        self.page = api.create_page(
-            'page', self.template, self.language, published=True)
-        self.placeholder = self.page.placeholders.all()[0]
-        self.superuser = self.create_superuser()
-        self.category = self.create_category()
-
-    def create_category(self, name='Administration'):
-        return JobCategory.objects.create(name=name)
-
-    def create_superuser(self):
-        return User.objects.create_superuser(
-            self.su_username, 'email@example.com', self.su_password)
+class JobsAddTest(JobsBaseTestCase):
 
     def test_create_job_category(self):
         """
-        We can create a new job category
+        Check if We can create a new job category.
         """
-        self.assertEqual(self.category.name, 'Administration')
-        self.assertEqual(JobCategory.objects.all()[0], self.category)
+        category_name = 'Administration'
+        new_category = JobCategory.objects.create(name=category_name)
+        self.assertEqual(new_category.name, 'Administration')
+        self.assertEqual(JobCategory.objects.filter(
+            pk=new_category.pk).count(), 1)
+        self.assertEqual(
+            JobCategory.objects.get(pk=new_category.pk).name, category_name)
 
     def test_create_job_offer(self):
         """
-        We can create a new job offer
+        Check if We can create a new job offer.
         """
         title = 'Programmer'
-        offer = JobOffer.objects.create(title=title, category=self.category)
+        offer = JobOffer.objects.create(
+            title=title, category=self.default_category)
         self.assertEqual(offer.title, title)
         self.assertEqual(JobOffer.objects.all()[0], offer)
 
-    def test_create_job_offer_with_category(self):
+    def test_category_relation_to_job_offer(self):
         """
-        We can add a job offer with a category
+        Check if We can access a job offer through a category.
         """
         title = 'Senior'
-        offer = JobOffer.objects.create(title=title, category=self.category)
-        offer.save()
-        self.assertIn(offer, self.category.jobs.all())
+        offer = JobOffer.objects.create(
+            title=title, category=self.default_category)
+        self.assertIn(offer, self.default_category.jobs.all())
 
     def test_add_offer_list_plugin_api(self):
         """
         We add an offer to the Plugin and look it up
         """
         title = 'Manager'
-        JobOffer.objects.create(title=title, category=self.category)
-        api.add_plugin(self.placeholder, JobList, self.language)
+        JobOffer.objects.create(title=title, category=self.default_category)
+        placeholder = self.page.placeholders.all()[0]
+        api.add_plugin(placeholder, 'JobList', self.language)
         self.page.publish(self.language)
-
-        url = self.page.get_absolute_url()
+        with override(self.language):
+            url = self.page.get_absolute_url()
         response = self.client.get(url)
         self.assertContains(response, title)
 
@@ -209,3 +200,80 @@ class JobApphookTest(JobsBaseTestCase):
             response = self.client.get(offer_list_url)
             self.assertContains(response, job_url)
             self.assertContains(response, job_title)
+
+    def test_jobs_config_placeholders_are_usable(self):
+        # make sure default config is apphooked to a page.
+        # FIXME: until migrations are not enabled and ensured to work with
+        # tests - this won't test the default namespace =(
+        # though this test is (or at least it should be) pretty useful.
+        default_config = JobsConfig.objects.get_or_create(
+            namespace='aldryn_jobs')[0]
+        if not namespace_is_apphooked(default_config.namespace):
+            page = api.create_page(
+                title='default jobs config en', template=self.template,
+                language='en',
+                published=True,
+                parent=self.root_page,
+                apphook='JobsApp',
+                apphook_namespace=default_config.namespace,
+                publication_date=tz_datetime(2014, 6, 8)
+            )
+            api.create_title('de', 'default jobs config en', page)
+            page.publish('en')
+            page.publish('de')
+            page_with_default_config = page.reload()
+            # get some time for aldryn-apphook-reload to perform actions
+            with force_language('en'):
+                default_config_url = page_with_default_config.get_absolute_url()
+            self.client.get(default_config_url)
+
+        configs = JobsConfig.objects.all()
+        # this would be used to build unique value for text plugin
+        # namespace-lang-placeholder_name, which would be searched on the page.
+        plugin_content_raw = '{0}-{1}-{2}'
+        plugins_content = {}
+        for cfg in configs:
+            cfg_placehodlers = [field for field in cfg._meta.fields
+                                if field.__class__ == Placeholder]
+            placeholders_names = [placeholder.name for placeholder in
+                                  cfg_placehodlers]
+            # make sure that we have an empty list to store plugins content
+            plugins_content[cfg] = []
+            for placeholder_name in placeholders_names:
+                placeholder_instance = getattr(cfg, placeholder_name)
+                self.assertNotEqual(type(placeholder_instance), type(None))
+                plugin_text = plugin_content_raw.format(
+                    cfg.namespace, 'en', placeholder_name)
+                api.add_plugin(
+                    placeholder_instance, 'TextPlugin', 'en',
+                    body=plugin_text)
+                # track other namespaces plugin content to check
+                # their uniqueness
+                plugins_content[cfg].append(plugin_text)
+
+        # test <config> placeholder content if it is attached to a page
+        skipped = []
+        for cfg in configs:
+            if not namespace_is_apphooked(cfg.namespace):
+                skipped.append(cfg)
+                continue
+
+            with force_language('en'):
+                apphook_url = reverse('{0}:job-offer-list'.format(
+                    cfg.namespace))
+            response = self.client.get(apphook_url)
+
+            # test own content
+            for text in plugins_content[cfg]:
+                self.assertIn(response, text)
+
+            # make sure other namespace plugins are not leaked
+            other_configs = [config for config in plugins_content.keys()
+                             if config is not cfg]
+            all_other_namespace_plugins_text = [
+                text for other_config in other_configs
+                for text in plugins_content[other_config]]
+            for other_plugins_text in all_other_namespace_plugins_text:
+                self.assertNotIn(response, other_plugins_text)
+        # make sure that we tested at least one config
+        self.assertNotEqual(configs.count(), len(skipped))

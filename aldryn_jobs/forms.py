@@ -4,23 +4,23 @@ from __future__ import unicode_literals
 
 import os
 
-from django import forms, get_version
+from django import forms
 from django.conf import settings
 from django.core.exceptions import (
-    NON_FIELD_ERRORS,
     ObjectDoesNotExist,
     ValidationError,
+    ImproperlyConfigured,
 )
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import pgettext_lazy as _, get_language
+from django.utils.translation import pgettext_lazy as _, get_language, ugettext
 
 from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
 from cms import __version__ as cms_version
 from cms.models import Page
-from distutils.version import LooseVersion, StrictVersion
+from distutils.version import LooseVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
@@ -29,9 +29,9 @@ from unidecode import unidecode
 
 from .models import (
     JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
-    NewsletterSignup, JobsConfig,
-    JobListPlugin, JobNewsletterRegistrationPlugin)
-
+    NewsletterSignup, JobsConfig, JobListPlugin,
+    JobNewsletterRegistrationPlugin, JobCategoriesPlugin)
+from .utils import namespace_is_apphooked
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(
     settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
@@ -288,95 +288,102 @@ class JobsConfigForm(AppDataForm):
     pass
 
 
-class JobListPluginForm(forms.ModelForm):
-    model = JobListPlugin
-
-    def add_error(self, field, error):
-        # TODO: move it to a form mixin in aldryn-commons would be good idea?
-        #       (or even something more generic)
-        if StrictVersion(get_version()) >= StrictVersion('1.7'):
-            return super(JobListPluginForm, self).add_error(field, error)
-
-        if not isinstance(error, ValidationError):
-            # Normalize to ValidationError and let its constructor
-            # do the hard work of making sense of the input.
-            error = ValidationError(error)
-
-        if hasattr(error, 'error_dict'):
-            if field is not None:
-                raise TypeError(
-                    "The argument `field` must be `None` when the `error` "
-                    "argument contains errors for multiple fields."
-                )
-            else:
-                error = error.error_dict
-        else:
-            error = {field or NON_FIELD_ERRORS: error}
-        for field, error_list in error.items():
-            if field not in self.errors:
-                if field != NON_FIELD_ERRORS and field not in self.fields:
-                    raise ValueError("'%s' has no field named '%s'." % (
-                        self.__class__.__name__, field))
-                self._errors[field] = self.error_class()
-            self._errors[field].extend(error_list.messages)
-            if field in self.cleaned_data:
-                del self.cleaned_data[field]
-
-    def clean(self):
-        data = super(JobListPluginForm, self).clean()
-        app_config = data.get('app_config')
-        offers = data.get('joboffers')
-        if app_config and offers:
-            for offer in offers:
-                if offer.app_config != app_config:
-                    self.add_error(
-                        'joboffers',
-                        _('aldryn-jobs',
-                          "Job Offer '%(joboffer)s' does not match app_config "
-                          "'%(config)s'. Please, remove it from selected Job "
-                          "Offers.") % {'joboffer': offer,
-                                        'config': app_config}
-                    )
-                    if 'joboffers' in data:
-                        data.pop('joboffers')
-        return data
-
-
-class JobNewsletterRegistrationPluginForm(forms.ModelForm):
-    model = JobNewsletterRegistrationPlugin
+class AppConfigPluginFormMixin(object):
+    config_model = JobsConfig
 
     def __init__(self, *args, **kwargs):
-        super(JobNewsletterRegistrationPluginForm, self).__init__(
-            *args, **kwargs)
-        # get available jobs configs, that have the same namespace as
-        # pages with namespaces. That will ensure that user wont select
-        # config that is not app hooked because that will lead to a 500
-        # error until that config wont be used.
-        available_configs = JobsConfig.objects.filter(
+        # config_model should be configured before using this mixin
+        if self.config_model is None:
+            raise ImproperlyConfigured(
+                ugettext('Cannot work properly when config class is '
+                         'not provided.'))
+
+        super(AppConfigPluginFormMixin, self).__init__(*args, **kwargs)
+        # get available event configs, that have the same namespace
+        # as pages with namespaces. that will ensure that user wont
+        # select config that is not app hooked because that
+        # will lead to a 500 error until that config wont be used.
+        available_configs = self.config_model.objects.filter(
             namespace__in=Page.objects.exclude(
                 application_namespace__isnull=True).values_list(
                 'application_namespace', flat=True))
-        self.fields['app_config'].queryset = available_configs
 
-    def clean(self):
+        published_configs_pks = [
+            config.pk for config in available_configs
+            if namespace_is_apphooked(config.namespace)]
+
+        self.fields['app_config'].queryset = available_configs.filter(
+            pk__in=published_configs_pks)
+        # inform user that there are not published namespaces
+        # which he shouldn't use
+        not_published = self.config_model.objects.exclude(
+            pk__in=published_configs_pks).values_list(
+            'namespace', flat=True)
+
+        # prepare help messages
+        msg_not_published = ugettext(
+            'Following {0} exists but either pages are not published, or '
+            'there is no apphook. To use them - attach them or publish pages '
+            'to which they are attached:'.format(self.config_model.__name__))
+
+        not_published_namespaces = '; '.join(not_published)
+
+        additional_message = None
+        if not_published.count() > 0:
+            # prepare message with list of not published configs.
+            additional_message = '{0}\n<br/>{1}'.format(
+                msg_not_published, not_published_namespaces)
+
+        # update help text
+        if additional_message:
+            self.fields['app_config'].help_text += '\n<br/>{0}'.format(
+                additional_message)
+
+        # pre select app config if there is only one option
+        if self.fields['app_config'].queryset.count() == 1:
+                self.fields['app_config'].empty_label = None
+
+    def clean_app_config(self):
         # since namespace is not a unique thing we need to validate it
         # additionally because it is possible that there is a page with same
         # namespace as a jobs config but which is using other app_config,
         # which also would lead to same 500 error. The easiest way is to try
         # to reverse, in case of success that would mean that the app_config
         # is correct and can be used.
-        data = super(JobNewsletterRegistrationPluginForm, self).clean()
-        try:
-            reverse('{0}:register_newsletter'.format(
-                data['app_config'].namespace))
-        except NoReverseMatch:
+        namespace = self.cleaned_data['app_config'].namespace
+        if not namespace_is_apphooked(namespace):
             raise ValidationError(
-                _('aldryn-jobs',
-                  'Seems that selected Job config is not plugged to any page, '
-                  'or maybe that page is not published.'
-                  'Please select Job config that is being used.'),
+                ugettext(
+                    'Seems that selected Job config is not plugged to any '
+                    'page, or maybe that page is not published.'
+                    'Please select Job config that is being used.'),
                 code='invalid')
+        return self.cleaned_data['app_config']
+
+
+class JobListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
+    model = JobListPlugin
+
+    def clean(self):
+        data = super(JobListPluginForm, self).clean()
+        # save only events for selected app_config
+        selected_events = data.get('joboffers', [])
+        app_config = data.get('app_config')
+        if app_config is None:
+            new_events = []
+        else:
+            new_events = [event for event in selected_events
+                          if event.app_config.pk == app_config.pk]
+        data['events'] = new_events
         return data
 
+
+class JobNewsletterRegistrationPluginForm(AppConfigPluginFormMixin,
+                                          forms.ModelForm):
+    model = JobNewsletterRegistrationPlugin
+
+
+class JobCategoriesListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
+    model = JobCategoriesPlugin
 
 setup_config(JobsConfigForm, JobsConfig)
