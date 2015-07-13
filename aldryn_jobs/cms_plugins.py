@@ -61,7 +61,7 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
     def render(self, context, instance, placeholder):
         namespace = (instance.app_config.namespace if instance.app_config
                      else '')
-        if namespace =='':
+        if namespace == '':
             vacancies = JobOffer.objects.none()
         else:
             vacancies = instance.job_offers(namespace)

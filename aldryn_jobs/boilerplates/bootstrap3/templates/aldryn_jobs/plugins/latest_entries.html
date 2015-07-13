@@ -7,17 +7,19 @@
         {% endif %}
     {% else %}
         <p class="alert alert-info">
-            {% blocktrans with total=instance.job_offers.count %}
-                Showing {{ total }} Job Offers
+            {% blocktrans count counter=vacancies_count %}
+                Showing {{ vacancies_count }} vacancy
+            {% plural %}
+                Showing {{ vacancies_count }} vacancies
             {% endblocktrans %}
         </p>
 
         <div class="list-group">
-            {% for job in instance.job_offers %}
-                <a href="{{ job.get_absolute_url }}" class="list-group-item">
-                    {{ job }}
-                    {% if job.start %}
-                        <span>{{ job.start|date }}</span>
+            {% for vacancy in vacancies %}
+                <a href="{{ vacancy.get_absolute_url }}" class="list-group-item">
+                    {{ vacancy }}
+                    {% if vacancy.start %}
+                        <span>{{ vacancy.start|date }}</span>
                     {% endif %}
                 </a>
             {% empty %}
