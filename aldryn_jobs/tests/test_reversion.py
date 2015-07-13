@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import reversion
 import six
 
@@ -73,7 +77,6 @@ class ReversionTestCase(JobsBaseTestCase):
         with transaction.atomic():
             with reversion.create_revision():
                 job_offer = JobOffer.objects.create(
-                    app_config=self.app_config,
                     category=self.default_category,
                     **self.offer_values_raw['en'])
         self.assertEqual(len(reversion.get_for_object(job_offer)), 1)
@@ -486,7 +489,6 @@ class ReversionTestCase(JobsBaseTestCase):
     def test_job_application_revision_is_created(self):
         job_offer = self.create_default_job_offer()
         application = JobApplication.objects.create(
-            app_config=self.app_config,
             job_offer=job_offer,
             **self.application_default_values)
         self.assertEqual(len(reversion.get_for_object(application)), 0)
@@ -499,7 +501,6 @@ class ReversionTestCase(JobsBaseTestCase):
     def test_job_application_contains_latest_values(self):
         job_offer = self.create_default_job_offer()
         application = JobApplication.objects.create(
-            app_config=self.app_config,
             job_offer=job_offer,
             **self.application_default_values)
 
@@ -515,7 +516,6 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
         new_offer = JobOffer.objects.create(
-            app_config=self.app_config,
             category=self.default_category,
             **self.make_new_values(self.offer_values_raw['en'], 2))
         new_values_2['job_offer'] = new_offer
@@ -539,7 +539,6 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
         new_offer = JobOffer.objects.create(
-            app_config=self.app_config,
             category=self.default_category,
             **self.make_new_values(self.offer_values_raw['en'], 2))
         new_values_2['job_offer'] = new_offer
@@ -567,7 +566,6 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
         new_offer = JobOffer.objects.create(
-            app_config=self.app_config,
             category=self.default_category,
             **self.make_new_values(self.offer_values_raw['en'], 2))
         new_values_2['job_offer'] = new_offer

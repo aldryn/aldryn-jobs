@@ -2,14 +2,23 @@
 Aldryn Jobs
 ###########
 
-.. image:: https://magnum.travis-ci.com/aldryn/aldryn-jobs.svg?token=2aLiyxMhwop2hnmajHuq&branch=master
-    :target: https://magnum.travis-ci.com/aldryn/aldryn-jobs
+|PyPI Version| |Build Status| |Coverage Status| |codeclimate| |requires_io|
 
-.. image:: https://img.shields.io/coveralls/aldryn/aldryn-jobs.svg
-  :target: https://coveralls.io/r/aldryn/aldryn-jobs
+.. |PyPI Version| image:: http://img.shields.io/pypi/v/aldryn-jobs.svg
+   :target: https://pypi.python.org/pypi/aldryn-jobs
+.. |Build Status| image:: http://img.shields.io/travis/aldryn/aldryn-jobs/master.svg
+   :target: https://travis-ci.org/aldryn/aldryn-jobs
+.. |Coverage Status| image:: http://img.shields.io/coveralls/aldryn/aldryn-jobs/master.svg
+   :target: https://coveralls.io/r/aldryn/aldryn-jobs?branch=master
+.. |codeclimate| image:: https://codeclimate.com/github/aldryn/aldryn-jobs/badges/gpa.svg
+   :target: https://codeclimate.com/github/aldryn/aldryn-jobs
+   :alt: Code Climate
+.. |requires_io| image:: https://requires.io/github/aldryn/aldryn-jobs/requirements.svg?branch=master
+   :target: https://requires.io/github/aldryn/aldryn-jobs/requirements/?branch=master
+   :alt: Requirements Status
 
-
-Aldryn Jobs is an Aldryn-compatible django CMS application for publishing vacancies and rceiving application.
+Aldryn Jobs is an Aldryn-compatible django CMS application for publishing
+vacancies and rceiving application.
 
 Please see the `Aldryn Jobs documentation <http://aldryn-jobs.readthedocs.org>`_,
 which includes information on installation and getting started.
@@ -19,7 +28,8 @@ It also contains `documentation for content editors and end-users
 
 IMPORTANT NOTE: ::
 
-    This repo is not ready for public use and is expected to undergo rapid change before its v1.0       release.
+    This repo is not ready for public use and is expected to undergo rapid
+    change before its v1.0 release.
 
 ************
 Contributing
@@ -27,7 +37,8 @@ Contributing
 
 Aldryn Jobs is a an open-source project. We'll be delighted to receive your
 feedback in the form of issues and pull requests. Before submitting your pull
-request, please review our `guidelines for Aldryn Addons <http://docs.aldryn.com/en/latest/reference/addons/index.html>`_.
+request, please review our
+`guidelines for Aldryn Addons <http://docs.aldryn.com/en/latest/reference/addons/index.html>`_.
 
 
 ************

@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
@@ -45,7 +44,6 @@ class JobOfferList(AppConfigMixin, ListView):
                             .language(language)
                             .translated(language)
                             .select_related('category')
-                            .namespace(self.namespace)
                             .order_by('category__id')
         )
 
@@ -90,7 +88,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
         slug_field = self.get_slug_field()
         language = get_language_from_request(self.request, check_path=True)
         queryset = (
-            queryset.namespace(self.namespace)
+            queryset.filter(category__app_config__namespace=self.namespace)
                     .language(language)
                     .translated(language, **{slug_field: slug})
         )

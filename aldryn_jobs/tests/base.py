@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -212,7 +216,6 @@ class JobsBaseTestCase(TransactionTestCase):
         with override('en'):
             job_offer = JobOffer.objects.create(
                 category=self.default_category,
-                app_config=self.app_config,
                 **self.default_job_values['en'])
             api.add_plugin(
                 job_offer.content,
@@ -231,9 +234,9 @@ class JobsBaseTestCase(TransactionTestCase):
 
     def make_new_values(self, values_dict, replace_with):
         """
-        Replace formating symbol {0} with replace_with param.
+        Replace formatting symbol {0} with replace_with param.
         modifies dates by + timedelta(days=int(replace_with))
-        Returns new dictionnary with same keys and replaced symbols.
+        Returns new dictionary with same keys and replaced symbols.
         """
         new_dict = {}
         for key, value in values_dict.items():

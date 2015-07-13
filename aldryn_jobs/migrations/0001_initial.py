@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
                 ('publication_end', models.DateTimeField(null=True, verbose_name='Published until', blank=True)),
                 ('can_apply', models.BooleanField(default=True, verbose_name='Viewer can apply for the job')),
                 ('category', models.ForeignKey(related_name='jobs', verbose_name='Category', to='aldryn_jobs.JobCategory')),
-                ('content', cms.models.fields.PlaceholderField(slotname=b'Job Offer Content', editable=False, to='cms.Placeholder', null=True)),
+                ('content', cms.models.fields.PlaceholderField(slotname='Job Offer Content', editable=False, to='cms.Placeholder', null=True)),
             ],
             options={
                 'ordering': ['category__ordering', 'category', '-created'],
