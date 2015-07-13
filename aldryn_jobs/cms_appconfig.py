@@ -2,13 +2,12 @@
 
 from __future__ import unicode_literals
 
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-
+from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.models import AppHookConfig
 from cms.models.fields import PlaceholderField
 
 
+@version_controlled_content
 class JobsConfig(AppHookConfig):
     # Job PHFs
     placeholder_jobs_top = PlaceholderField(
