@@ -4,7 +4,7 @@ from django.utils.translation import override
 from django.contrib.auth.models import Group
 from cms import api
 
-from ..models import JobOffer, JobCategory, JobsConfig
+from ..models import JobOpening, JobCategory, JobsConfig
 
 from .base import JobsBaseTestCase
 
@@ -244,11 +244,11 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
 
     def setUp(self):
         super(TestJobListPlugin, self).setUp()
-        job_opening = self.create_default_job_opening(translated=True)
-        self.create_plugin(self.plugin_page, 'en', self.app_config,
-                           jobopenings=job_opening)
-        self.create_plugin(self.plugin_page, 'de', self.app_config,
-                           jobopenings=job_opening)
+        self.job_opening = self.create_default_job_opening(translated=True)
+        self.plugin_en = self.create_plugin(self.plugin_page, 'en',
+            self.app_config, jobopenings=self.job_opening)
+        self.plugin_de = self.create_plugin(self.plugin_page, 'de',
+            self.app_config, jobopenings=self.job_opening)
 
     def create_plugin(self, page, language, app_config, jobopenings=None,
                       **plugin_params):
@@ -264,11 +264,11 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
 
     def create_new_job_opening(self, data):
         with override('en'):
-            job_opening = JobOffer.objects.create(**data)
+            job_opening = JobOpening.objects.create(**data)
         return job_opening
 
     def prepare_data(self, replace_with=1, category=None, update_date=False):
-        values = deepcopy(self.offer_values_raw['en'])
+        values = deepcopy(self.opening_values_raw['en'])
         # if we need to change date to something in future
         # we should do it before call to self.make_new_values
         if update_date:
@@ -292,27 +292,27 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
         # contain all that we need.
         with override('en'):
             page_url = self.plugin_page.get_absolute_url()
-            default_opening_url = self.job_offer.get_absolute_url()
+            default_opening_url = self.job_opening.get_absolute_url()
         response = self.client.get(page_url)
-        self.assertContains(response, self.job_offer.title)
+        self.assertContains(response, self.job_opening.title)
         self.assertContains(response, default_opening_url)
 
-    def test_list_plugin_doesnt_shows_delayed_offers(self):
+    def test_list_plugin_doesnt_shows_delayed_openings(self):
         new_opening = self.create_new_job_opening(
             self.prepare_data(1, update_date=True))
-        self.plugin_en.joblistplugin.joboffers.add(new_opening)
+        self.plugin_en.joblistplugin.jobopenings.add(new_opening)
         self.plugin_en.save()
         self.plugin_page.publish('en')
         with override('en'):
             page_url = self.plugin_page.get_absolute_url()
             opening_url = new_opening.get_absolute_url()
-            default_opening_url = self.job_offer.get_absolute_url()
+            default_opening_url = self.job_opening.get_absolute_url()
         response = self.client.get(page_url)
         self.assertNotContains(response, new_opening.title)
         self.assertNotContains(response, opening_url)
 
         # test that default job opening is still present
-        self.assertContains(response, self.job_offer.title)
+        self.assertContains(response, self.job_opening.title)
         self.assertContains(response, default_opening_url)
 
     def test_list_plugin_doesnt_shows_job_openings_from_other_config(self):
@@ -327,18 +327,18 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
             app_config=new_config)
         new_opening = self.create_new_job_opening(
             self.prepare_data(1, category=new_category))
-        self.plugin_en.joblistplugin.joboffers.add(new_opening)
+        self.plugin_en.joblistplugin.jobopenings.add(new_opening)
         self.plugin_en.app_config = new_config
         self.plugin_en.save()
         self.plugin_page.publish('en')
         with override('en'):
             page_url = self.plugin_page.get_absolute_url()
-            default_opening_url = self.job_offer.get_absolute_url()
+            default_opening_url = self.job_opening.get_absolute_url()
             new_opening_url = new_opening.get_absolute_url()
         response = self.client.get(page_url)
         # check that app config is repsected by plugin
         self.assertContains(response, new_opening.title)
         self.assertContains(response, new_opening_url)
         # check that there is no openings from other config
-        self.assertNotContains(response, self.job_offer.title)
+        self.assertNotContains(response, self.job_opening.title)
         self.assertNotContains(response, default_opening_url)

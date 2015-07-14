@@ -17,7 +17,7 @@ from .models import (
     JobListPlugin,
     JobNewsletterRegistrationPlugin,
     JobCategoriesPlugin,
-    JobOffer,
+    JobOpening,
 )
 from .utils import namespace_is_apphooked
 
@@ -63,9 +63,9 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
         namespace = (instance.app_config.namespace if instance.app_config
                      else '')
         if namespace == '' or context.get('plugin_configuration_error', False):
-            vacancies = JobOffer.objects.none()
+            vacancies = JobOpening.objects.none()
         else:
-            vacancies = instance.job_offers(namespace)
+            vacancies = instance.job_openings(namespace)
         context['vacancies'] = vacancies
         context['vacancies_count'] = vacancies.count()
         return context
