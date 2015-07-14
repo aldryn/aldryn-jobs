@@ -13,7 +13,7 @@ import cms.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0012_auto_20150607_2207'),
+        ('cms', '0003_auto_20140926_2347'),
         ('auth', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                 ('publication_end', models.DateTimeField(verbose_name='Published until', null=True, blank=True)),
                 ('can_apply', models.BooleanField(default=True, verbose_name='Viewer can apply for the job')),
                 ('category', models.ForeignKey(related_name='jobs', to='aldryn_jobs.JobCategory', verbose_name='Category')),
-                ('content', cms.models.fields.PlaceholderField(slotname='Job Ppening Content', null=True, to='cms.Placeholder', editable=False)),
+                ('content', cms.models.fields.PlaceholderField(slotname='Job Opening Content', null=True, to='cms.Placeholder', editable=False)),
             ],
             options={
                 'ordering': ['category__ordering', 'category', '-created'],
