@@ -77,7 +77,6 @@ HELPER_SETTINGS = {
         ],
     },
     'ALDRYN_BOILERPLATE_NAME': 'legacy',
-    'ALDRYN_JOBS_NEWSLETTER_ADDITIONAL_NOTIFICATION_EMAILS': ['default_admin@notification.em'],  # NOQA
     # add aldryn_apphook_reload so that pages would be restored on apphook
     # reload.
     'MIDDLEWARE_CLASSES': [

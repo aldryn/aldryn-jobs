@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 from django.utils.translation import override
-from django.contrib.auth.models import Group
 from cms import api
 
 from ..models import JobOpening, JobCategory, JobsConfig
@@ -136,87 +135,6 @@ class TestPluginFailuresWithDeletedAppHookMixin(object):
         self.assertContains(
             response,
             'There is an error in plugin configuration: selected Job')
-
-
-class TestNewsletterPlugin(TestAppConfigPluginsMixin,
-                           TestPluginFailuresWithDeletedAppHookMixin,
-                           JobsBaseTestCase):
-    plugin_to_test = 'JobNewsletter'
-
-    def setUp(self):
-        super(TestNewsletterPlugin, self).setUp()
-        self.default_group = Group.objects.get_or_create(
-            name='Newsletter signup notifications')[0]
-        # create default plugins to test against them
-        self.create_plugin(
-            page=self.plugin_page,
-            language=self.language,
-            app_config=self.app_config,
-            mail_to_group=self.default_group,
-            **self.plugin_params)
-        #
-        self.create_plugin(self.plugin_page, 'de', self.app_config,
-                           mail_to_group=self.default_group)
-
-    def create_plugin(self, page, language, app_config, mail_to_group=None,
-                      **plugin_params):
-        plugin = self._create_plugin(
-            page, language, app_config, **plugin_params)
-        if mail_to_group is not None:
-            # we need to update plugin configuration model with correct group
-            # it is located under it's own manager
-            plugin.jobnewsletterregistrationplugin.mail_to_group.add(
-                mail_to_group)
-            plugin.save()
-        return plugin
-
-    # FIXME: should be changed after switch to app_config settings
-    # for mailing etc.
-    def test_newsletter_plugins_configured_with_different_groups(self):
-        other_group = Group.objects.get_or_create(
-            name='Newsletter signup notifications DE')[0]
-        other_group_plugin = self.create_plugin(
-            self.plugin_page, 'de', self.app_config,
-            mail_to_group=other_group)
-        placeholder = self.plugin_page.placeholders.all()[0]
-
-        # test en plugin group equals to default_group
-        plugin = placeholder.get_plugins().filter(language='en')[0]
-        self.assertEqual(
-            plugin.jobnewsletterregistrationplugin.mail_to_group.count(), 1)
-        self.assertEqual(
-            plugin.jobnewsletterregistrationplugin.mail_to_group.all()[0],
-            self.default_group)
-
-        # test de plugin group
-        plugin = placeholder.get_plugins().filter(
-            language='de').get(pk=other_group_plugin.pk)
-        self.assertEqual(
-            plugin.jobnewsletterregistrationplugin.mail_to_group.count(), 2)
-        self.assertIn(
-            other_group,
-            plugin.jobnewsletterregistrationplugin.mail_to_group.all())
-
-    def test_plugin_with_different_groups_does_not_breaks_page(self):
-        other_group = Group.objects.get_or_create(
-            name='Newsletter signup notifications DE')[0]
-        self.create_plugin(
-            self.plugin_page, 'de', self.app_config, mail_to_group=other_group)
-
-        for language_code in ('en', 'de'):
-            with override(language_code):
-                page_url_en = self.plugin_page.get_absolute_url()
-            response = self.client.get(page_url_en)
-            self.assertEqual(response.status_code, 200)
-
-    def test_plugin_with_deleted_group_does_not_breaks_page(self):
-        self.default_group.delete()
-
-        for language_code in ('en', 'de'):
-            with override(language_code):
-                page_url_en = self.plugin_page.get_absolute_url()
-            response = self.client.get(page_url_en)
-            self.assertEqual(response.status_code, 200)
 
 
 class TestJobCategoriesListPlugin(TestAppConfigPluginsMixin,

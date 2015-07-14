@@ -8,14 +8,11 @@ from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
 from .forms import (
-    NewsletterSignupForm,
     JobListPluginForm,
-    JobNewsletterRegistrationPluginForm,
     JobCategoriesListPluginForm,
 )
 from .models import (
     JobListPlugin,
-    JobNewsletterRegistrationPlugin,
     JobCategoriesPlugin,
     JobOpening,
 )
@@ -67,35 +64,8 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
         else:
             vacancies = instance.job_openings(namespace)
         context['vacancies'] = vacancies
-        context['vacancies_count'] = vacancies.count()
+        context['vacancies_count'] = len(vacancies)
         return context
-
-
-class JobNewsletter(NameSpaceCheckMixin, CMSPluginBase):
-    module = 'Jobs'
-    render_template = 'aldryn_jobs/plugins/newsletter_registration.html'
-    name = _('Form for Newsletter')
-    model = JobNewsletterRegistrationPlugin
-    form = JobNewsletterRegistrationPluginForm
-    cache = False
-
-    def render(self, context, instance, placeholder):
-        context = super(JobNewsletter, self).render(
-            context, instance, placeholder)
-        # if there is data for form (i.e validation errors) render that
-        # form with data. explicitly check that request POST has the right
-        # data.
-        request = context.get('request')
-
-        if request is not None and request.POST.get('recipient'):
-            context['form'] = NewsletterSignupForm(
-                request.POST, app_config=instance.app_config)
-        else:
-            context['form'] = NewsletterSignupForm(
-                app_config=instance.app_config)
-        return context
-
 
 plugin_pool.register_plugin(JobCategoriesList)
 plugin_pool.register_plugin(JobList)
-plugin_pool.register_plugin(JobNewsletter)
