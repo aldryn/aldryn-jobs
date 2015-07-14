@@ -244,21 +244,21 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
 
     def setUp(self):
         super(TestJobListPlugin, self).setUp()
-        self.job_offer = self.create_default_job_offer(translated=True)
-        self.plugin_en = self.create_plugin(
-            self.plugin_page, 'en', self.app_config, joboffers=self.job_offer)
-        self.plugin_de = self.create_plugin(
-            self.plugin_page, 'de', self.app_config, joboffers=self.job_offer)
+        job_opening = self.create_default_job_opening(translated=True)
+        self.create_plugin(self.plugin_page, 'en', self.app_config,
+                           jobopenings=job_opening)
+        self.create_plugin(self.plugin_page, 'de', self.app_config,
+                           jobopenings=job_opening)
 
-    def create_plugin(self, page, language, app_config, joboffers=None,
+    def create_plugin(self, page, language, app_config, jobopenings=None,
                       **plugin_params):
         plugin = self._create_plugin(
             page, language, app_config, **plugin_params)
-        if joboffers is not None:
+        if jobopenings is not None:
             # we need to update plugin configuration model with correct group
             # it is located under it's own manager
-            plugin.joblistplugin.joboffers.add(
-                joboffers)
+            plugin.joblistplugin.jobopenings.add(
+                jobopenings)
             plugin.save()
         return plugin
 

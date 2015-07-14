@@ -15,7 +15,7 @@ from django.utils.translation import override
 from cms import api
 from cms.utils import get_cms_setting
 
-from ..models import JobsConfig, JobCategory, JobOffer
+from ..models import JobsConfig, JobCategory, JobOpening
 
 
 def tz_datetime(*args, **kwargs):
@@ -37,14 +37,14 @@ class JobsBaseTestCase(TransactionTestCase):
     }
     default_job_values = {
         'en': {
-            'title': 'Default job offer en',
-            'slug': 'default-job-offer-en',
+            'title': 'Default job opening en',
+            'slug': 'default-job-opening-en',
             'lead_in': '<p>Default job for default people! <br/>'
                        'Apply now!</p>',
         },
         'de': {
-            'title': 'Default job offer de',
-            'slug': 'default-job-offer-de',
+            'title': 'Default job opening de',
+            'slug': 'default-job-opening-de',
             'lead_in': '<p>Default job for default people! Now in German! <br/>'
                        'Apply now!</p>',
         },
@@ -57,7 +57,7 @@ class JobsBaseTestCase(TransactionTestCase):
         'en': 'English New, revision {0}, content en',
         'de': 'German revision {0}, new content de',
     }
-    offer_values_raw = {
+    opening_values_raw = {
         'en': {
             'title': 'Title revision {0} en',
             'slug': 'title-revision-{0}-en',
@@ -209,28 +209,29 @@ class JobsBaseTestCase(TransactionTestCase):
 
         return JobCategory.objects.language('en').get(pk=job_category.pk)
 
-    def create_default_job_offer(self, translated=False):
+    def create_default_job_opening(self, translated=False):
         # ensure that we always start with english, since it looks
         # like there is some issues with handling active language
         # between tests cases run
         with override('en'):
-            job_offer = JobOffer.objects.create(
+            job_opening = JobOpening.objects.create(
                 category=self.default_category,
                 **self.default_job_values['en'])
             api.add_plugin(
-                job_offer.content,
+                job_opening.content,
                 'TextPlugin',
                 'en',
                 body=self.default_plugin_content['en'])
 
-        # check if we need a translated job offer
+        # check if we need a translated job opening
         if translated:
-            job_offer.create_translation('de', **self.default_job_values['de'])
+            job_opening.create_translation(
+                'de', **self.default_job_values['de'])
             with override('de'):
-                api.add_plugin(job_offer.content, 'TextPlugin', 'de',
+                api.add_plugin(job_opening.content, 'TextPlugin', 'de',
                                body=self.default_plugin_content['de'])
 
-        return JobOffer.objects.language('en').get(pk=job_offer.pk)
+        return JobOpening.objects.language('en').get(pk=job_opening.pk)
 
     def make_new_values(self, values_dict, replace_with):
         """

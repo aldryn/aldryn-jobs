@@ -7,7 +7,7 @@ Reference
 Attachment storage
 ******************
 
-While applying for vacancies, visitors can attach files. Those files are saved and stored using Django's file storage API. You need to ensure that the storage options you choose are appropriately secured against unauthorised access:
+While applying for job openings, visitors can attach files. Those files are saved and stored using Django's file storage API. You need to ensure that the storage options you choose are appropriately secured against unauthorised access:
 
 ALDRYN_JOBS_ATTACHMENT_STORAGE
 ==============================

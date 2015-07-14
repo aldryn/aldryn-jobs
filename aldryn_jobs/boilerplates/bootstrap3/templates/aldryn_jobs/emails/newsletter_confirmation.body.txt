@@ -5,7 +5,7 @@
 {% else %}{% blocktrans context "aldryn-jobs" %}Dear User.{% endblocktrans %}
 {% endif %}
 {% blocktrans context "aldryn-jobs" %}
-You have registered for the job newsletter. Thank you for your interest in the vacancies at our site.
+You have registered for the job newsletter. Thank you for your interest in the job openings at our site.
 Please confirm your email address using the link below:
 {% endblocktrans %}
 {{ full_link }}
