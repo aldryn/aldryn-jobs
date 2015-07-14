@@ -6,7 +6,7 @@ from django.utils.translation import override
 
 from .base import JobsBaseTestCase
 from .test_plugins import TestAppConfigPluginsMixin
-from ..models import (JobsConfig, JobOffer, JobCategory, NewsletterSignup,
+from ..models import (JobsConfig, JobOpening, JobCategory, NewsletterSignup,
     NewsletterSignupUser)
 
 
@@ -432,7 +432,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                 app_config=new_config,
                 **self.make_new_values(self.category_values_raw['en'], 1)
             )
-            offer_new_config = JobOffer.objects.create(
+            offer_new_config = JobOpening.objects.create(
                 category=category_new_config,
                 **self.make_new_values(self.offer_values_raw['en'], 1)
             )
@@ -515,7 +515,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                 app_config=new_config,
                 **self.make_new_values(self.category_values_raw['en'], 1)
             )
-            offer_new_config = JobOffer.objects.create(
+            offer_new_config = JobOpening.objects.create(
                 category=category_new_config,
                 **self.make_new_values(self.offer_values_raw['en'], 1)
             )

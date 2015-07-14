@@ -27,20 +27,20 @@ from .forms import (
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
 )
 from .models import (
-    JobCategory, JobOffer, NewsletterSignup,
+    JobCategory, JobOpening, NewsletterSignup,
     NewsletterSignupUser, JobsConfig,
 )
 
 
 class JobOfferList(AppConfigMixin, ListView):
     template_name = 'aldryn_jobs/jobs_list.html'
-    model = JobOffer
+    model = JobOpening
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
         language = get_language_from_request(self.request, check_path=True)
         return (
-            JobOffer.objects.active()
+            JobOpening.objects.active()
                             .language(language)
                             .translated(language)
                             .select_related('category')
@@ -96,7 +96,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
         job_offer = None
         try:
             job_offer = queryset.get()
-        except JobOffer.DoesNotExist:
+        except JobOpening.DoesNotExist:
             pass
         finally:
             if (not job_offer or (not job_offer.get_active() and
@@ -129,7 +129,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
         language = get_language_from_request(self.request, check_path=True)
-        return JobOffer.objects.language(language).translated(
+        return JobOpening.objects.language(language).translated(
             language
         ).select_related('category')
 

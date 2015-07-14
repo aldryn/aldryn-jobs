@@ -15,7 +15,7 @@ from django.utils.translation import override
 from cms import api
 from cms.utils import get_cms_setting
 
-from ..models import JobsConfig, JobCategory, JobOffer
+from ..models import JobsConfig, JobCategory, JobOpening
 
 
 def tz_datetime(*args, **kwargs):
@@ -214,7 +214,7 @@ class JobsBaseTestCase(TransactionTestCase):
         # like there is some issues with handling active language
         # between tests cases run
         with override('en'):
-            job_offer = JobOffer.objects.create(
+            job_offer = JobOpening.objects.create(
                 category=self.default_category,
                 **self.default_job_values['en'])
             api.add_plugin(
@@ -230,7 +230,7 @@ class JobsBaseTestCase(TransactionTestCase):
                 api.add_plugin(job_offer.content, 'TextPlugin', 'de',
                                body=self.default_plugin_content['de'])
 
-        return JobOffer.objects.language('en').get(pk=job_offer.pk)
+        return JobOpening.objects.language('en').get(pk=job_offer.pk)
 
     def make_new_values(self, values_dict, replace_with):
         """

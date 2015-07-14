@@ -60,7 +60,7 @@ class NewsletterSignupManager(models.Manager):
         actions. Returns number of successfully sent emails.
         """
         # avoid circular import
-        from .models import JobOffer, NewsletterSignup
+        from .models import JobOpening, NewsletterSignup
 
         # since this method can and should be also used as a management
         # command. check and warn user that this is required parameter
@@ -74,7 +74,7 @@ class NewsletterSignupManager(models.Manager):
             # with error msg.
             return -1
 
-        job_object_list = JobOffer.objects.filter(
+        job_object_list = JobOpening.objects.filter(
             pk__in=job_list).select_related('app_config')
         job_configs = set(job.category.app_config for job in job_object_list)
 

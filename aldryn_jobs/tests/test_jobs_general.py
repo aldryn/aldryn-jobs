@@ -10,7 +10,7 @@ from cms.utils import get_cms_setting
 from cms.utils.i18n import force_language
 from cms.test_utils.testcases import CMSTestCase
 
-from ..models import JobCategory, JobOffer
+from ..models import JobCategory, JobOpening
 from ..cms_appconfig import JobsConfig
 from ..utils import namespace_is_apphooked
 
@@ -36,17 +36,17 @@ class JobsAddTest(JobsBaseTestCase):
         Check if We can create a new job offer.
         """
         title = 'Programmer'
-        offer = JobOffer.objects.create(
+        offer = JobOpening.objects.create(
             title=title, category=self.default_category)
         self.assertEqual(offer.title, title)
-        self.assertEqual(JobOffer.objects.all()[0], offer)
+        self.assertEqual(JobOpening.objects.all()[0], offer)
 
     def test_category_relation_to_job_offer(self):
         """
         Check if We can access a job offer through a category.
         """
         title = 'Senior'
-        offer = JobOffer.objects.create(
+        offer = JobOpening.objects.create(
             title=title, category=self.default_category)
         self.assertIn(offer, self.default_category.jobs.all())
 
@@ -55,7 +55,7 @@ class JobsAddTest(JobsBaseTestCase):
         We add an offer to the Plugin and look it up
         """
         title = 'Manager'
-        JobOffer.objects.create(title=title, category=self.default_category)
+        JobOpening.objects.create(title=title, category=self.default_category)
         placeholder = self.page.placeholders.all()[0]
         api.add_plugin(placeholder, 'JobList', self.language)
         self.page.publish(self.language)

@@ -9,7 +9,7 @@ from django.utils.translation import (
     get_language_from_request
 )
 
-from aldryn_jobs.models import JobOffer
+from aldryn_jobs.models import JobOpening
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
@@ -32,7 +32,7 @@ def get_joboffer_from_path(path, language, current_url=None):
                 " populating cms menu")
 
     if current_url.url_name == 'job-offer-detail':
-        job_offer = JobOffer.objects.language(language)
+        job_offer = JobOpening.objects.language(language)
 
         if 'category_slug' in current_url.kwargs:
             category_slug = current_url.kwargs['category_slug']

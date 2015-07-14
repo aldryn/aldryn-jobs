@@ -12,7 +12,7 @@ from parler.utils.context import switch_language
 from aldryn_reversion.core import create_revision_with_placeholders
 
 from ..models import (
-    JobCategory, JobOffer, JobApplication, NewsletterSignup,
+    JobCategory, JobOpening, JobApplication, NewsletterSignup,
     NewsletterSignupUser
 )
 
@@ -76,7 +76,7 @@ class ReversionTestCase(JobsBaseTestCase):
     def test_revision_is_created_on_job_offer_object_created(self):
         with transaction.atomic():
             with reversion.create_revision():
-                job_offer = JobOffer.objects.create(
+                job_offer = JobOpening.objects.create(
                     category=self.default_category,
                     **self.offer_values_raw['en'])
         self.assertEqual(len(reversion.get_for_object(job_offer)), 1)
@@ -123,7 +123,7 @@ class ReversionTestCase(JobsBaseTestCase):
         content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_offer, content=content_en_1, **new_values_en_1)
 
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         for prop in new_values_en_1.keys():
             self.assertEqual(getattr(job_offer, prop), new_values_en_1[prop])
 
@@ -176,7 +176,7 @@ class ReversionTestCase(JobsBaseTestCase):
         content_en_2 = self.plugin_values_raw['en'].format(2)
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         for prop in new_values_en_2.keys():
             self.assertEqual(getattr(job_offer, prop), new_values_en_2[prop])
 
@@ -194,7 +194,7 @@ class ReversionTestCase(JobsBaseTestCase):
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
         # test served title
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         with switch_language(job_offer, 'en'):
             url = job_offer.get_absolute_url()
         response = self.client.get(url)
@@ -246,7 +246,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revert to 1
         self.revert_to(job_offer, 1)
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         new_values_en_1['category'] = self.default_category
         for prop in new_values_en_1.keys():
             self.assertEqual(getattr(job_offer, prop), new_values_en_1[prop])
@@ -266,9 +266,9 @@ class ReversionTestCase(JobsBaseTestCase):
         self.create_revision(job_offer, content=content_en_2, **new_values_en_2)
 
         # revert to 1
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         self.revert_to(job_offer, 1)
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         with switch_language(job_offer, 'en'):
             url = job_offer.get_absolute_url()
         response = self.client.get(url)
@@ -307,7 +307,7 @@ class ReversionTestCase(JobsBaseTestCase):
         self.assertNotContains(response, content_en_1)
 
         self.revert_to(job_offer, 1)
-        job_offer = JobOffer.objects.get(pk=job_offer.pk)
+        job_offer = JobOpening.objects.get(pk=job_offer.pk)
         response = self.client.get(job_offer.get_absolute_url())
         self.assertContains(response, content_en_1)
         self.assertNotContains(response, content_en_2)
@@ -385,7 +385,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revert to 3: en 1, de 2
         self.revert_to(offer, 3)
-        offer = JobOffer.objects.get(pk=offer.pk)
+        offer = JobOpening.objects.get(pk=offer.pk)
         # test en values
         with switch_language(offer, 'en'):
             for prop in new_values_en_1.keys():
@@ -434,7 +434,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revert to 3: en 1, de 2
         self.revert_to(offer, 3)
-        offer = JobOffer.objects.get(pk=offer.pk)
+        offer = JobOpening.objects.get(pk=offer.pk)
         # test en values
         with switch_language(offer, 'en'):
             url_reverted_en = offer.get_absolute_url()
@@ -481,7 +481,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revert to 1
         self.revert_to(offer, 1)
-        offer = JobOffer.objects.get(pk=offer.pk)
+        offer = JobOpening.objects.get(pk=offer.pk)
         self.assertNotEqual(offer.category, category_2)
         self.assertEqual(JobCategory.objects.all().count(), 2)
 
@@ -515,7 +515,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
-        new_offer = JobOffer.objects.create(
+        new_offer = JobOpening.objects.create(
             category=self.default_category,
             **self.make_new_values(self.offer_values_raw['en'], 2))
         new_values_2['job_offer'] = new_offer
@@ -538,7 +538,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
-        new_offer = JobOffer.objects.create(
+        new_offer = JobOpening.objects.create(
             category=self.default_category,
             **self.make_new_values(self.offer_values_raw['en'], 2))
         new_values_2['job_offer'] = new_offer
@@ -565,7 +565,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
-        new_offer = JobOffer.objects.create(
+        new_offer = JobOpening.objects.create(
             category=self.default_category,
             **self.make_new_values(self.offer_values_raw['en'], 2))
         new_values_2['job_offer'] = new_offer
@@ -579,9 +579,9 @@ class ReversionTestCase(JobsBaseTestCase):
         # revert to 1
         self.revert_to(application, 1)
         application = JobApplication.objects.get(pk=application.pk)
-        self.assertEqual(JobOffer.objects.all().count(), 2)
+        self.assertEqual(JobOpening.objects.all().count(), 2)
         # get restored job offer
-        job_offer = JobOffer.objects.all().exclude(pk=new_offer.pk).get()
+        job_offer = JobOpening.objects.all().exclude(pk=new_offer.pk).get()
         # add initial job_offer to values list to be checked
         new_values_1['job_offer'] = job_offer
         for prop in new_values_1.keys():

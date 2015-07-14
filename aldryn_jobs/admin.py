@@ -20,7 +20,7 @@ from parler.admin import TranslatableAdmin
 
 from .forms import JobCategoryAdminForm, JobOfferAdminForm
 from .models import (
-    JobApplication, JobCategory, JobOffer,
+    JobApplication, JobCategory, JobOpening,
     JobsConfig, NewsletterSignup
 )
 
@@ -225,6 +225,6 @@ class JobsConfigAdmin(BaseAppHookConfig):
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
-admin.site.register(JobOffer, JobOfferAdmin)
+admin.site.register(JobOpening, JobOfferAdmin)
 admin.site.register(JobsConfig, JobsConfigAdmin)
 admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)

@@ -196,7 +196,7 @@ class JobCategory(TranslatableModel):
 
 @version_controlled_content(follow=['category'])
 @python_2_unicode_compatible
-class JobOffer(TranslatableModel):
+class JobOpening(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('Title'), max_length=255),
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
@@ -279,7 +279,7 @@ class JobApplication(models.Model):
         (FEMALE, _('Mrs.')),
     )
 
-    job_offer = models.ForeignKey(JobOffer)
+    job_offer = models.ForeignKey(JobOpening)
     salutation = models.CharField(_('Salutation'),
         max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
     first_name = models.CharField(_('First name'), max_length=20)
@@ -437,7 +437,7 @@ class BaseJobsPlugin(CMSPlugin):
 @python_2_unicode_compatible
 class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
-    joboffers = SortedManyToManyField(JobOffer, blank=True, null=True,
+    joboffers = SortedManyToManyField(JobOpening, blank=True, null=True,
         help_text=_("Select Job Offers to show or don't select any to show "
                     "last job offers. Note that Job Offers form different "
                     "app config would be ignored."))
@@ -453,7 +453,7 @@ class JobListPlugin(BaseJobsPlugin):
             return self.joboffers.all()
 
         return (
-            JobOffer.objects.filter(category__app_config=self.app_config)
+            JobOpening.objects.filter(category__app_config=self.app_config)
                             .language(self.language)
                             .translated(self.language)
                             .active()

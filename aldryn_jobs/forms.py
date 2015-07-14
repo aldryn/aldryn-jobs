@@ -28,7 +28,7 @@ from unidecode import unidecode
 
 
 from .models import (
-    JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
+    JobApplication, JobApplicationAttachment, JobCategory, JobOpening,
     NewsletterSignup, JobsConfig, JobListPlugin,
     JobNewsletterRegistrationPlugin, JobCategoriesPlugin)
 from .utils import namespace_is_apphooked
@@ -130,7 +130,7 @@ class JobOfferAdminForm(AutoSlugForm):
     slugified_field = 'title'
 
     class Meta:
-        model = JobOffer
+        model = JobOpening
         fields = [
             'title',
             'slug',

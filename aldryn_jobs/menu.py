@@ -11,7 +11,7 @@ from menus.base import NavigationNode
 from menus.menu_pool import menu_pool
 
 from .models import JobCategory
-from .models import JobOffer
+from .models import JobOpening
 
 
 class JobCategoryMenu(CMSAttachMenu):
@@ -55,7 +55,7 @@ class JobOfferMenu(CMSAttachMenu):
         current_language = get_language_from_request(request)
         nodes = []
         offers = (
-            JobOffer.objects
+            JobOpening.objects
                     .active()
                     .filter(category__app_config__namespace=app_namespace)
                     .language(current_language)
