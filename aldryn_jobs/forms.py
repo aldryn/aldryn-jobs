@@ -151,8 +151,15 @@ class JobOpeningAdminForm(AutoSlugForm):
         # small monkey patch to show better label for categories
         def label_from_instance(category_object):
             return "{0} / {1}".format(
-                category_object.category.app_config, category_object)
-        self.fields['category'].label_from_instance = label_from_instance
+                category_object.app_config,
+                category_object
+            )
+        try:
+            self.fields['category'].label_from_instance = label_from_instance
+        except KeyError:
+            # When the form is invoked by the render_model template tag with a
+            # list of explicitly set fields, category might not be present.
+            pass
 
 
 class JobApplicationForm(forms.ModelForm):
