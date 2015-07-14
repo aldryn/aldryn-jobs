@@ -7,10 +7,10 @@ from django.template import RequestContext
 
 from aldryn_search.utils import get_index_base, strip_tags
 
-from .models import JobOffer
+from .models import JobOpening
 
 
-class JobOffersIndex(get_index_base()):
+class JobOpeningsIndex(get_index_base()):
     haystack_use_for_indexing = getattr(settings, "ALDRYN_JOBS_SEARCH", True)
 
     INDEX_TITLE = True
@@ -28,7 +28,7 @@ class JobOffersIndex(get_index_base()):
         return self.get_model().objects.active()
 
     def get_model(self):
-        return JobOffer
+        return JobOpening
 
     def get_search_data(self, obj, language, request):
         text_bits = [strip_tags(obj.lead_in)]

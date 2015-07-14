@@ -51,7 +51,7 @@ CLASSIFIERS = [
 setup(
     name='aldryn-jobs',
     version=__version__,
-    description='Publish job offers on your site',
+    description='Publish job openings on your site',
     author='Divio AG',
     author_email='info@divio.ch',
     url='https://github.com/aldryn/aldryn-jobs',

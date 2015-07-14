@@ -5,14 +5,14 @@ from __future__ import unicode_literals
 from django.conf.urls import patterns, url
 
 from .views import (
-    CategoryJobOfferList, JobOfferDetail, JobOfferList,
+    CategoryJobOpeningList, JobOpeningDetail, JobOpeningList,
     ConfirmNewsletterSignup, SuccessRegistrationMessage,
     RegisterJobNewsletter, UnsubscibeNewsletterSignup,
     ResendNewsletterConfirmation
 )
 
 # default view (root url) which is pointing to ^$ url
-DEFAULT_VIEW = 'job-offer-list'
+DEFAULT_VIEW = 'job-opening-list'
 
 urlpatterns = patterns(
     '',
@@ -37,14 +37,14 @@ urlpatterns = patterns(
         ResendNewsletterConfirmation.as_view(),
         name="resend_confirmation_link"),
 
-    url(r'^$', JobOfferList.as_view(),
-        name='job-offer-list'),
+    url(r'^$', JobOpeningList.as_view(),
+        name='job-opening-list'),
 
     url(r'^(?P<category_slug>\w[-_\w]*)/$',
-        CategoryJobOfferList.as_view(),
-        name='category-job-offer-list'),
+        CategoryJobOpeningList.as_view(),
+        name='category-job-opening-list'),
 
-    url(r'^(?P<category_slug>\w[-_\w]*)/(?P<job_offer_slug>\w[-_\w]*)/$',
-        JobOfferDetail.as_view(),
-        name='job-offer-detail'),
+    url(r'^(?P<category_slug>\w[-_\w]*)/(?P<job_opening_slug>\w[-_\w]*)/$',
+        JobOpeningDetail.as_view(),
+        name='job-opening-detail'),
 )
