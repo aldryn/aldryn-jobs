@@ -7,8 +7,8 @@
         {% endif %}
     {% else %}
         <ul class="jobs-latest-entries">
-        {% for job in instance.job_openings %}
-            <li><p><a href="{{ job.get_absolute_url }}">{{ job }}</a></p></li>
+        {% for vacancy in vacancies %}
+            <li><p><a href="{{ vacancy.get_absolute_url }}">{{ vacancy }}</a></p></li>
         {% empty %}
             <li class="jobs-empty"><p>{% trans "There are currently no job openings." %}</p></li>
         {% endfor %}
