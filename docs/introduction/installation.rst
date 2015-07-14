@@ -36,8 +36,8 @@ In your project's ``settings.py`` make sure you have all of::
     'aldryn_jobs',
     'emailit',
     'parler',
-    'standard_form',
     'sortedm2m',
+    'standard_form',
 
 listed in ``INSTALLED_APPS``, *after* ``'cms'``.
 
@@ -45,7 +45,35 @@ listed in ``INSTALLED_APPS``, *after* ``'cms'``.
    If you are using Django 1.6, add ``south`` to  ``INSTALLED_APPS``.
 
 
-Now set the name of the boilerplate you want to use in your project::
+Aldryn Boilerplates
+===================
+
+This application uses (and will install) `Aldryn Boilerplates <https://github.com/aldryn/aldryn-boilerplates>`_,
+which requires some basic configuration to get you started. 
+
+Edit your settings so that they conform to::
+
+    TEMPLATE_CONTEXT_PROCESSORS = [
+        ...
+        'aldryn_boilerplates.context_processors.boilerplate',
+        ...
+    ]
+
+    STATICFILES_FINDERS = [
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        # important - place immediately before AppDirectoriesFinder
+        'aldryn_boilerplates.staticfile_finders.AppDirectoriesFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    ]
+
+    TEMPLATE_LOADERS = [
+        'django.template.loaders.filesystem.Loader',
+        # important! place right before django.template.loaders.app_directories.Loader
+        'aldryn_boilerplates.template_loaders.AppDirectoriesLoader',
+        'django.template.loaders.app_directories.Loader',
+    ]
+
+Now set the name of the boilerplate you'll use in your project::
 
     ALDRYN_BOILERPLATE_NAME = 'bootstrap3'
 
@@ -56,7 +84,7 @@ Now set the name of the boilerplate you want to use in your project::
    multiple different frontend schemes ('Boilerplates')and switch between them without the need for
    project-by-project file overwriting.
 
-   Aldryn Jobs's templates and staticfiles will be found in named directories inside the
+   Aldryn Jobs's templates and staticfiles will be found in named directories in the
    ``/boilerplates`` directory.
 
 
@@ -64,8 +92,8 @@ Now set the name of the boilerplate you want to use in your project::
 Prepare the database and run
 ****************************
 
-Now run ``python manage.py migrate`` to prepare the database for the new application, then
-``python manage.py runserver``.
+Now run ``python manage.py migrate`` to prepare the database for the new
+application, then ``python manage.py runserver``.
 
 
 ****************

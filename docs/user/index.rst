@@ -12,13 +12,14 @@ Using Aldryn Jobs
 Add a job opening
 *****************
 
-Visit the Jobs page. You should see that the django CMS toolbar now contains a new item, *Jobs*. Select *Add Job Openings...* from this menu.
+Visit the Jobs page. You should see that the django CMS toolbar now contains a new item, *Jobs*. Select *Add Job Opening...* from this menu.
 
 Provide some basic details, such as:
 
 * the ``Lead in`` is a brief summary of the opening, that will be used in lists of openings, such
   as on a jobs landing page
 * a ``Category``
+  will need to create a ``Category`` too)
 
 and **Save** it.
 
@@ -44,6 +45,6 @@ List
 Choose the job openings you wish to have displayed.
 
 Categories list
-=======================
+===============
 
-A list of job categories.
+Displays a list of categories of job openings.

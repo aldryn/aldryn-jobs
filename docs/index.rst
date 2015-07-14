@@ -15,5 +15,4 @@ Aldryn Jobs is `open-source software <https://github.com/aldryn/aldryn-jobs>`_.
    :maxdepth: 2
 
    introduction/index
-   reference/index
    user/index
