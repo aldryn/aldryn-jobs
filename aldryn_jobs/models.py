@@ -38,7 +38,7 @@ from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
 from .cms_appconfig import JobsConfig
-from .managers import NewsletterSignupManager, JobOpeningsManager
+from .managers import JobOpeningsManager
 from .utils import get_valid_filename
 
 strict_version = StrictVersion(get_version())
@@ -315,116 +315,6 @@ class JobApplicationAttachment(models.Model):
     file = JobApplicationFileField()
 
 
-@version_controlled_content
-@python_2_unicode_compatible
-class NewsletterSignup(models.Model):
-    recipient = models.EmailField(_('recipient'), unique=True)
-    default_language = models.CharField(_('language'), blank=True,
-        default='', max_length=32, choices=settings.LANGUAGES)
-    signup_date = models.DateTimeField(auto_now_add=True)
-    is_verified = models.BooleanField(default=False)
-    is_disabled = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=40, unique=True)
-
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True)
-
-    objects = NewsletterSignupManager()
-
-    def get_absolute_url(self):
-        kwargs = {'key': self.confirmation_key}
-        with force_language(self.default_language):
-            try:
-                url = reverse(
-                    '{0}:confirm_newsletter_email'.format(
-                        self.app_config.namespace),
-                    kwargs=kwargs
-                )
-            except NoReverseMatch:
-                try:
-                    url = reverse(
-                        '{0}:confirm_newsletter_not_found'.format(
-                            self.app_config.namespace))
-                except NoReverseMatch:
-                    raise Http404()
-        return url
-
-    def reset_confirmation(self):
-        """ Reset the confirmation key.
-
-        Note that the old key won't work anymore
-        """
-        update_fields = ['confirmation_key', ]
-        self.confirmation_key = NewsletterSignup.objects.generate_random_key()
-        # check if user was in the mailing list but then disabled newsletter
-        # and now wants to get it again
-        if self.is_verified and self.is_disabled:
-            self.is_disabled = False
-            self.is_verified = False
-            update_fields.extend(['is_disabled', 'is_verified'])
-        self.save(update_fields=update_fields)
-        self.send_newsletter_confirmation_email()
-
-    def send_newsletter_confirmation_email(self, request=None):
-        context = {
-            'data': self,
-            'full_name': None,
-        }
-        # check if we have a user somewhere
-        user = None
-        if hasattr(self, 'user'):
-            user = self.user
-        elif request is not None and request.user.is_authenticated():
-            user = request.user
-        elif self.related_user.filter(signup__pk=self.pk):
-            user = self.related_user.filter(signup__pk=self.pk).get()
-
-        if user:
-            context['full_name'] = user.get_full_name()
-
-        # get site domain
-        full_link = '{0}{1}'.format(
-            get_current_site(request).domain,
-            self.get_absolute_url()
-        )
-        context['link'] = self.get_absolute_url()
-        context['full_link'] = full_link
-        # build url
-        send_mail(recipients=[self.recipient],
-                  context=context,
-                  language=self.default_language,
-                  template_base='aldryn_jobs/emails/newsletter_confirmation')
-
-    def confirm(self):
-        """
-        Confirms NewsletterSignup, excepts that is_verified is checked before
-        calling this method.
-        """
-        self.is_verified = True
-        self.save(update_fields=['is_verified', ])
-
-    def disable(self):
-        self.is_disabled = True
-        self.save(update_fields=['is_disabled', ])
-
-    def __str__(self):
-        return '{0} / {1}'.format(self.recipient, self.app_config)
-
-
-@version_controlled_content(follow=['signup', 'user'])
-@python_2_unicode_compatible
-class NewsletterSignupUser(models.Model):
-    signup = models.ForeignKey(NewsletterSignup, related_name='related_user')
-    user = models.ForeignKey(get_user_model_for_fields(),
-        related_name='newsletter_signup')
-
-    def get_full_name(self):
-        return self.user.get_full_name()
-
-    def __str__(self):
-        return 'link to user {0}'.format(self.get_full_name())
-
-
 class BaseJobsPlugin(CMSPlugin):
     app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
         null=True, help_text=_(
@@ -481,15 +371,3 @@ class JobCategoriesPlugin(BaseJobsPlugin):
                        .annotate(count=models.Count('jobs'))
                        .order_by('ordering', '-count', 'translations__name')
         )
-
-
-class JobNewsletterRegistrationPlugin(BaseJobsPlugin):
-    mail_to_group = models.ManyToManyField(
-        Group, verbose_name=_('Notification to'),
-        blank=True,
-        help_text=_('If user successfuly completed registration.<br/>'
-            'Notification would be sent to users from selected groups<br/>'
-            'Leave blank to disable notifications.<br/>'))
-
-    def copy_relations(self, oldinstance):
-        self.mail_to_group = oldinstance.mail_to_group.all()

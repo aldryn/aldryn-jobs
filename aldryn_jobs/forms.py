@@ -29,8 +29,7 @@ from unidecode import unidecode
 
 from .models import (
     JobApplication, JobApplicationAttachment, JobCategory, JobOpening,
-    NewsletterSignup, JobsConfig, JobListPlugin,
-    JobNewsletterRegistrationPlugin, JobCategoriesPlugin)
+    JobsConfig, JobListPlugin, JobCategoriesPlugin)
 from .utils import namespace_is_apphooked
 
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(
@@ -236,55 +235,6 @@ class JobApplicationForm(forms.ModelForm):
                   template_base='aldryn_jobs/emails/notification', **kwargs)
 
 
-class NewsletterSignupForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        self.app_config = kwargs.pop('app_config')
-        super(NewsletterSignupForm, self).__init__(*args, **kwargs)
-
-    def clean(self):
-
-        obj_qs = NewsletterSignup.objects.filter(
-            recipient=self.data['recipient'],
-            app_config=self.app_config)
-        if obj_qs.count() > 0:
-            # TODO: Handle multiple objects! rasie or handle them properly
-            raise ValidationError(
-                _('aldryn-jobs',
-                  "This email is already registered."),
-                code='invalid')
-        return super(NewsletterSignupForm, self).clean()
-
-    class Meta:
-        model = NewsletterSignup
-        fields = ['recipient']
-        labels = {
-            'recipient': _('aldryn-jobs', 'Email'),
-        }
-
-
-class NewsletterConfirmationForm(forms.ModelForm):
-
-    class Meta:
-        model = NewsletterSignup
-        fields = ['confirmation_key']
-        widgets = {
-            'confirmation_key': forms.HiddenInput(),
-        }
-
-
-class NewsletterUnsubscriptionForm(NewsletterConfirmationForm):
-    # form is actually the same
-    # if it shouldn't be the same - please rewrite this form
-    pass
-
-
-class NewsletterResendConfirmationForm(NewsletterConfirmationForm):
-    # form is actually the same, but for confirming the resend action
-    # if it shouldn't be the same - please rewrite this form
-    pass
-
-
 class JobsConfigForm(AppDataForm):
     pass
 
@@ -377,11 +327,6 @@ class JobListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
                           if event.app_config.pk == app_config.pk]
         data['events'] = new_events
         return data
-
-
-class JobNewsletterRegistrationPluginForm(AppConfigPluginFormMixin,
-                                          forms.ModelForm):
-    model = JobNewsletterRegistrationPlugin
 
 
 class JobCategoriesListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):

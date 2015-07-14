@@ -1,1 +1,0 @@
-{% load i18n %}{% blocktrans context "aldryn-jobs" %}New subscription added to job newsletter mailing list.{% endblocktrans %}

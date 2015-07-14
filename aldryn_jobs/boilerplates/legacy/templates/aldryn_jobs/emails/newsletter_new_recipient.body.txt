@@ -1,7 +1,0 @@
-{% load i18n %}
-
-{% block content %}
-{% blocktrans context 'aldryn-jobs' %}
-New recipient "{{ new_recipient }}" is added to job newsletter mailing list.
-{% endblocktrans %}
-{% endblock %}

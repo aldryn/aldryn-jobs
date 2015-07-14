@@ -19,10 +19,7 @@ from parler.admin import TranslatableAdmin
 
 
 from .forms import JobCategoryAdminForm, JobOpeningAdminForm
-from .models import (
-    JobApplication, JobCategory, JobOpening,
-    JobsConfig, NewsletterSignup
-)
+from .models import JobApplication, JobCategory, JobOpening, JobsConfig
 
 
 def _send_rejection_email(modeladmin, request, queryset, lang_code='',
@@ -162,7 +159,6 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
     form = JobOpeningAdminForm
     list_display = ['__str__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
-    actions = ['send_newsletter_email']
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -185,39 +181,6 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
             fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
 
-    def send_newsletter_email(self, request, queryset):
-        """
-        Sends a newsletter to all active recipients.
-        """
-        # FIXME: this will use admin's domain instead of language specific
-        # if site has multiple domains for different languages
-        current_domain = get_current_site(request).domain
-
-        job_list = [job.pk for job in queryset]
-        sent_emails = NewsletterSignup.objects.send_job_notifiation(
-            job_list=job_list, current_domain=current_domain)
-
-        jobs_sent = len(job_list)
-        if jobs_sent == 1:
-            message_bit = _("1 job was")
-        else:
-            message_bit = _('{0} jobs were').format(jobs_sent)
-        if sent_emails > 0:
-            self.message_user(request,
-                _("{0} successfully sent in the newsletter.").format(
-                    message_bit))
-        else:
-            self.message_user(request,
-                _('Seems there was some error. Please contact administrator'))
-    send_newsletter_email.short_description = _("Send Job Newsletter")
-
-
-class JobNewsletterSignupAdmin(VersionedPlaceholderAdminMixin,
-                               admin.ModelAdmin):
-    list_display = ['recipient', 'default_language', 'signup_date',
-                    'is_verified', 'is_disabled']
-    order_by = ['recipient']
-
 
 class JobsConfigAdmin(BaseAppHookConfig):
     pass
@@ -227,4 +190,3 @@ admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
 admin.site.register(JobOpening, JobOpeningAdmin)
 admin.site.register(JobsConfig, JobsConfigAdmin)
-admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)
