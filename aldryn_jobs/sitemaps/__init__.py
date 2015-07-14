@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from sitemap import JobOfferSitemap, JobOfferCategoriesSitemap  # NOQA
+from sitemap import JobOpeningSitemap, JobOpeningCategoriesSitemap  # NOQA

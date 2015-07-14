@@ -7,13 +7,13 @@
         {% endif %}
     {% else %}
         <p class="alert alert-info">
-            {% blocktrans with total=instance.job_offers.count %}
-                Showing {{ total }} Job Offers
+            {% blocktrans with total=instance.job_openings.count %}
+                Showing {{ total }} Job Openings
             {% endblocktrans %}
         </p>
 
         <div class="list-group">
-            {% for job in instance.job_offers %}
+            {% for job in instance.job_openings %}
                 <a href="{{ job.get_absolute_url }}" class="list-group-item">
                     {{ job }}
                     {% if job.start %}

@@ -38,7 +38,7 @@ from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
 from .cms_appconfig import JobsConfig
-from .managers import NewsletterSignupManager, JobOffersManager
+from .managers import NewsletterSignupManager, JobOpeningsManager
 from .utils import get_valid_filename
 
 strict_version = StrictVersion(get_version())
@@ -150,7 +150,7 @@ class JobCategory(TranslatableModel):
     supervisors = models.ManyToManyField(
         get_user_model_for_fields(), verbose_name=_('Supervisors'),
         # FIXME: This is mis-named should be "job_categories"?
-        related_name='job_offer_categories',
+        related_name='job_opening_categories',
         help_text=_('Those people will be notified via e-mail when new '
                     'application arrives.'),
         blank=True
@@ -180,10 +180,10 @@ class JobCategory(TranslatableModel):
         with force_language(language):
             try:
                 if not slug:
-                    return reverse('{0}:job-offer-list'.format(namespace))
+                    return reverse('{0}:job-opening-list'.format(namespace))
                 kwargs = {'category_slug': slug}
                 return reverse(
-                    '{0}:category-job-offer-list'.format(namespace),
+                    '{0}:category-job-opening-list'.format(namespace),
                     kwargs=kwargs,
                     current_app=self.app_config.namespace
                 )
@@ -207,7 +207,7 @@ class JobOpening(TranslatableModel):
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
-    content = PlaceholderField('Job Offer Content')
+    content = PlaceholderField('Job Ppening Content')
     category = models.ForeignKey(JobCategory, verbose_name=_('Category'),
         related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
@@ -219,11 +219,11 @@ class JobOpening(TranslatableModel):
     can_apply = models.BooleanField(_('Viewer can apply for the job'),
         default=True)
 
-    objects = JobOffersManager()
+    objects = JobOpeningsManager()
 
     class Meta:
-        verbose_name = _('Job offer')
-        verbose_name_plural = _('Job offers')
+        verbose_name = _('Job opening')
+        verbose_name_plural = _('Job openings')
         ordering = ['category__ordering', 'category', '-created']
 
     def __str__(self):
@@ -244,10 +244,10 @@ class JobOpening(TranslatableModel):
                     return self.category.get_absolute_url(language=language)
                 kwargs = {
                     'category_slug': category_slug,
-                    'job_offer_slug': slug,
+                    'job_opening_slug': slug,
                 }
                 return reverse(
-                    '{0}:job-offer-detail'.format(namespace),
+                    '{0}:job-opening-detail'.format(namespace),
                     kwargs=kwargs,
                     current_app=self.category.app_config.namespace
                 )
@@ -267,7 +267,7 @@ class JobOpening(TranslatableModel):
         return self.category.get_notification_emails()
 
 
-@version_controlled_content(follow=['job_offer'])
+@version_controlled_content(follow=['job_opening'])
 @python_2_unicode_compatible
 class JobApplication(models.Model):
     # FIXME: Gender is not the same as salutation.
@@ -279,7 +279,7 @@ class JobApplication(models.Model):
         (FEMALE, _('Mrs.')),
     )
 
-    job_offer = models.ForeignKey(JobOpening)
+    job_opening = models.ForeignKey(JobOpening)
     salutation = models.CharField(_('Salutation'),
         max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
     first_name = models.CharField(_('First name'), max_length=20)
@@ -437,20 +437,20 @@ class BaseJobsPlugin(CMSPlugin):
 @python_2_unicode_compatible
 class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
-    joboffers = SortedManyToManyField(JobOpening, blank=True, null=True,
-        help_text=_("Select Job Offers to show or don't select any to show "
-                    "last job offers. Note that Job Offers form different "
+    jobopenings = SortedManyToManyField(JobOpening, blank=True, null=True,
+        help_text=_("Select Job Openings to show or don't select any to show "
+                    "last job openings. Note that Job Openings form different "
                     "app config would be ignored."))
 
-    def job_offers(self):
+    def job_openings(self):
         """
-        Return the selected JobOffer for JobListPlugin.
+        Return the selected JobOpening for JobListPlugin.
 
-        If no JobOffer are selected, return all active events for namespace
+        If no JobOpening are selected, return all active events for namespace
         and language.
         """
-        if self.joboffers.exists():
-            return self.joboffers.all()
+        if self.jobopenings.exists():
+            return self.jobopenings.all()
 
         return (
             JobOpening.objects.filter(category__app_config=self.app_config)
@@ -463,7 +463,7 @@ class JobListPlugin(BaseJobsPlugin):
         return force_text(self.pk)
 
     def copy_relations(self, oldinstance):
-        self.joboffers = oldinstance.joboffers.all()
+        self.jobopenings = oldinstance.jobopenings.all()
 
 
 class JobCategoriesPlugin(BaseJobsPlugin):

@@ -14,7 +14,7 @@ from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
 
-def get_joboffer_from_path(path, language, current_url=None):
+def get_jobopening_from_path(path, language, current_url=None):
     # There is an issue with resolve(path) which is related to django cache
     # (django functools memoize) which uses usual dict and cannot be disabled
     # that leads to a Resolver404 because that cache contains wrong language
@@ -31,24 +31,24 @@ def get_joboffer_from_path(path, language, current_url=None):
                 "Could not resolve path to obtain current url for"
                 " populating cms menu")
 
-    if current_url.url_name == 'job-offer-detail':
-        job_offer = JobOpening.objects.language(language)
+    if current_url.url_name == 'job-opening-detail':
+        job_opening = JobOpening.objects.language(language)
 
         if 'category_slug' in current_url.kwargs:
             category_slug = current_url.kwargs['category_slug']
-            job_offer = job_offer.filter(
+            job_opening = job_opening.filter(
                 category__translations__slug=category_slug,
                 category__translations__language_code=language
             )
 
-        if 'job_offer_slug' in current_url.kwargs:
-            job_slug = current_url.kwargs['job_offer_slug']
+        if 'job_opening_slug' in current_url.kwargs:
+            job_slug = current_url.kwargs['job_opening_slug']
             # FIXME: is there is a reason for explicit language 'en'?
-            job_offer = job_offer.translated('en', slug=job_slug)
+            job_opening = job_opening.translated('en', slug=job_slug)
 
-        if job_offer.count():
+        if job_opening.count():
             # Let MultipleObjectsReturned propagate if it is raised
-            return job_offer.get()
+            return job_opening.get()
 
     return None
 
@@ -68,29 +68,29 @@ class JobsToolbar(CMSToolbar):
                     return False
             return True
 
-        if self.is_current_app and (can(['add', 'change'], 'joboffer') or
+        if self.is_current_app and (can(['add', 'change'], 'jobopening') or
                                     can(['add', 'change'], 'jobsconfig')):
             menu = self.toolbar.get_or_create_menu('jobs-app', _('Jobs'))
-            if can(['add', 'change'], 'joboffer'):
+            if can(['add', 'change'], 'jobopening'):
                 menu.add_modal_item(
-                    _('Add Job Offer'),
-                    reverse('admin:aldryn_jobs_joboffer_add')
+                    _('Add Job Opening'),
+                    reverse('admin:aldryn_jobs_jobopening_add')
                 )
                 language = get_language_from_request(
                     self.request, check_path=True
                 )
                 # try to reuse resolver_match instead of doing double work with
-                # cache issues, see comments inside of get_joboffer_from_path
+                # cache issues, see comments inside of get_jobopening_from_path
                 current_url = getattr(self.request, 'resolver_match', None)
-                job_offer = get_joboffer_from_path(
+                job_opening = get_jobopening_from_path(
                     self.request.path, language, current_url=current_url
                 )
-                if job_offer:
+                if job_opening:
                     url = reverse(
-                        'admin:aldryn_jobs_joboffer_change',
-                        args=(job_offer.pk,)
+                        'admin:aldryn_jobs_jobopening_change',
+                        args=(job_opening.pk,)
                     )
-                    menu.add_modal_item(_('Edit Job Offer'), url, active=True)
+                    menu.add_modal_item(_('Edit Job Opening'), url, active=True)
 
             if can(['add', 'change'], 'jobsconfig'):
                 url = reverse('admin:aldryn_jobs_jobsconfig_changelist')

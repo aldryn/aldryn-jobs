@@ -18,7 +18,7 @@ Aldryn Jobs
    :alt: Requirements Status
 
 Aldryn Jobs is an Aldryn-compatible django CMS application for publishing
-vacancies and rceiving application.
+job openings and receiving applications.
 
 Please see the `Aldryn Jobs documentation <http://aldryn-jobs.readthedocs.org>`_,
 which includes information on installation and getting started.

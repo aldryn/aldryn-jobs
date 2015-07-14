@@ -41,9 +41,9 @@ class JobCategoryMenu(CMSAttachMenu):
         return nodes
 
 
-class JobOfferMenu(CMSAttachMenu):
+class JobOpeningMenu(CMSAttachMenu):
 
-    name = _("Job Offers Menu")
+    name = _("Job Openings Menu")
 
     def get_nodes(self, request):
 
@@ -54,19 +54,19 @@ class JobOfferMenu(CMSAttachMenu):
 
         current_language = get_language_from_request(request)
         nodes = []
-        offers = (
+        openings = (
             JobOpening.objects
                     .active()
                     .filter(category__app_config__namespace=app_namespace)
                     .language(current_language)
                     .translated(current_language)
         )
-        for job_offer in offers:
+        for job_opening in openings:
             try:
                 node = NavigationNode(
-                    title=job_offer.title,
-                    url=job_offer.get_absolute_url(),
-                    id=job_offer.pk,
+                    title=job_opening.title,
+                    url=job_opening.get_absolute_url(),
+                    id=job_opening.pk,
                 )
             except NoReverseMatch:
                 pass
@@ -76,4 +76,4 @@ class JobOfferMenu(CMSAttachMenu):
 
 
 menu_pool.register_menu(JobCategoryMenu)
-menu_pool.register_menu(JobOfferMenu)
+menu_pool.register_menu(JobOpeningMenu)

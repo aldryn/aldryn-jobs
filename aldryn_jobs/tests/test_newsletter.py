@@ -402,7 +402,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
     def test_send_newsletter_uses_app_config(self):
         # newsletter should distinguish between apphooks, and
         # should not send newsletter to recipients if they have
-        # different app_config then job offer.
+        # different app_config then job opening.
 
         # setup another apphooked page, since reload takes some time
         # we will setup apphook on the beginning of a test case
@@ -426,20 +426,20 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
             app_config=new_config,
             confirmation_key=NewsletterSignup.objects.generate_random_key())
 
-        offer_default = self.create_default_job_offer(translated=True)
+        opening_default = self.create_default_job_opening(translated=True)
         with override('en'):
             category_new_config = JobCategory.objects.create(
                 app_config=new_config,
                 **self.make_new_values(self.category_values_raw['en'], 1)
             )
-            offer_new_config = JobOpening.objects.create(
+            opening_new_config = JobOpening.objects.create(
                 category=category_new_config,
-                **self.make_new_values(self.offer_values_raw['en'], 1)
+                **self.make_new_values(self.opening_values_raw['en'], 1)
             )
 
         # send newsletter
         NewsletterSignup.objects.send_job_notifiation(
-            job_list=[job.pk for job in (offer_default, offer_new_config)])
+            job_list=[job.pk for job in (opening_default, opening_new_config)])
 
         self.assertEqual(len(mail.outbox), 2)
         email0 = mail.outbox[0]
@@ -454,7 +454,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                     signup_default_namespace.app_config.namespace),
                 kwargs={'key': signup_default_namespace.confirmation_key}
             )
-            offer_link_default_namespace = offer_default.get_absolute_url()
+            opening_link_default_namespace = opening_default.get_absolute_url()
 
         with override(signup_new_namespace.default_language):
             unsubscribe_link_new_namespace = reverse(
@@ -462,7 +462,7 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
                     signup_new_namespace.app_config.namespace),
                 kwargs={'key': signup_new_namespace.confirmation_key}
             )
-            offer_link_new_namespace = offer_new_config.get_absolute_url()
+            opening_link_new_namespace = opening_new_config.get_absolute_url()
 
         # test unsubscribe links are present in the email
         self.assertNotEqual(
@@ -470,16 +470,16 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
         self.assertNotEqual(
             email1.body.find(unsubscribe_link_new_namespace), -1)
 
-        # test job offer links are present in the emails
+        # test job opening links are present in the emails
         self.assertNotEqual(
-            email0.body.find(offer_link_default_namespace), -1)
+            email0.body.find(opening_link_default_namespace), -1)
         self.assertNotEqual(
-            email1.body.find(offer_link_new_namespace), -1)
+            email1.body.find(opening_link_new_namespace), -1)
         # test that job links from different namespace are absent
         self.assertEqual(
-            email0.body.find(offer_link_new_namespace), -1)
+            email0.body.find(opening_link_new_namespace), -1)
         self.assertEqual(
-            email1.body.find(offer_link_default_namespace), -1)
+            email1.body.find(opening_link_default_namespace), -1)
 
     def test_disabled_users_do_not_get_newsletter(self):
         # setup another apphooked page, since reload takes some time
@@ -508,20 +508,20 @@ class TestNewsletterSignupViews(TestAppConfigPluginsMixin, JobsBaseTestCase):
             app_config=new_config,
             confirmation_key=NewsletterSignup.objects.generate_random_key())
 
-        # prepare job offer
-        offer_default = self.create_default_job_offer(translated=True)
+        # prepare job opening
+        opening_default = self.create_default_job_opening(translated=True)
         with override('en'):
             category_new_config = JobCategory.objects.create(
                 app_config=new_config,
                 **self.make_new_values(self.category_values_raw['en'], 1)
             )
-            offer_new_config = JobOpening.objects.create(
+            opening_new_config = JobOpening.objects.create(
                 category=category_new_config,
-                **self.make_new_values(self.offer_values_raw['en'], 1)
+                **self.make_new_values(self.opening_values_raw['en'], 1)
             )
 
         # send newsletter
         NewsletterSignup.objects.send_job_notifiation(
-            job_list=[job.pk for job in (offer_default, offer_new_config)])
+            job_list=[job.pk for job in (opening_default, opening_new_config)])
 
         self.assertEqual(len(mail.outbox), 0)

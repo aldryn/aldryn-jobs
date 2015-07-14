@@ -14,7 +14,7 @@ from emailit.api import send_mail
 from parler.managers import TranslatableManager, TranslatableQuerySet
 
 
-class JobOffersQuerySet(TranslatableQuerySet):
+class JobOpeningsQuerySet(TranslatableQuerySet):
     def active(self):
         now = timezone.now()
         return self.filter(
@@ -24,9 +24,9 @@ class JobOffersQuerySet(TranslatableQuerySet):
         )
 
 
-class JobOffersManager(TranslatableManager):
+class JobOpeningsManager(TranslatableManager):
     def get_queryset(self):
-        return JobOffersQuerySet(self.model, using=self.db)
+        return JobOpeningsQuerySet(self.model, using=self.db)
 
     get_query_set = get_queryset
 
@@ -55,7 +55,7 @@ class NewsletterSignupManager(models.Manager):
         regardless of recipients kwarg is provided or not. If recipients list
         provided (PKs only) NewsletterSignup records would be selected and
         filtered with respect to active recipients (confirmed and not disabled.
-        If job_list provided (PKs only) job Offers would be selected. Note that
+        If job_list provided (PKs only) job Openings would be selected. Note that
         job_list is always provided when this method is used through admin
         actions. Returns number of successfully sent emails.
         """
@@ -80,13 +80,13 @@ class NewsletterSignupManager(models.Manager):
 
         recipients_per_config = {}
         if not recipients:
-            # get recipients based on selected job offers app configs
+            # get recipients based on selected job openings app configs
             for config in job_configs:
                 # TODO: prefetch_related related_user can be added here
                 recipients_per_config[config] = self.active_recipients(
                     app_config=config)
         else:
-            # otherwise get recipients with respect to job offer app configs.
+            # otherwise get recipients with respect to job opening app configs.
             recipients_qs = NewsletterSignup.objects.active_recipients(
                 pk__in=recipients)
             for config in job_configs:
@@ -141,7 +141,7 @@ class NewsletterSignupManager(models.Manager):
                     recipients=[recipient_record.recipient],
                     context=context,
                     language=recipient_record.default_language,
-                    template_base='aldryn_jobs/emails/newsletter_job_offers')
+                    template_base='aldryn_jobs/emails/newsletter_job_openings')
 
                 if sent_successfully:
                     sent_emails += 1

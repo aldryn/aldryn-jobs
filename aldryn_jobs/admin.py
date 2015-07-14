@@ -18,7 +18,7 @@ from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
 
 
-from .forms import JobCategoryAdminForm, JobOfferAdminForm
+from .forms import JobCategoryAdminForm, JobOpeningAdminForm
 from .models import (
     JobApplication, JobCategory, JobOpening,
     JobsConfig, NewsletterSignup
@@ -80,15 +80,15 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
 
 
 class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
-    list_display = ['__str__', 'job_offer', 'created', 'is_rejected',
+    list_display = ['__str__', 'job_opening', 'created', 'is_rejected',
                     'rejection_date']
-    list_filter = ['job_offer', 'is_rejected']
+    list_filter = ['job_opening', 'is_rejected']
     readonly_fields = ['get_attachment_address']
-    raw_id_fields = ['job_offer']
+    raw_id_fields = ['job_opening']
 
     fieldsets = [
-        (_('Job Offer'), {
-            'fields': ['job_offer']
+        (_('Job Opening'), {
+            'fields': ['job_opening']
         }),
         (_('Personal information'), {
             'fields': ['salutation', 'first_name', 'last_name', 'email']
@@ -157,9 +157,9 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
         return fieldsets
 
 
-class JobOfferAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
+class JobOpeningAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
                     TranslatableAdmin):
-    form = JobOfferAdminForm
+    form = JobOpeningAdminForm
     list_display = ['__str__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')
     actions = ['send_newsletter_email']
@@ -225,6 +225,6 @@ class JobsConfigAdmin(BaseAppHookConfig):
 
 admin.site.register(JobApplication, JobApplicationAdmin)
 admin.site.register(JobCategory, JobCategoryAdmin)
-admin.site.register(JobOpening, JobOfferAdmin)
+admin.site.register(JobOpening, JobOpeningAdmin)
 admin.site.register(JobsConfig, JobsConfigAdmin)
 admin.site.register(NewsletterSignup, JobNewsletterSignupAdmin)
