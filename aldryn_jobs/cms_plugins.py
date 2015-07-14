@@ -64,7 +64,7 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
         else:
             vacancies = instance.job_openings(namespace)
         context['vacancies'] = vacancies
-        context['vacancies_count'] = vacancies.count()
+        context['vacancies_count'] = len(vacancies)
         return context
 
 
