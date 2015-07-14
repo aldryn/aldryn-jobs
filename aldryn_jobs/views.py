@@ -27,30 +27,30 @@ from .forms import (
     NewsletterUnsubscriptionForm, NewsletterResendConfirmationForm
 )
 from .models import (
-    JobCategory, JobOffer, NewsletterSignup,
+    JobCategory, JobOpening, NewsletterSignup,
     NewsletterSignupUser, JobsConfig,
 )
 
 
-class JobOfferList(AppConfigMixin, ListView):
+class JobOpeningList(AppConfigMixin, ListView):
     template_name = 'aldryn_jobs/jobs_list.html'
-    model = JobOffer
+    model = JobOpening
 
     def get_queryset(self):
         # have to be a method, so the language isn't cached
         language = get_language_from_request(self.request, check_path=True)
         return (
-            JobOffer.objects.active()
-                            .language(language)
-                            .translated(language)
-                            .select_related('category')
-                            .order_by('category__id')
+            JobOpening.objects.active()
+                              .language(language)
+                              .translated(language)
+                              .select_related('category')
+                              .order_by('category__id')
         )
 
 
-class CategoryJobOfferList(JobOfferList):
+class CategoryJobOpeningList(JobOpeningList):
     def get_queryset(self):
-        qs = super(CategoryJobOfferList, self).get_queryset()
+        qs = super(CategoryJobOpeningList, self).get_queryset()
         language = get_language_from_request(self.request, check_path=True)
 
         category_slug = self.kwargs['category_slug']
@@ -69,17 +69,17 @@ class CategoryJobOfferList(JobOfferList):
         set_language_changer(self.request, category.get_absolute_url)
 
 
-class JobOfferDetail(AppConfigMixin, DetailView):
+class JobOpeningDetail(AppConfigMixin, DetailView):
     form_class = JobApplicationForm
     template_name = 'aldryn_jobs/jobs_detail.html'
-    slug_url_kwarg = 'job_offer_slug'
+    slug_url_kwarg = 'job_opening_slug'
 
     def dispatch(self, request, *args, **kwargs):
         self.request = request
         self.namespace, self.config = get_app_instance(request)
         self.object = self.get_object()
         self.set_language_changer(self.object)
-        return super(JobOfferDetail, self).dispatch(request, *args, **kwargs)
+        return super(JobOpeningDetail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         if queryset is None:
@@ -93,16 +93,16 @@ class JobOfferDetail(AppConfigMixin, DetailView):
                     .translated(language, **{slug_field: slug})
         )
 
-        job_offer = None
+        job_opening = None
         try:
-            job_offer = queryset.get()
-        except JobOffer.DoesNotExist:
+            job_opening = queryset.get()
+        except JobOpening.DoesNotExist:
             pass
         finally:
-            if (not job_offer or (not job_offer.get_active() and
+            if (not job_opening or (not job_opening.get_active() and
                                   not self.request.user.is_staff)):
-                raise Http404(_("Offer is not longer valid."))
-        return job_offer
+                raise Http404(_("Opening is no longer valid."))
+        return job_opening
 
     def get_form_class(self):
         return self.form_class
@@ -111,7 +111,7 @@ class JobOfferDetail(AppConfigMixin, DetailView):
         """
         Returns the keyword arguments for instantiating the form.
         """
-        kwargs = {'job_offer': self.object}
+        kwargs = {'job_opening': self.object}
 
         if self.request.method in ('POST', 'PUT'):
             kwargs.update({
@@ -129,18 +129,18 @@ class JobOfferDetail(AppConfigMixin, DetailView):
     def get_queryset(self):
         # not active as well, see `get_object` for more detail
         language = get_language_from_request(self.request, check_path=True)
-        return JobOffer.objects.language(language).translated(
+        return JobOpening.objects.language(language).translated(
             language
         ).select_related('category')
 
-    def set_language_changer(self, job_offer):
+    def set_language_changer(self, job_opening):
         """Translate the slug while changing the language."""
-        set_language_changer(self.request, job_offer.get_absolute_url)
+        set_language_changer(self.request, job_opening.get_absolute_url)
 
     def get(self, *args, **kwargs):
         form_class = self.get_form_class()
         self.form = self.get_form(form_class)
-        return super(JobOfferDetail, self).get(*args, **kwargs)
+        return super(JobOpeningDetail, self).get(*args, **kwargs)
 
     def post(self, *args, **kwargs):
         """Handles application for the job."""
@@ -160,10 +160,10 @@ class JobOfferDetail(AppConfigMixin, DetailView):
             messages.success(self.request, msg)
             return redirect(self.object.get_absolute_url())
         else:
-            return super(JobOfferDetail, self).get(*args, **kwargs)
+            return super(JobOpeningDetail, self).get(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(JobOfferDetail, self).get_context_data(**kwargs)
+        context = super(JobOpeningDetail, self).get_context_data(**kwargs)
         context['form'] = self.form
         return context
 
@@ -424,7 +424,7 @@ class RegisterJobNewsletter(CreateView):
         # TODO: add GET requests registration functionality
         # don't serve get requests, only plugin registration so far
         return HttpResponsePermanentRedirect(
-            reverse('{0}:job-offer-list'.format(self.app_config.namespace)))
+            reverse('{0}:job-opening-list'.format(self.app_config.namespace)))
 
     def get_invalid_template_name(self):
         return 'aldryn_jobs/newsletter/invalid_email.html'

@@ -3,12 +3,12 @@
 {% regroup object_list by category.id as categories %}
 <ul class="jobs-items">
 	{% for category in categories %}
-	{% for job_offer in category.list %}
+	{% for job_opening in category.list %}
 	<li>
-		<p class="jobs-category"><a href="{{ category.grouper.get_absolute_url }}">{{ job_offer.category.name }}</a></p>
-		<h3 class="jobs-title"><a href="{{ job_offer.get_absolute_url }}">{% render_model job_offer "title" %}</a></h3>
-		<div class="jobs-lead">{% render_model job_offer "lead_in" "lead_in" safe %}</div>
-		<p class="jobs-more"><a href="{{ job_offer.get_absolute_url }}">{% trans "read more" %}</a></p>
+		<p class="jobs-category"><a href="{{ category.grouper.get_absolute_url }}">{{ job_opening.category.name }}</a></p>
+		<h3 class="jobs-title"><a href="{{ job_opening.get_absolute_url }}">{% render_model job_opening "title" %}</a></h3>
+		<div class="jobs-lead">{% render_model job_opening "lead_in" "lead_in" safe %}</div>
+		<p class="jobs-more"><a href="{{ job_opening.get_absolute_url }}">{% trans "read more" %}</a></p>
 	</li>
 	{% endfor %}
 	{% empty %}

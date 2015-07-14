@@ -28,7 +28,7 @@ from unidecode import unidecode
 
 
 from .models import (
-    JobApplication, JobApplicationAttachment, JobCategory, JobOffer,
+    JobApplication, JobApplicationAttachment, JobCategory, JobOpening,
     NewsletterSignup, JobsConfig, JobListPlugin,
     JobNewsletterRegistrationPlugin, JobCategoriesPlugin)
 from .utils import namespace_is_apphooked
@@ -125,12 +125,12 @@ class JobCategoryAdminForm(AutoSlugForm):
         fields = ['name', 'slug', 'supervisors', 'app_config']
 
 
-class JobOfferAdminForm(AutoSlugForm):
+class JobOpeningAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
 
     class Meta:
-        model = JobOffer
+        model = JobOpening
         fields = [
             'title',
             'slug',
@@ -146,12 +146,12 @@ class JobOfferAdminForm(AutoSlugForm):
             fields.append('content')
 
     def __init__(self, *args, **kwargs):
-        super(JobOfferAdminForm, self).__init__(*args, **kwargs)
+        super(JobOpeningAdminForm, self).__init__(*args, **kwargs)
 
         # small monkey patch to show better label for categories
         def label_from_instance(category_object):
             return "{0} / {1}".format(
-                category_object.app_config, category_object)
+                category_object.category.app_config, category_object)
         self.fields['category'].label_from_instance = label_from_instance
 
 
@@ -165,7 +165,7 @@ class JobApplicationForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.job_offer = kwargs.pop('job_offer')
+        self.job_opening = kwargs.pop('job_opening')
         if not hasattr(self, 'request') and kwargs.get('request') is not None:
             self.request = kwargs.pop('request')
         super(JobApplicationForm, self).__init__(*args, **kwargs)
@@ -182,7 +182,7 @@ class JobApplicationForm(forms.ModelForm):
 
     def save(self, commit=True):
         super(JobApplicationForm, self).save(commit=False)
-        self.instance.job_offer = self.job_offer
+        self.instance.job_opening = self.job_opening
 
         if commit:
             self.instance.save()
@@ -204,7 +204,7 @@ class JobApplicationForm(forms.ModelForm):
                   template_base='aldryn_jobs/emails/confirmation')
 
     def send_staff_notifications(self):
-        recipients = self.instance.job_offer.get_notification_emails()
+        recipients = self.instance.job_opening.get_notification_emails()
         if DEFAULT_SEND_TO:
             recipients += [DEFAULT_SEND_TO]
         admin_change_form = reverse(
@@ -347,10 +347,10 @@ class AppConfigPluginFormMixin(object):
     def clean_app_config(self):
         # since namespace is not a unique thing we need to validate it
         # additionally because it is possible that there is a page with same
-        # namespace as a jobs config but which is using other app_config,
-        # which also would lead to same 500 error. The easiest way is to try
-        # to reverse, in case of success that would mean that the app_config
-        # is correct and can be used.
+        # namespace as a jobs config but which is using other app_config, which
+        # also would lead to same 500 error. The easiest way is to try to
+        # reverse, in case of success that would mean that the app_config is
+        # correct and can be used.
         namespace = self.cleaned_data['app_config'].namespace
         if not namespace_is_apphooked(namespace):
             raise ValidationError(
@@ -368,7 +368,7 @@ class JobListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
     def clean(self):
         data = super(JobListPluginForm, self).clean()
         # save only events for selected app_config
-        selected_events = data.get('joboffers', [])
+        selected_events = data.get('jobopenings', [])
         app_config = data.get('app_config')
         if app_config is None:
             new_events = []

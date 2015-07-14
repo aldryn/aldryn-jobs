@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n cms_tags %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-17">
+                {% render_placeholder view.config.placeholder_jobs_top %}
+                <div class="aldryn aldryn-jobs">
+                    {% block jobs_title %}{% endblock %}
+                    {% block jobs_content %}{% endblock %}
+                    {% block jobs_footer %}{% endblock %}
+                </div>
+            </div>
+            <div class="col-md-7 aldryn-jobs aldryn-jobs-sidebar">
+                {% block jobs_sidebar %}{% endblock %}
+                {% render_placeholder view.config.placeholder_jobs_sidebar %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
