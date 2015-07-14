@@ -59,9 +59,10 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
     render_template = 'aldryn_jobs/plugins/latest_entries.html'
 
     def render(self, context, instance, placeholder):
+        context = super(JobList, self).render(context, instance, placeholder)
         namespace = (instance.app_config.namespace if instance.app_config
                      else '')
-        if namespace == '':
+        if namespace == '' or context.get('plugin_configuration_error', False):
             vacancies = JobOffer.objects.none()
         else:
             vacancies = instance.job_offers(namespace)

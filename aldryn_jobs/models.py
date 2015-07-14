@@ -450,7 +450,8 @@ class JobListPlugin(BaseJobsPlugin):
         and language.
         """
         if self.joboffers.exists():
-            return self.joboffers.namespace(namespace).active()
+            return self.joboffers.filter(
+                category__app_config__namespace=namespace).active()
 
         return (
             JobOffer.objects.filter(category__app_config=self.app_config)

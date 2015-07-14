@@ -1,6 +1,10 @@
+from copy import deepcopy
+
 from django.utils.translation import override
 from django.contrib.auth.models import Group
 from cms import api
+
+from ..models import JobOffer, JobCategory, JobsConfig
 
 from .base import JobsBaseTestCase
 
@@ -240,11 +244,11 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
 
     def setUp(self):
         super(TestJobListPlugin, self).setUp()
-        job_offer = self.create_default_job_offer(translated=True)
-        self.create_plugin(self.plugin_page, 'en', self.app_config,
-                           joboffers=job_offer)
-        self.create_plugin(self.plugin_page, 'de', self.app_config,
-                           joboffers=job_offer)
+        self.job_offer = self.create_default_job_offer(translated=True)
+        self.plugin_en = self.create_plugin(
+            self.plugin_page, 'en', self.app_config, joboffers=self.job_offer)
+        self.plugin_de = self.create_plugin(
+            self.plugin_page, 'de', self.app_config, joboffers=self.job_offer)
 
     def create_plugin(self, page, language, app_config, joboffers=None,
                       **plugin_params):
@@ -257,3 +261,84 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
                 joboffers)
             plugin.save()
         return plugin
+
+    def create_new_job_opening(self, data):
+        with override('en'):
+            job_opening = JobOffer.objects.create(**data)
+        return job_opening
+
+    def prepare_data(self, replace_with=1, category=None, update_date=False):
+        values = deepcopy(self.offer_values_raw['en'])
+        # if we need to change date to something in future
+        # we should do it before call to self.make_new_values
+        if update_date:
+            values.update(self.default_publication_start)
+        # make new values adds timedelta days=number which is passed as a
+        # second argument
+        values = self.make_new_values(values, replace_with)
+        # setup category
+        if category is None:
+            values['category'] = self.default_category
+        else:
+            values['category'] = category
+        # if date was not updated - use the default one
+        if not update_date:
+            values.update(self.default_publication_start)
+        return values
+
+    def test_list_plugin_shows_selected_items(self):
+        # since we setting up plugin in a setUp method with default
+        # job opening and default config, at this point it should
+        # contain all that we need.
+        with override('en'):
+            page_url = self.plugin_page.get_absolute_url()
+            default_opening_url = self.job_offer.get_absolute_url()
+        response = self.client.get(page_url)
+        self.assertContains(response, self.job_offer.title)
+        self.assertContains(response, default_opening_url)
+
+    def test_list_plugin_doesnt_shows_delayed_offers(self):
+        new_opening = self.create_new_job_opening(
+            self.prepare_data(1, update_date=True))
+        self.plugin_en.joblistplugin.joboffers.add(new_opening)
+        self.plugin_en.save()
+        self.plugin_page.publish('en')
+        with override('en'):
+            page_url = self.plugin_page.get_absolute_url()
+            opening_url = new_opening.get_absolute_url()
+            default_opening_url = self.job_offer.get_absolute_url()
+        response = self.client.get(page_url)
+        self.assertNotContains(response, new_opening.title)
+        self.assertNotContains(response, opening_url)
+
+        # test that default job opening is still present
+        self.assertContains(response, self.job_offer.title)
+        self.assertContains(response, default_opening_url)
+
+    def test_list_plugin_doesnt_shows_job_openings_from_other_config(self):
+        new_config = JobsConfig.objects.create(namespace='different_namespace')
+        # prepare apphook
+        self.create_page(
+            title='new apphook', slug='new-apphook',
+            namespace=new_config.namespace)
+        new_category = JobCategory.objects.create(
+            name='Completely different namespace',
+            slug='completely-different-namespace',
+            app_config=new_config)
+        new_opening = self.create_new_job_opening(
+            self.prepare_data(1, category=new_category))
+        self.plugin_en.joblistplugin.joboffers.add(new_opening)
+        self.plugin_en.app_config = new_config
+        self.plugin_en.save()
+        self.plugin_page.publish('en')
+        with override('en'):
+            page_url = self.plugin_page.get_absolute_url()
+            default_opening_url = self.job_offer.get_absolute_url()
+            new_opening_url = new_opening.get_absolute_url()
+        response = self.client.get(page_url)
+        # check that app config is repsected by plugin
+        self.assertContains(response, new_opening.title)
+        self.assertContains(response, new_opening_url)
+        # check that there is no openings from other config
+        self.assertNotContains(response, self.job_offer.title)
+        self.assertNotContains(response, default_opening_url)
