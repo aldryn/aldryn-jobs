@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from aldryn_apphooks_config.admin import BaseAppHookConfig
 from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
+from aldryn_translation_tools.admin import AllTranslationsMixin
 from cms import __version__ as cms_version
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
@@ -154,9 +155,10 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
 
 
 class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
-                      FrontendEditableAdminMixin, TranslatableAdmin):
+                      FrontendEditableAdminMixin,
+                      AllTranslationsMixin, TranslatableAdmin):
     form = JobOpeningAdminForm
-    list_display = ['__str__', 'language_column']
+    list_display = ['__str__', 'category', ]
     frontend_editable_fields = ('title', 'lead_in')
 
     def get_fieldsets(self, request, obj=None):
