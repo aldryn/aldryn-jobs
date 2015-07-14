@@ -207,7 +207,7 @@ class JobOpening(TranslatableModel):
         meta={'unique_together': [['slug', 'language_code']]}
     )
 
-    content = PlaceholderField('Job Ppening Content')
+    content = PlaceholderField('Job Opening Content')
     category = models.ForeignKey(JobCategory, verbose_name=_('Category'),
         related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
