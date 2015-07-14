@@ -34,6 +34,7 @@ In your project's ``settings.py`` make sure you have all of::
     'aldryn_reversion',
     'aldryn_categories',
     'aldryn_jobs',
+    'aldryn_translation_tools',
     'emailit',
     'parler',
     'sortedm2m',
