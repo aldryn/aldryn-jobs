@@ -153,8 +153,12 @@ class JobOpeningAdminForm(AutoSlugForm):
                 category_object.app_config,
                 category_object
             )
-
-        self.fields['category'].label_from_instance = label_from_instance
+        try:
+            self.fields['category'].label_from_instance = label_from_instance
+        except KeyError:
+            # When the form is invoked by the render_model template tag with a
+            # list of explicitly set fields, category might not be present.
+            pass
 
 
 class JobApplicationForm(forms.ModelForm):
