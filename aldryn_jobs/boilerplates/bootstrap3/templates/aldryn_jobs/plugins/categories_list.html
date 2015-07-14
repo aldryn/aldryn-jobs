@@ -8,7 +8,7 @@
     {% else %}
         <div class="list-group">
             {% for category in instance.categories %}
-                <a href="{% namespace_url "category-job-offer-list" category.slug namespace=instance.app_config.namespace %}" class="list-group-item">
+                <a href="{% namespace_url "category-job-opening-list" category.slug namespace=instance.app_config.namespace %}" class="list-group-item">
                     {{ category.name }}
                     <span class="badge pull-right">{{ category.count }}</span>
                 </a>

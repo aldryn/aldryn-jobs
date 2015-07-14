@@ -8,17 +8,17 @@ Using Aldryn Jobs
    has been set up </introduction/basic_usage>`.
 
 
-*************
-Add a vacancy
-*************
+*****************
+Add a job opening
+*****************
 
 Visit the Jobs page. You should see that the django CMS toolbar now contains a new item, *Jobs*. Select *Add Job Opening...* from this menu.
 
 Provide some basic details, such as:
 
-* the ``Short description`` is a brief summary of the vacancy, that will be used in lists of
-  job openings, such as on a jobs landing page
-* a ``Category`` (a ``Category`` is required to associate job openings with supervisors, so you
+* the ``Lead in`` is a brief summary of the opening, that will be used in lists of openings, such
+  as on a jobs landing page
+* a ``Category``
   will need to create a ``Category`` too)
 
 and **Save** it.
@@ -37,7 +37,7 @@ number of plugins that can be inserted into any django CMS page - indeed, into a
 deliver information about jobs.
 
 For example, if you have a news article announcing a new project, you can drop a Jobs
-plugin into that page to display related openings.
+plugin into that page to display related job openings.
 
 List
 ====

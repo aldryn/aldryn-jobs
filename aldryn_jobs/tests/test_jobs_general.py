@@ -10,7 +10,7 @@ from cms.utils import get_cms_setting
 from cms.utils.i18n import force_language
 from cms.test_utils.testcases import CMSTestCase
 
-from ..models import JobCategory, JobOffer
+from ..models import JobCategory, JobOpening
 from ..cms_appconfig import JobsConfig
 from ..utils import namespace_is_apphooked
 
@@ -31,31 +31,31 @@ class JobsAddTest(JobsBaseTestCase):
         self.assertEqual(
             JobCategory.objects.get(pk=new_category.pk).name, category_name)
 
-    def test_create_job_offer(self):
+    def test_create_job_opening(self):
         """
-        Check if We can create a new job offer.
+        Check if We can create a new job opening.
         """
         title = 'Programmer'
-        offer = JobOffer.objects.create(
+        opening = JobOpening.objects.create(
             title=title, category=self.default_category)
-        self.assertEqual(offer.title, title)
-        self.assertEqual(JobOffer.objects.all()[0], offer)
+        self.assertEqual(opening.title, title)
+        self.assertEqual(JobOpening.objects.all()[0], opening)
 
-    def test_category_relation_to_job_offer(self):
+    def test_category_relation_to_job_opening(self):
         """
-        Check if We can access a job offer through a category.
+        Check if We can access a job opening through a category.
         """
         title = 'Senior'
-        offer = JobOffer.objects.create(
+        opening = JobOpening.objects.create(
             title=title, category=self.default_category)
-        self.assertIn(offer, self.default_category.jobs.all())
+        self.assertIn(opening, self.default_category.jobs.all())
 
-    def test_add_offer_list_plugin_api(self):
+    def test_add_opening_list_plugin_api(self):
         """
-        We add an offer to the Plugin and look it up
+        We add an opening to the Plugin and look it up
         """
         title = 'Manager'
-        JobOffer.objects.create(title=title, category=self.default_category)
+        JobOpening.objects.create(title=title, category=self.default_category)
         placeholder = self.page.placeholders.all()[0]
         api.add_plugin(placeholder, 'JobList', self.language)
         self.page.publish(self.language)
@@ -120,11 +120,11 @@ class JobApphookTest(JobsBaseTestCase):
                 apphook_urls.append(apphook_url)
         return apphook_urls
 
-    def get_i18n_urls_for_job(self, job_offer):
+    def get_i18n_urls_for_job(self, job_opening):
         job_urls = []
         for language, _ in settings.LANGUAGES:
-            with switch_language(job_offer, language):
-                job_url = job_offer.get_absolute_url()
+            with switch_language(job_opening, language):
+                job_url = job_opening.get_absolute_url()
                 self.assertNotIn(job_url, job_urls)
                 job_urls.append(job_url)
         return job_urls
@@ -145,7 +145,7 @@ class JobApphookTest(JobsBaseTestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_apphooked_pages_are_available_for_jobs_and_categories(self):
-        self.create_default_job_offer(translated=True)
+        self.create_default_job_opening(translated=True)
 
         for apphook_url in self.apphook_urls:
             response = self.client.get(apphook_url)
@@ -156,7 +156,7 @@ class JobApphookTest(JobsBaseTestCase):
         Test apphooked pages are available if there is jobs and categories for
         super user
         """
-        self.create_default_job_offer(translated=True)
+        self.create_default_job_opening(translated=True)
 
         login_result = self.client.login(
             username=self.super_user, password=self.super_user_password)
@@ -167,17 +167,17 @@ class JobApphookTest(JobsBaseTestCase):
             response = self.client.get(apphook_url_with_toolbar)
             self.assertEqual(response.status_code, 200)
 
-    def test_job_offer_is_accessible(self):
-        job_offer = self.create_default_job_offer(translated=True)
-        job_urls = self.get_i18n_urls_for_job(job_offer)
+    def test_job_opening_is_accessible(self):
+        job_opening = self.create_default_job_opening(translated=True)
+        job_urls = self.get_i18n_urls_for_job(job_opening)
 
         for job_url in job_urls:
             response = self.client.get(job_url)
             self.assertEqual(response.status_code, 200)
 
-    def test_job_offer_is_accessible_by_super_user(self):
-        job_offer = self.create_default_job_offer(translated=True)
-        job_urls = self.get_i18n_urls_for_job(job_offer)
+    def test_job_opening_is_accessible_by_super_user(self):
+        job_opening = self.create_default_job_opening(translated=True)
+        job_urls = self.get_i18n_urls_for_job(job_opening)
 
         login_result = self.client.login(
             username=self.super_user, password=self.super_user_password)
@@ -187,17 +187,17 @@ class JobApphookTest(JobsBaseTestCase):
             response = self.client.get(job_url)
             self.assertEqual(response.status_code, 200)
 
-    def test_job_offer_list_page_contains_correct_detail_urls(self):
-        job_offer = self.create_default_job_offer(translated=True)
+    def test_job_opening_list_page_contains_correct_detail_urls(self):
+        job_opening = self.create_default_job_opening(translated=True)
 
         for language, _ in settings.LANGUAGES:
-            with switch_language(job_offer, language):
-                job_url = job_offer.get_absolute_url()
-                job_title = job_offer.title
+            with switch_language(job_opening, language):
+                job_url = job_opening.get_absolute_url()
+                job_title = job_opening.title
             with override(language):
-                offer_list_url = self.page.get_absolute_url()
+                opening_list_url = self.page.get_absolute_url()
 
-            response = self.client.get(offer_list_url)
+            response = self.client.get(opening_list_url)
             self.assertContains(response, job_url)
             self.assertContains(response, job_title)
 
@@ -259,7 +259,7 @@ class JobApphookTest(JobsBaseTestCase):
                 continue
 
             with force_language('en'):
-                apphook_url = reverse('{0}:job-offer-list'.format(
+                apphook_url = reverse('{0}:job-opening-list'.format(
                     cfg.namespace))
             response = self.client.get(apphook_url)
 
