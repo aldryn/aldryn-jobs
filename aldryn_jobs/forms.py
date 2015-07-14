@@ -368,14 +368,18 @@ class JobListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
     def clean(self):
         data = super(JobListPluginForm, self).clean()
         # save only events for selected app_config
-        selected_events = data.get('jobopenings', [])
+        selected = data.get('jobopenings', [])
         app_config = data.get('app_config')
+
+        new_jobopenings = []
         if app_config is None:
-            new_events = []
+            pass
         else:
-            new_events = [event for event in selected_events
-                          if event.app_config.pk == app_config.pk]
-        data['events'] = new_events
+            for job in selected:
+                if job.category.app_config == app_config:
+                    new_jobopenings.append(job)
+
+        data['jobopenings'] = new_jobopenings
         return data
 
 
