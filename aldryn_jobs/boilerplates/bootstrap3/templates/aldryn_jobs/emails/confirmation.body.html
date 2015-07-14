@@ -1,0 +1,6 @@
+{% extends "emailit/base_email.body.html" %}
+{% load i18n html_filter_tags %}
+
+{% block content %}
+    <p>{% trans "We will inform you about the progress." context "aldryn-jobs" %}</p>
+{% endblock %}
