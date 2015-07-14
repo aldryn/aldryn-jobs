@@ -8,47 +8,18 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'JobApplication.job_offer'
-        db.delete_column(u'aldryn_jobs_jobapplication', 'job_offer_id')
+        # Rename column
+        db.rename_column(u'aldryn_jobs_jobapplication', 'job_offer', 'job_opening')
 
-        # Adding field 'JobApplication.job_opening'
-        db.add_column(u'aldryn_jobs_jobapplication', 'job_opening',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['aldryn_jobs.JobOpening']),
-                      keep_default=False)
-
-        # Removing M2M table for field joboffers on 'JobListPlugin'
-        db.delete_table(db.shorten_name(u'aldryn_jobs_joblistplugin_joboffers'))
-
-
-        # Adding SortedM2M table for field jobopenings on 'JobListPlugin'
-        db.create_table(u'aldryn_jobs_joblistplugin_jobopenings', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('joblistplugin', models.ForeignKey(orm[u'aldryn_jobs.joblistplugin'], null=False)),
-            ('jobopening', models.ForeignKey(orm[u'aldryn_jobs.jobopening'], null=False)),
-            ('sort_value', models.IntegerField())
-        ))
-        db.create_unique(u'aldryn_jobs_joblistplugin_jobopenings', ['joblistplugin_id', 'jobopening_id'])
+        # Rename M2M table for field joboffers on 'JobListPlugin'
+        db.rename_table(u'aldryn_jobs_joblistplugin_joboffers', u'aldryn_jobs_joblistplugin_jobopenings')
 
     def backwards(self, orm):
-        # Adding field 'JobApplication.job_offer'
-        db.add_column(u'aldryn_jobs_jobapplication', 'job_offer',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['aldryn_jobs.JobOpening']),
-                      keep_default=False)
+        # Rename column
+        db.rename_column(u'aldryn_jobs_jobapplication', 'job_opening', 'job_offer')
 
-        # Deleting field 'JobApplication.job_opening'
-        db.delete_column(u'aldryn_jobs_jobapplication', 'job_opening_id')
-
-
-        # Adding SortedM2M table for field joboffers on 'JobListPlugin'
-        db.create_table(u'aldryn_jobs_joblistplugin_joboffers', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('joblistplugin', models.ForeignKey(orm[u'aldryn_jobs.joblistplugin'], null=False)),
-            ('jobopening', models.ForeignKey(orm[u'aldryn_jobs.jobopening'], null=False)),
-            ('sort_value', models.IntegerField())
-        ))
-        db.create_unique(u'aldryn_jobs_joblistplugin_joboffers', ['joblistplugin_id', 'jobopening_id'])
-        # Removing M2M table for field jobopenings on 'JobListPlugin'
-        db.delete_table(db.shorten_name(u'aldryn_jobs_joblistplugin_jobopenings'))
+        # Rename M2M table for field joboffers on 'JobListPlugin'
+        db.rename_table(u'aldryn_jobs_joblistplugin_jobopenings', u'aldryn_jobs_joblistplugin_joboffers')
 
 
     models = {
