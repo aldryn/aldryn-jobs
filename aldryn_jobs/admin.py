@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.sites.models import get_current_site
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _

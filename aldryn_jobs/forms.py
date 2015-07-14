@@ -150,7 +150,10 @@ class JobOpeningAdminForm(AutoSlugForm):
         # small monkey patch to show better label for categories
         def label_from_instance(category_object):
             return "{0} / {1}".format(
-                category_object.app_config, category_object)
+                category_object.app_config,
+                category_object
+            )
+
         self.fields['category'].label_from_instance = label_from_instance
 
 

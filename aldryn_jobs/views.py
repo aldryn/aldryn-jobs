@@ -2,24 +2,15 @@
 
 from __future__ import unicode_literals
 
-from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponsePermanentRedirect
-from django.shortcuts import redirect, render
-from django.template import RequestContext
+from django.http import Http404
+from django.shortcuts import redirect
 from django.utils.translation import (
     ugettext_lazy as _, get_language_from_request
 )
-from django.views.generic import (
-    CreateView, DetailView, ListView, TemplateView, View
-)
-from django.views.generic.base import TemplateResponseMixin
-
+from django.views.generic import DetailView, ListView
 from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_apphooks_config.utils import get_app_instance
-from emailit.api import send_mail
 from menus.utils import set_language_changer
 
 from .forms import JobApplicationForm

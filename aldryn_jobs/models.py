@@ -7,13 +7,10 @@ import reversion
 from django import get_version
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
-from django.http import Http404
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.importlib import import_module
 from django.utils.timezone import now
@@ -29,7 +26,6 @@ from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
 from cms.utils.i18n import force_language
 from distutils.version import StrictVersion
-from emailit.api import send_mail
 from functools import partial
 from os.path import join as join_path
 from parler.models import TranslatableModel, TranslatedFields

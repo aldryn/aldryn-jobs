@@ -6,7 +6,6 @@ import reversion
 import six
 
 from django.db import transaction
-from django.contrib.auth.models import User
 from parler.utils.context import switch_language
 
 from aldryn_reversion.core import create_revision_with_placeholders

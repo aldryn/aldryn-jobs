@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 from django.utils.translation import override
-from django.contrib.auth.models import Group
 from cms import api
 
 from ..models import JobOpening, JobCategory, JobsConfig

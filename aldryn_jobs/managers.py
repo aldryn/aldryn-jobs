@@ -2,15 +2,9 @@
 
 from __future__ import unicode_literals
 
-from django.contrib.sites.models import get_current_site
-from django.core.urlresolvers import reverse
-from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from django.utils.crypto import get_random_string
-from django.utils.translation import override
 
-from emailit.api import send_mail
 from parler.managers import TranslatableManager, TranslatableQuerySet
 
 
