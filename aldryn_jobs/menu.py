@@ -56,10 +56,10 @@ class JobOpeningMenu(CMSAttachMenu):
         nodes = []
         openings = (
             JobOpening.objects
-                    .active()
-                    .filter(category__app_config__namespace=app_namespace)
-                    .language(current_language)
-                    .translated(current_language)
+                      .active()
+                      .filter(category__app_config__namespace=app_namespace)
+                      .language(current_language)
+                      .translated(current_language)
         )
         for job_opening in openings:
             try:

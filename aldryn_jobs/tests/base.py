@@ -225,7 +225,8 @@ class JobsBaseTestCase(TransactionTestCase):
 
         # check if we need a translated job opening
         if translated:
-            job_opening.create_translation('de', **self.default_job_values['de'])
+            job_opening.create_translation(
+                'de', **self.default_job_values['de'])
             with override('de'):
                 api.add_plugin(job_opening.content, 'TextPlugin', 'de',
                                body=self.default_plugin_content['de'])

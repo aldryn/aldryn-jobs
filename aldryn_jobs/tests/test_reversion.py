@@ -121,7 +121,8 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
-        self.create_revision(job_opening, content=content_en_1, **new_values_en_1)
+        self.create_revision(
+            job_opening, content=content_en_1, **new_values_en_1)
 
         job_opening = JobOpening.objects.get(pk=job_opening.pk)
         for prop in new_values_en_1.keys():
@@ -132,7 +133,8 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
-        self.create_revision(job_opening, content=content_en_1, **new_values_en_1)
+        self.create_revision(
+            job_opening, content=content_en_1, **new_values_en_1)
 
         # test url and served content
         with switch_language(job_opening, 'en'):
@@ -169,12 +171,14 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
-        self.create_revision(job_opening, content=content_en_1, **new_values_en_1)
+        self.create_revision(
+            job_opening, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.opening_values_raw['en'], 2)
         content_en_2 = self.plugin_values_raw['en'].format(2)
-        self.create_revision(job_opening, content=content_en_2, **new_values_en_2)
+        self.create_revision(
+            job_opening, content=content_en_2, **new_values_en_2)
 
         job_opening = JobOpening.objects.get(pk=job_opening.pk)
         for prop in new_values_en_2.keys():
@@ -186,12 +190,14 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
-        self.create_revision(job_opening, content=content_en_1, **new_values_en_1)
+        self.create_revision(
+            job_opening, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.opening_values_raw['en'], 2)
         content_en_2 = self.plugin_values_raw['en'].format(2)
-        self.create_revision(job_opening, content=content_en_2, **new_values_en_2)
+        self.create_revision(
+            job_opening, content=content_en_2, **new_values_en_2)
 
         # test served title
         job_opening = JobOpening.objects.get(pk=job_opening.pk)
@@ -233,7 +239,8 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
-        self.create_revision(job_opening, content=content_en_1, **new_values_en_1)
+        self.create_revision(
+            job_opening, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.opening_values_raw['en'], 2)
@@ -242,7 +249,8 @@ class ReversionTestCase(JobsBaseTestCase):
             app_config=self.app_config,
             **self.make_new_values(self.category_values_raw['en'], 2))
         new_values_en_2['category'] = new_category
-        self.create_revision(job_opening, content=content_en_2, **new_values_en_2)
+        self.create_revision(
+            job_opening, content=content_en_2, **new_values_en_2)
 
         # revert to 1
         self.revert_to(job_opening, 1)
@@ -258,12 +266,14 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
-        self.create_revision(job_opening, content=content_en_1, **new_values_en_1)
+        self.create_revision(
+            job_opening, content=content_en_1, **new_values_en_1)
 
         # revision 2
         new_values_en_2 = self.make_new_values(self.opening_values_raw['en'], 2)
         content_en_2 = self.plugin_values_raw['en'].format(2)
-        self.create_revision(job_opening, content=content_en_2, **new_values_en_2)
+        self.create_revision(
+            job_opening, content=content_en_2, **new_values_en_2)
 
         # revert to 1
         job_opening = JobOpening.objects.get(pk=job_opening.pk)
@@ -412,25 +422,29 @@ class ReversionTestCase(JobsBaseTestCase):
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
         content_en_1 = self.plugin_values_raw['en'].format(1)
         with switch_language(opening, 'en'):
-            self.create_revision(opening, content=content_en_1, **new_values_en_1)
+            self.create_revision(
+                opening, content=content_en_1, **new_values_en_1)
 
         # revision 2: en 1, de 1
         new_values_de_1 = self.make_new_values(self.opening_values_raw['de'], 1)
         content_de_1 = self.plugin_values_raw['de'].format(1)
         with switch_language(opening, 'de'):
-            self.create_revision(opening, content=content_de_1, **new_values_de_1)
+            self.create_revision(
+                opening, content=content_de_1, **new_values_de_1)
 
         # revision 3: en 1, de 2
         new_values_de_2 = self.make_new_values(self.opening_values_raw['de'], 2)
         content_de_2 = self.plugin_values_raw['de'].format(2)
         with switch_language(opening, 'de'):
-            self.create_revision(opening, content=content_de_2, **new_values_de_2)
+            self.create_revision(
+                opening, content=content_de_2, **new_values_de_2)
 
         # revision 4: en 2, de 2
         content_en_2 = self.plugin_values_raw['en'].format(2)
         new_values_en_2 = self.make_new_values(self.opening_values_raw['en'], 2)
         with switch_language(opening, 'en'):
-            self.create_revision(opening, content=content_en_2, **new_values_en_2)
+            self.create_revision(
+                opening, content=content_en_2, **new_values_en_2)
 
         # revert to 3: en 1, de 2
         self.revert_to(opening, 3)

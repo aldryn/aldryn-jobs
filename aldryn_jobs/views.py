@@ -41,10 +41,10 @@ class JobOpeningList(AppConfigMixin, ListView):
         language = get_language_from_request(self.request, check_path=True)
         return (
             JobOpening.objects.active()
-                            .language(language)
-                            .translated(language)
-                            .select_related('category')
-                            .order_by('category__id')
+                              .language(language)
+                              .translated(language)
+                              .select_related('category')
+                              .order_by('category__id')
         )
 
 

@@ -150,7 +150,8 @@ class JobOpeningAdminForm(AutoSlugForm):
 
         # small monkey patch to show better label for categories
         def label_from_instance(category_object):
-            return "{0} / {1}".format(category_object.category.app_config, category_object)
+            return "{0} / {1}".format(
+                category_object.category.app_config, category_object)
         self.fields['category'].label_from_instance = label_from_instance
 
 
@@ -346,10 +347,10 @@ class AppConfigPluginFormMixin(object):
     def clean_app_config(self):
         # since namespace is not a unique thing we need to validate it
         # additionally because it is possible that there is a page with same
-        # namespace as a jobs config but which is using other app_config,
-        # which also would lead to same 500 error. The easiest way is to try
-        # to reverse, in case of success that would mean that the app_config
-        # is correct and can be used.
+        # namespace as a jobs config but which is using other app_config, which
+        # also would lead to same 500 error. The easiest way is to try to
+        # reverse, in case of success that would mean that the app_config is
+        # correct and can be used.
         namespace = self.cleaned_data['app_config'].namespace
         if not namespace_is_apphooked(namespace):
             raise ValidationError(

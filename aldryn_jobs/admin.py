@@ -157,8 +157,8 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
         return fieldsets
 
 
-class JobOpeningAdmin(VersionedPlaceholderAdminMixin, FrontendEditableAdminMixin,
-                    TranslatableAdmin):
+class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
+                      FrontendEditableAdminMixin, TranslatableAdmin):
     form = JobOpeningAdminForm
     list_display = ['__str__', 'language_column']
     frontend_editable_fields = ('title', 'lead_in')

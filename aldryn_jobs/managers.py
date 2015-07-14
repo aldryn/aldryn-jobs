@@ -55,8 +55,8 @@ class NewsletterSignupManager(models.Manager):
         regardless of recipients kwarg is provided or not. If recipients list
         provided (PKs only) NewsletterSignup records would be selected and
         filtered with respect to active recipients (confirmed and not disabled.
-        If job_list provided (PKs only) job Openings would be selected. Note that
-        job_list is always provided when this method is used through admin
+        If job_list provided (PKs only) job Openings would be selected. Note
+        that job_list is always provided when this method is used through admin
         actions. Returns number of successfully sent emails.
         """
         # avoid circular import

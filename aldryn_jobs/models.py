@@ -454,9 +454,9 @@ class JobListPlugin(BaseJobsPlugin):
 
         return (
             JobOpening.objects.filter(category__app_config=self.app_config)
-                            .language(self.language)
-                            .translated(self.language)
-                            .active()
+                              .language(self.language)
+                              .translated(self.language)
+                              .active()
         )
 
     def __str__(self):
