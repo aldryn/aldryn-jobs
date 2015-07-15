@@ -133,9 +133,10 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
     get_attachment_address.short_description = _('Attachments')
 
 
-class JobCategoryAdmin(VersionedPlaceholderAdminMixin, TranslatableAdmin):
+class JobCategoryAdmin(VersionedPlaceholderAdminMixin,
+                       AllTranslationsMixin, TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__str__', 'language_column', 'ordering']
+    list_display = ['__str__', 'ordering']
     list_editable = ['ordering']
     filter_horizontal = ['supervisors']
 
