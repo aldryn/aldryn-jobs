@@ -71,6 +71,11 @@ class JobsToolbar(CMSToolbar):
         if self.is_current_app and (can(['add', 'change'], 'jobopening') or
                                     can(['add', 'change'], 'jobsconfig')):
             menu = self.toolbar.get_or_create_menu('jobs-app', _('Jobs'))
+
+            if can(['add', 'change'], 'jobsconfig'):
+                url = reverse('admin:aldryn_jobs_jobsconfig_changelist')
+                menu.add_sideframe_item(_('Configure application'), url)
+
             if can(['add', 'change'], 'jobopening'):
                 menu.add_modal_item(
                     _('Add Job Opening'),
@@ -92,6 +97,3 @@ class JobsToolbar(CMSToolbar):
                     )
                     menu.add_modal_item(_('Edit Job Opening'), url, active=True)
 
-            if can(['add', 'change'], 'jobsconfig'):
-                url = reverse('admin:aldryn_jobs_jobsconfig_changelist')
-                menu.add_sideframe_item(_('Configure Jobs Application'), url)
