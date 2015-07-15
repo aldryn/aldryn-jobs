@@ -28,7 +28,7 @@ REQUIREMENTS = [
 py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
 if py26:
     REQUIREMENTS += [
-        'Django<1.7,>1.5',
+        'Django>1.5,<1.7',
         'ordereddict',
     ]
 
