@@ -197,7 +197,7 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
             fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
 
-    def queryset(self, request):
+    def get_queryset(self, request):
         qs = super(JobOpeningAdmin, self).queryset(request)
         qs = qs.annotate(applications_count=models.Count('applications'))
         return qs
