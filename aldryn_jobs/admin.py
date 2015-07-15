@@ -4,13 +4,17 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib import admin
+from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from aldryn_apphooks_config.admin import BaseAppHookConfig
 from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
-from aldryn_translation_tools.admin import AllTranslationsMixin
+from aldryn_translation_tools.admin import (
+    AllTranslationsMixin,
+    LinkedRelatedInlineMixin,
+)
 from cms import __version__ as cms_version
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
@@ -78,7 +82,7 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
 
 class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
     list_display = ['__str__', 'job_opening', 'created', 'is_rejected',
-                    'rejection_date']
+                    'rejection_date', ]
     list_filter = ['job_opening', 'is_rejected']
     readonly_fields = ['get_attachment_address']
     raw_id_fields = ['job_opening']
@@ -155,12 +159,22 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin,
         return fieldsets
 
 
+class JobApplicationInline(LinkedRelatedInlineMixin, admin.TabularInline):
+    model = JobApplication
+    fields = ['email', 'is_rejected', ]
+    readonly_fields = ['email', 'is_rejected', ]
+
+    def has_add_permission(self, request):
+        return False
+
+
 class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
                       FrontendEditableAdminMixin,
                       AllTranslationsMixin, TranslatableAdmin):
     form = JobOpeningAdminForm
-    list_display = ['__str__', 'category', ]
+    list_display = ['__str__', 'category', 'num_applications', ]
     frontend_editable_fields = ('title', 'lead_in')
+    inlines = [JobApplicationInline, ]
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -182,6 +196,16 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
             }
             fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
+
+    def queryset(self, request):
+        qs = super(JobOpeningAdmin, self).queryset(request)
+        qs = qs.annotate(applications_count=models.Count('applications'))
+        return qs
+
+    def num_applications(self, obj):
+        return obj.applications_count
+    num_applications.short_description = '# Applications'
+    num_applications.admin_order_field = 'applications_count'
 
 
 class JobsConfigAdmin(BaseAppHookConfig):
