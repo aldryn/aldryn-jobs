@@ -14,7 +14,7 @@ REQUIREMENTS = [
     'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
     'aldryn-reversion>=0.0.2',
-    'aldryn-translation-tools>=0.0.5',
+    'aldryn-translation-tools>=0.0.6',
     # aldryn categories has been added because of a migration dependency
     # which sneaked somehow and we need it to be properly migrated
     # also it would be used heavily in future (after a switch to this package
