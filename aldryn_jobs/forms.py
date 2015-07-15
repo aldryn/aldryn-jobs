@@ -207,14 +207,14 @@ class JobApplicationForm(forms.ModelForm):
         except:
             # We're handling ANY exception here because we don't want to
             # prevent the form from ultimately getting saved here.
-            logger.exception('WARNING: Could not send a confirmation email!')
+            logger.exception('Could not send a confirmation email!')
 
         try:
             self.send_staff_notifications()
         except:
             # We're handling ANY exception here because we don't want to
             # prevent the form from ultimately getting saved here.
-            logger.exception('WARNING: Could not send a staff notifications!')
+            logger.exception('Could not send a staff notifications!')
 
         return self.instance
 
