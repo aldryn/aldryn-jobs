@@ -3,15 +3,19 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse, resolve, Resolver404
+from django.core.urlresolvers import resolve, Resolver404
 from django.utils.translation import (
     ugettext_lazy as _,
     get_language_from_request
 )
 
-from aldryn_jobs.models import JobOpening
+from aldryn_apphooks_config.utils import get_app_instance
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
+from cms.utils.urlutils import admin_reverse
+
+from .cms_appconfig import JobsConfig
+from .models import JobOpening
 
 
 def get_jobopening_from_path(path, language, current_url=None):
@@ -56,6 +60,18 @@ def get_jobopening_from_path(path, language, current_url=None):
 @toolbar_pool.register
 class JobsToolbar(CMSToolbar):
 
+    def get_jobs_config(self):
+        try:
+            __, config = get_app_instance(self.request)
+            if not isinstance(config, JobsConfig):
+                # This is not the app_hook you are looking for.
+                return None
+        except ImproperlyConfigured:
+            # There is no app_hook at all.
+            return None
+
+        return config
+
     def populate(self):
         def can(actions, model):
             if isinstance(actions, basestring):
@@ -72,28 +88,40 @@ class JobsToolbar(CMSToolbar):
                                     can(['add', 'change'], 'jobsconfig')):
             menu = self.toolbar.get_or_create_menu('jobs-app', _('Jobs'))
 
+            # try to reuse resolver_match instead of doing double work with
+            # cache issues, see comments inside of get_jobopening_from_path
+            current_url = getattr(self.request, 'resolver_match', None)
+            jobsconfig = self.get_jobs_config()
+            language = get_language_from_request(self.request, check_path=True)
+            job_opening = get_jobopening_from_path(
+                self.request.path, language, current_url=current_url
+            )
+
             if can(['add', 'change'], 'jobsconfig'):
-                url = reverse('admin:aldryn_jobs_jobsconfig_changelist')
-                menu.add_sideframe_item(_('Configure application'), url)
+                url = admin_reverse('aldryn_jobs_jobsconfig_change',
+                                    args=(jobsconfig.pk, ))
+                menu.add_modal_item(_('Configure application'), url)
+
+            if can(['add', 'change'], 'jobcategory'):
+                if job_opening and job_opening.category:
+                    url = admin_reverse('aldryn_jobs_jobcategory_change',
+                        args=(job_opening.category.pk, ))
+                    menu.add_modal_item(_('Edit category'), url, active=True)
+
+                base_url = admin_reverse('aldryn_jobs_jobcategory_add')
+                url = "{base}?app_config={config}".format(
+                    base=base_url, config=jobsconfig.pk if jobsconfig else None)
+                menu.add_modal_item(_('Add new category'), url)
 
             if can(['add', 'change'], 'jobopening'):
-                menu.add_modal_item(
-                    _('Add Job Opening'),
-                    reverse('admin:aldryn_jobs_jobopening_add')
-                )
-                language = get_language_from_request(
-                    self.request, check_path=True
-                )
-                # try to reuse resolver_match instead of doing double work with
-                # cache issues, see comments inside of get_jobopening_from_path
-                current_url = getattr(self.request, 'resolver_match', None)
-                job_opening = get_jobopening_from_path(
-                    self.request.path, language, current_url=current_url
-                )
                 if job_opening:
-                    url = reverse(
-                        'admin:aldryn_jobs_jobopening_change',
+                    url = admin_reverse(
+                        'aldryn_jobs_jobopening_change',
                         args=(job_opening.pk,)
                     )
-                    menu.add_modal_item(_('Edit Job Opening'), url, active=True)
+                    menu.add_modal_item(_('Edit job opening'), url, active=True)
+                menu.add_modal_item(
+                    _('Add new job opening'),
+                    admin_reverse('aldryn_jobs_jobopening_add')
+                )
 
