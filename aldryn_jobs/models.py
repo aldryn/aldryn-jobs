@@ -152,7 +152,7 @@ class JobCategory(TranslatableModel):
         blank=True
     )
     app_config = models.ForeignKey(JobsConfig,
-        verbose_name=_('app_config'), null=True)
+        verbose_name=_('app_config'), related_name='categories', null=True)
 
     ordering = models.IntegerField(_('Ordering'), default=0)
 
@@ -275,7 +275,7 @@ class JobApplication(models.Model):
         (FEMALE, _('Mrs.')),
     )
 
-    job_opening = models.ForeignKey(JobOpening)
+    job_opening = models.ForeignKey(JobOpening, related_name='applications')
     salutation = models.CharField(_('Salutation'),
         max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
     first_name = models.CharField(_('First name'), max_length=20)
@@ -289,6 +289,8 @@ class JobApplication(models.Model):
 
     class Meta:
         ordering = ['-created']
+        verbose_name = _('job application')
+        verbose_name_plural = _('job applications')
 
     def __str__(self):
         return self.get_full_name()
