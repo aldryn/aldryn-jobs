@@ -6,6 +6,7 @@ import os
 import logging
 
 from django import forms
+from django.db.models import Q
 from django.conf import settings
 from django.core.exceptions import (
     ObjectDoesNotExist,
@@ -67,9 +68,9 @@ class AutoSlugForm(TranslatableModelForm):
             self.data = raw_data
         else:
             slug = self.cleaned_data[self.slug_field]
-
+        language_code = self.get_language_code()
         # validate uniqueness
-        conflict = self.get_slug_conflict(slug=slug)
+        conflict = self.get_slug_conflict(slug=slug, language=language_code)
         if conflict:
             self.report_error(conflict=conflict)
 
@@ -79,15 +80,18 @@ class AutoSlugForm(TranslatableModelForm):
         content_to_slugify = self.cleaned_data.get(self.slugified_field, '')
         return slugify(unidecode(content_to_slugify))
 
-    def get_slug_conflict(self, slug):
+    def get_language_code(self):
         try:
             language_code = self.instance.get_current_language()
         except ObjectDoesNotExist:
             language_code = get_language()
+        return language_code
 
+    def get_slug_conflict(self, slug, language):
+        app_config_filter = self.get_app_config_filter()
         conflicts = (
-            self._meta.model.objects.language(language_code).translated(
-                language_code, slug=slug)
+            self._meta.model.objects.language(language).filter(
+                app_config_filter).translated(language, slug=slug)
         )
         if self.is_edit_action():
             conflicts = conflicts.exclude(pk=self.instance.pk)
@@ -99,7 +103,7 @@ class AutoSlugForm(TranslatableModelForm):
 
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
-            'url': conflict.master.get_absolute_url(),
+            'url': conflict.get_absolute_url(),
             'label': _('aldryn-jobs', 'the conflicting object')}
         error_message = (
             _('aldryn-jobs', 'Conflicting slug. See %(address)s.') % {
@@ -117,10 +121,36 @@ class AutoSlugForm(TranslatableModelForm):
     def is_edit_action(self):
         return self.instance.pk is not None
 
+    def validate_field_uniqueness_with_app_config(self, field_name,
+                                                  error_message):
+        field = self.cleaned_data[field_name]
+        language = self.get_language_code()
+        app_config_filter = self.get_app_config_filter()
+        # validate uniqueness
+        found = self._meta.model.objects.language(language).filter(
+            app_config_filter).translated(language,
+                                          Q(field_name=field)).count()
+
+        if found > 0:
+            self.append_to_errors(field_name, error_message)
+        return found > 0
+
 
 class JobCategoryAdminForm(AutoSlugForm):
 
     slugified_field = 'name'
+
+    def get_app_config_filter(self):
+        app_config = self.cleaned_data['app_config']
+        return Q(app_config=app_config)
+
+    def clean(self):
+        super(JobCategoryAdminForm, self).clean()
+        error_message = _(
+            'aldryn-jobs',
+            'Category with that name already exists for selected app_config.')
+        self.validate_field_uniqueness_with_app_config('name', error_message)
+        return self.cleaned_data
 
     class Meta:
         model = JobCategory
@@ -130,6 +160,18 @@ class JobCategoryAdminForm(AutoSlugForm):
 class JobOpeningAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
+
+    def get_app_config_filter(self):
+        app_config = self.cleaned_data['category'].app_config
+        return Q(category__app_config=app_config)
+
+    def clean(self):
+        super(JobOpeningAdminForm, self).clean()
+        error_message = _(
+            'aldryn-jobs',
+            'Opening with that title already exists for selected category.')
+        self.validate_field_uniqueness_with_app_config('title', error_message)
+        return self.cleaned_data
 
     class Meta:
         model = JobOpening
