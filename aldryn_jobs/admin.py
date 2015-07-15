@@ -129,7 +129,7 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
                     attachment_link.format(address=attachment.file.url))
         return mark_safe('<br>'.join(attachments)) if attachments else '-'
 
-    get_attachment_address.alow_tags = True
+    get_attachment_address.allow_tags = True
     get_attachment_address.short_description = _('Attachments')
 
 
