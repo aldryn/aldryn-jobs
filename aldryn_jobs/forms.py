@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import os
+import logger
 
 from django import forms
 from django.conf import settings
@@ -35,6 +36,8 @@ from .utils import namespace_is_apphooked
 SEND_ATTACHMENTS_WITH_EMAIL = getattr(
     settings, 'ALDRYN_JOBS_SEND_ATTACHMENTS_WITH_EMAIL', True)
 DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
+
+logger = logging.getLogger(__name__)
 
 
 class AutoSlugForm(TranslatableModelForm):
@@ -193,13 +196,25 @@ class JobApplicationForm(forms.ModelForm):
         if commit:
             self.instance.save()
 
-        for each in self.cleaned_data['attachments']:
-            att = JobApplicationAttachment(application=self.instance, file=each)
+        for attachment in self.cleaned_data['attachments']:
+            att = JobApplicationAttachment(
+                application=self.instance, file=attachment)
             att.save()
 
         # additional actions while applying for the job
-        self.send_confirmation_email()
-        self.send_staff_notifications()
+        try:
+            self.send_confirmation_email()
+        except:
+            # We're handling ANY exception here because we don't want to
+            # prevent the form from ultimately getting saved here.
+            logger.exception('WARNING: Could not send a confirmation email!')
+
+        try:
+            self.send_staff_notifications()
+        except:
+            # We're handling ANY exception here because we don't want to
+            # prevent the form from ultimately getting saved here.
+            logger.exception('WARNING: Could not send a staff notifications!')
 
         return self.instance
 

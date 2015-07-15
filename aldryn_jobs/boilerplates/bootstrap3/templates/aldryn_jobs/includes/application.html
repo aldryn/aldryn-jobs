@@ -1,6 +1,6 @@
 {% load i18n bootstrap3 %}
 
-<form class="aldryn-jobs-form" method="post">
+<form class="aldryn-jobs-form"{% if form.is_multipart %} enctype="multipart/form-data" {% endif %}method="post">
     {% if form.non_field_errors %}
         <div class="alert alert-danger" role="alert">
             {% for error in form.non_field_errors %}
