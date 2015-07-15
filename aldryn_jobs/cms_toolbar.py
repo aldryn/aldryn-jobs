@@ -124,4 +124,3 @@ class JobsToolbar(CMSToolbar):
                     _('Add new job opening'),
                     admin_reverse('aldryn_jobs_jobopening_add')
                 )
-
