@@ -365,7 +365,7 @@ class JobCategoriesPlugin(BaseJobsPlugin):
         return (
             JobCategory.objects
                        .namespace(self.app_config.namespace)
-                       .filter(jobs=True)
                        .annotate(count=models.Count('jobs'))
+                       .filter(count__gte=1)
                        .order_by('ordering', '-count', 'translations__name')
         )
