@@ -54,7 +54,7 @@ class JobCategoryAdminFormTestCase(JobsBaseTestCase):
         data = {
             'name': 'different name',
             'slug': self.default_category_values['en']['slug'],
-            'app_config': self.app_config.pk,
+            'app_config': other_config.pk,
         }
         data.update(self.default_category_values['en'])
         form = JobCategoryAdminForm(data)
@@ -161,7 +161,7 @@ class JobOpeningAdminFormTestCase(JobsBaseTestCase):
         data = {
             'title': 'different title',
             'slug': self.default_job_values['en']['slug'],
-            'category': self.default_category.pk,
+            'category': other_category.pk,
         }
         data.update(self.default_job_values['en'])
         form = JobOpeningAdminForm(data)

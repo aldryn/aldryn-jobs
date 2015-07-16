@@ -139,8 +139,7 @@ class JobCategory(TranslatableModel):
         name=models.CharField(_('Name'), max_length=255),
         slug=models.SlugField(_('Slug'), max_length=255, blank=True,
             help_text=_('Auto-generated. Used in the URL. If changed, the URL'
-                        ' will change. Clean it to have it re-created.')),
-        meta={'unique_together': [['slug', 'language_code']]}
+                        ' will change. Clean it to have it re-created.'))
     )
 
     supervisors = models.ManyToManyField(
@@ -199,8 +198,7 @@ class JobOpening(TranslatableModel):
             help_text=_('Auto-generated. Used in the URL. If changed, the URL '
                         'will change. Clean it to have it re-created.')),
         lead_in=HTMLField(_('Lead in'), blank=True,
-            help_text=_('Will be displayed in lists')),
-        meta={'unique_together': [['slug', 'language_code']]}
+            help_text=_('Will be displayed in lists'))
     )
 
     content = PlaceholderField('Job Opening Content')
