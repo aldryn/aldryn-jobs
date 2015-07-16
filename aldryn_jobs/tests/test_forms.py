@@ -1,5 +1,5 @@
 from ..cms_appconfig import JobsConfig
-from ..models import JobCategory, JobOpening
+from ..models import JobCategory
 from ..forms import JobCategoryAdminForm, JobOpeningAdminForm
 
 from .base import JobsBaseTestCase
