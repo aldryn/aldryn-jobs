@@ -23,6 +23,7 @@ REQUIREMENTS = [
     'unidecode',
     'django-multiupload>=0.3',
     'django-sortedm2m',
+    'django-admin-sortable2>=0.5.0',
 ]
 
 py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
