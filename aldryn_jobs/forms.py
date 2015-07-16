@@ -135,9 +135,14 @@ class AutoSlugForm(TranslatableModelForm):
         app_config_filter = self.get_app_config_filter()
         # validate uniqueness
         # translated accepts key word arguments not Q objects.
-        found = self._meta.model.objects.language(language).filter(
-            app_config_filter).translated(language,
-                                          **{field_name: field}).count()
+        found = (
+            self._meta.model.objects
+                            .exclude(pk=self.instance.pk)
+                            .language(language)
+                            .filter(app_config_filter)
+                            .translated(language, **{field_name: field})
+                            .count()
+        )
 
         if found > 0:
             self.append_to_errors(field_name, error_message)
@@ -168,10 +173,6 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
 class JobOpeningAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
-
-    def get_app_config_filter(self):
-        app_config = self.cleaned_data['category'].app_config
-        return Q(category__app_config=app_config)
 
     def clean(self):
         super(JobOpeningAdminForm, self).clean()
@@ -212,6 +213,17 @@ class JobOpeningAdminForm(AutoSlugForm):
             # When the form is invoked by the render_model template tag with a
             # list of explicitly set fields, category might not be present.
             pass
+
+    def get_app_config_filter(self):
+        """
+        If there is a category, returns a filter limiting the queryset to
+        objects in the same app_config, otherwise, returns an empty filter
+        (Q-object).
+        """
+        if 'category' in self.cleaned_data:
+            app_config = self.cleaned_data['category'].app_config
+            return Q(category__app_config=app_config)
+        return Q()
 
 
 class JobApplicationForm(forms.ModelForm):
