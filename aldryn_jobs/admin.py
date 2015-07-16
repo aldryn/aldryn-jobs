@@ -140,7 +140,7 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
 class JobCategoryAdmin(VersionedPlaceholderAdminMixin,
                        AllTranslationsMixin, TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__str__', 'ordering']
+    list_display = ['__str__', 'ordering', 'app_config']
     list_editable = ['ordering']
     filter_horizontal = ['supervisors']
 

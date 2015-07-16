@@ -8,18 +8,76 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Rename column
-        db.rename_column(u'aldryn_jobs_jobapplication', 'job_offer_id', 'job_opening_id')
+        # Removing unique constraint on 'JobCategoryTranslation', fields ['slug', 'language_code']
+        db.delete_unique(u'aldryn_jobs_jobcategory_translation', ['slug', 'language_code'])
 
-        # Rename M2M table for field joboffers on 'JobListPlugin'
-        db.rename_table(u'aldryn_jobs_joblistplugin_joboffers', u'aldryn_jobs_joblistplugin_jobopenings')
+        # Removing unique constraint on 'JobOpeningTranslation', fields ['slug', 'language_code']
+        db.delete_unique(u'aldryn_jobs_jobopening_translation', ['slug', 'language_code'])
+
+        # Deleting model 'NewsletterSignup'
+        db.delete_table(u'aldryn_jobs_newslettersignup')
+
+        # Deleting model 'JobNewsletterRegistrationPlugin'
+        db.delete_table(u'aldryn_jobs_jobnewsletterregistrationplugin')
+
+        # Removing M2M table for field mail_to_group on 'JobNewsletterRegistrationPlugin'
+        db.delete_table(db.shorten_name(u'aldryn_jobs_jobnewsletterregistrationplugin_mail_to_group'))
+
+        # Deleting model 'NewsletterSignupUser'
+        db.delete_table(u'aldryn_jobs_newslettersignupuser')
+
+        # Deleting field 'JobsConfig.placeholder_jobs_newsletter_registration'
+        db.delete_column(u'aldryn_jobs_jobsconfig', 'placeholder_jobs_newsletter_registration_id')
+
 
     def backwards(self, orm):
-        # Rename column
-        db.rename_column(u'aldryn_jobs_jobapplication', 'job_opening_id', 'job_offer_id')
+        # Adding model 'NewsletterSignup'
+        db.create_table(u'aldryn_jobs_newslettersignup', (
+            ('recipient', self.gf('django.db.models.fields.EmailField')(max_length=75, unique=True)),
+            ('app_config', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['aldryn_jobs.JobsConfig'], null=True)),
+            ('is_verified', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('is_disabled', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('default_language', self.gf('django.db.models.fields.CharField')(default=u'', max_length=32, blank=True)),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('signup_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('confirmation_key', self.gf('django.db.models.fields.CharField')(max_length=40, unique=True)),
+        ))
+        db.send_create_signal(u'aldryn_jobs', ['NewsletterSignup'])
 
-        # Rename M2M table for field joboffers on 'JobListPlugin'
-        db.rename_table(u'aldryn_jobs_joblistplugin_jobopenings', u'aldryn_jobs_joblistplugin_joboffers')
+        # Adding model 'JobNewsletterRegistrationPlugin'
+        db.create_table(u'aldryn_jobs_jobnewsletterregistrationplugin', (
+            (u'cmsplugin_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['cms.CMSPlugin'], unique=True, primary_key=True)),
+            ('app_config', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['aldryn_jobs.JobsConfig'], null=True)),
+        ))
+        db.send_create_signal(u'aldryn_jobs', ['JobNewsletterRegistrationPlugin'])
+
+        # Adding M2M table for field mail_to_group on 'JobNewsletterRegistrationPlugin'
+        m2m_table_name = db.shorten_name(u'aldryn_jobs_jobnewsletterregistrationplugin_mail_to_group')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('jobnewsletterregistrationplugin', models.ForeignKey(orm[u'aldryn_jobs.jobnewsletterregistrationplugin'], null=False)),
+            ('group', models.ForeignKey(orm[u'auth.group'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['jobnewsletterregistrationplugin_id', 'group_id'])
+
+        # Adding model 'NewsletterSignupUser'
+        db.create_table(u'aldryn_jobs_newslettersignupuser', (
+            ('signup', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'related_user', to=orm['aldryn_jobs.NewsletterSignup'])),
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'newsletter_signup', to=orm['auth.User'])),
+        ))
+        db.send_create_signal(u'aldryn_jobs', ['NewsletterSignupUser'])
+
+        # Adding unique constraint on 'JobOpeningTranslation', fields ['slug', 'language_code']
+        db.create_unique(u'aldryn_jobs_jobopening_translation', ['slug', 'language_code'])
+
+        # Adding unique constraint on 'JobCategoryTranslation', fields ['slug', 'language_code']
+        db.create_unique(u'aldryn_jobs_jobcategory_translation', ['slug', 'language_code'])
+
+        # Adding field 'JobsConfig.placeholder_jobs_newsletter_registration'
+        db.add_column(u'aldryn_jobs_jobsconfig', 'placeholder_jobs_newsletter_registration',
+                      self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'aldryn_jobs_newsletter_registration', null=True, to=orm['cms.Placeholder']),
+                      keep_default=False)
 
 
     models = {
@@ -31,7 +89,7 @@ class Migration(SchemaMigration):
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_rejected': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'job_opening': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['aldryn_jobs.JobOpening']"}),
+            'job_opening': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'applications'", 'to': u"orm['aldryn_jobs.JobOpening']"}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'rejection_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'salutation': ('django.db.models.fields.CharField', [], {'default': "u'male'", 'max_length': '20', 'blank': 'True'})
@@ -49,13 +107,13 @@ class Migration(SchemaMigration):
         },
         u'aldryn_jobs.jobcategory': {
             'Meta': {'ordering': "[u'ordering']", 'object_name': 'JobCategory'},
-            'app_config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['aldryn_jobs.JobsConfig']", 'null': 'True'}),
+            'app_config': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'categories'", 'null': 'True', 'to': u"orm['aldryn_jobs.JobsConfig']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ordering': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'supervisors': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'job_opening_categories'", 'blank': 'True', 'to': u"orm['auth.User']"})
         },
         u'aldryn_jobs.jobcategorytranslation': {
-            'Meta': {'unique_together': "[[u'slug', u'language_code'], (u'language_code', u'master')]", 'object_name': 'JobCategoryTranslation', 'db_table': "u'aldryn_jobs_jobcategory_translation'"},
+            'Meta': {'unique_together': "[(u'language_code', u'master')]", 'object_name': 'JobCategoryTranslation', 'db_table': "u'aldryn_jobs_jobcategory_translation'"},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'language_code': ('django.db.models.fields.CharField', [], {'max_length': '15', 'db_index': 'True'}),
             u'master': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'translations'", 'null': 'True', 'to': u"orm['aldryn_jobs.JobCategory']"}),
@@ -67,12 +125,6 @@ class Migration(SchemaMigration):
             'app_config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['aldryn_jobs.JobsConfig']", 'null': 'True'}),
             u'cmsplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['cms.CMSPlugin']", 'unique': 'True', 'primary_key': 'True'}),
             'jobopenings': ('sortedm2m.fields.SortedManyToManyField', [], {'symmetrical': 'False', 'to': u"orm['aldryn_jobs.JobOpening']", 'null': 'True', 'blank': 'True'})
-        },
-        u'aldryn_jobs.jobnewsletterregistrationplugin': {
-            'Meta': {'object_name': 'JobNewsletterRegistrationPlugin'},
-            'app_config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['aldryn_jobs.JobsConfig']", 'null': 'True'}),
-            u'cmsplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['cms.CMSPlugin']", 'unique': 'True', 'primary_key': 'True'}),
-            'mail_to_group': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'})
         },
         u'aldryn_jobs.jobopening': {
             'Meta': {'ordering': "[u'category__ordering', u'category', u'-created']", 'object_name': 'JobOpening'},
@@ -86,7 +138,7 @@ class Migration(SchemaMigration):
             'publication_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         },
         u'aldryn_jobs.jobopeningtranslation': {
-            'Meta': {'unique_together': "[[u'slug', u'language_code'], (u'language_code', u'master')]", 'object_name': 'JobOpeningTranslation', 'db_table': "u'aldryn_jobs_jobopening_translation'"},
+            'Meta': {'unique_together': "[(u'language_code', u'master')]", 'object_name': 'JobOpeningTranslation', 'db_table': "u'aldryn_jobs_jobopening_translation'"},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'language_code': ('django.db.models.fields.CharField', [], {'max_length': '15', 'db_index': 'True'}),
             'lead_in': ('djangocms_text_ckeditor.fields.HTMLField', [], {'blank': 'True'}),
@@ -104,27 +156,9 @@ class Migration(SchemaMigration):
             'placeholder_jobs_detail_top': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'aldryn_jobs_detail_top'", 'null': 'True', 'to': "orm['cms.Placeholder']"}),
             'placeholder_jobs_list_bottom': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'aldryn_jobs_list_bottom'", 'null': 'True', 'to': "orm['cms.Placeholder']"}),
             'placeholder_jobs_list_top': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'aldryn_jobs_list_top'", 'null': 'True', 'to': "orm['cms.Placeholder']"}),
-            'placeholder_jobs_newsletter_registration': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'aldryn_jobs_newsletter_registration'", 'null': 'True', 'to': "orm['cms.Placeholder']"}),
             'placeholder_jobs_sidebar': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'aldryn_jobs_sidebar'", 'null': 'True', 'to': "orm['cms.Placeholder']"}),
             'placeholder_jobs_top': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'aldryn_jobs_top'", 'null': 'True', 'to': "orm['cms.Placeholder']"}),
             'type': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'aldryn_jobs.newslettersignup': {
-            'Meta': {'object_name': 'NewsletterSignup'},
-            'app_config': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['aldryn_jobs.JobsConfig']", 'null': 'True'}),
-            'confirmation_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'}),
-            'default_language': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '32', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_verified': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'recipient': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75'}),
-            'signup_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'})
-        },
-        u'aldryn_jobs.newslettersignupuser': {
-            'Meta': {'object_name': 'NewsletterSignupUser'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'signup': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'related_user'", 'to': u"orm['aldryn_jobs.NewsletterSignup']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'newsletter_signup'", 'to': u"orm['auth.User']"})
         },
         u'auth.group': {
             'Meta': {'object_name': 'Group'},

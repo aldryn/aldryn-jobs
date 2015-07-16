@@ -100,16 +100,6 @@ class Migration(migrations.Migration):
             bases=('cms.cmsplugin',),
         ),
         migrations.CreateModel(
-            name='JobNewsletterRegistrationPlugin',
-            fields=[
-                ('cmsplugin_ptr', models.OneToOneField(serialize=False, primary_key=True, auto_created=True, parent_link=True, to='cms.CMSPlugin')),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=('cms.cmsplugin',),
-        ),
-        migrations.CreateModel(
             name='JobOpening',
             fields=[
                 ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
@@ -170,52 +160,13 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.CreateModel(
-            name='NewsletterSignup',
-            fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
-                ('recipient', models.EmailField(max_length=75, unique=True, verbose_name='recipient')),
-                ('default_language', models.CharField(max_length=32, choices=[('en', 'English'), ('de', 'German')], blank=True, default='', verbose_name='language')),
-                ('signup_date', models.DateTimeField(auto_now_add=True)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('is_disabled', models.BooleanField(default=False)),
-                ('confirmation_key', models.CharField(max_length=40, unique=True)),
-                ('app_config', models.ForeignKey(null=True, to='aldryn_jobs.JobsConfig', verbose_name='app_config')),
-            ],
-            options={
-            },
-            bases=(models.Model,),
-        ),
-        migrations.CreateModel(
-            name='NewsletterSignupUser',
-            fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
-                ('signup', models.ForeignKey(related_name='related_user', to='aldryn_jobs.NewsletterSignup')),
-                ('user', models.ForeignKey(related_name='newsletter_signup', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-            },
-            bases=(models.Model,),
-        ),
         migrations.AlterUniqueTogether(
             name='jobsconfig',
             unique_together=set([('type', 'namespace')]),
         ),
         migrations.AlterUniqueTogether(
             name='jobopeningtranslation',
-            unique_together=set([('language_code', 'master'), ('slug', 'language_code')]),
-        ),
-        migrations.AddField(
-            model_name='jobnewsletterregistrationplugin',
-            name='app_config',
-            field=models.ForeignKey(null=True, help_text='Select appropriate add-on configuration for this plugin.', to='aldryn_jobs.JobsConfig', verbose_name='app_config'),
-            preserve_default=True,
-        ),
-        migrations.AddField(
-            model_name='jobnewsletterregistrationplugin',
-            name='mail_to_group',
-            field=models.ManyToManyField(help_text='If user successfuly completed registration.<br/>Notification would be sent to users from selected groups<br/>Leave blank to disable notifications.<br/>', to='auth.Group', blank=True, verbose_name='Notification to'),
-            preserve_default=True,
+            unique_together=set([('language_code', 'master')]),
         ),
         migrations.AddField(
             model_name='joblistplugin',
@@ -231,7 +182,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='jobcategorytranslation',
-            unique_together=set([('language_code', 'master'), ('slug', 'language_code')]),
+            unique_together=set([('language_code', 'master')]),
         ),
         migrations.AddField(
             model_name='jobcategory',
