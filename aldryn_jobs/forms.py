@@ -64,14 +64,14 @@ class AutoSlugForm(TranslatableModelForm):
         super(AutoSlugForm, self).clean()
 
         if not self.data.get(self.slug_field):
-            slug = self.generate_slug()
+            # We cannot modify self.data directly since it is immutable
             raw_data = self.data.copy()
             # add to self.data in order to show generated slug in the
             # form in case of an error
-            raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug  # NOQA
-
-            # We cannot modify self.data directly because it can be
-            # Immutable QueryDict
+            slug = self.generate_slug()
+            raw_data[self.slug_field] = slug
+            self.cleaned_data[self.slug_field] = slug
+            # Copy modifications back to self.data
             self.data = raw_data
         else:
             slug = self.cleaned_data[self.slug_field]
@@ -100,7 +100,7 @@ class AutoSlugForm(TranslatableModelForm):
             self._meta.model.objects.language(language).filter(
                 app_config_filter).translated(language, slug=slug)
         )
-        if self.is_edit_action():
+        if self.instance.pk:
             conflicts = conflicts.exclude(pk=self.instance.pk)
 
         try:
@@ -153,6 +153,10 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
 
     slugified_field = 'name'
 
+    class Meta:
+        model = JobCategory
+        fields = ['name', 'slug', 'supervisors', 'app_config']
+
     def get_app_config_filter(self):
         app_config = self.cleaned_data['app_config']
         return Q(app_config=app_config)
@@ -165,22 +169,10 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
         self.validate_field_uniqueness_with_app_config('name', error_message)
         return self.cleaned_data
 
-    class Meta:
-        model = JobCategory
-        fields = ['name', 'slug', 'supervisors', 'app_config']
-
 
 class JobOpeningAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
-
-    def clean(self):
-        super(JobOpeningAdminForm, self).clean()
-        error_message = _(
-            'aldryn-jobs',
-            'Opening with that title already exists for selected category.')
-        self.validate_field_uniqueness_with_app_config('title', error_message)
-        return self.cleaned_data
 
     class Meta:
         model = JobOpening
@@ -225,13 +217,22 @@ class JobOpeningAdminForm(AutoSlugForm):
             return Q(category__app_config=app_config)
         return Q()
 
+    def clean(self):
+        super(JobOpeningAdminForm, self).clean()
+        error_message = _(
+            'aldryn-jobs',
+            'Opening with that title already exists for selected category.')
+        self.validate_field_uniqueness_with_app_config('title', error_message)
+        return self.cleaned_data
+
 
 class JobApplicationForm(forms.ModelForm):
+    FIVE_MEGABYTES = 1024 * 1024 * 5
     attachments = MultiFileField(
         max_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT', 5),
         min_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT', 0),
-        max_file_size=getattr(settings,
-            'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024 * 1024 * 5),
+        max_file_size=getattr(
+            settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', FIVE_MEGABYTES),
         required=False
     )
 
