@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from adminsortable2.admin import SortableAdminMixin
 from aldryn_apphooks_config.admin import BaseAppHookConfig
 from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
 from aldryn_translation_tools.admin import (
@@ -19,7 +20,7 @@ from cms import __version__ as cms_version
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
-from parler.admin import TranslatableAdmin
+from parler.admin import TranslatableAdmin, SortedRelatedFieldListFilter
 
 
 from .forms import JobCategoryAdminForm, JobOpeningAdminForm
@@ -138,10 +139,10 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
 
 
 class JobCategoryAdmin(VersionedPlaceholderAdminMixin,
-                       AllTranslationsMixin, TranslatableAdmin):
+                       SortableAdminMixin, AllTranslationsMixin,
+                       TranslatableAdmin):
     form = JobCategoryAdminForm
-    list_display = ['__str__', 'ordering', 'app_config']
-    list_editable = ['ordering']
+    list_display = ['__str__', 'app_config']
     filter_horizontal = ['supervisors']
 
     def get_fieldsets(self, request, obj=None):
@@ -168,9 +169,10 @@ class JobApplicationInline(LinkedRelatedInlineMixin, admin.TabularInline):
         return False
 
 
-class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
+class JobOpeningAdmin(AllTranslationsMixin,
+                      VersionedPlaceholderAdminMixin,
                       FrontendEditableAdminMixin,
-                      AllTranslationsMixin, TranslatableAdmin):
+                      TranslatableAdmin):
     form = JobOpeningAdminForm
     list_display = ['__str__', 'category', 'num_applications', ]
     frontend_editable_fields = ('title', 'lead_in')

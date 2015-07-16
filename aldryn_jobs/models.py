@@ -218,7 +218,8 @@ class JobOpening(TranslatableModel):
     class Meta:
         verbose_name = _('job opening')
         verbose_name_plural = _('job openings')
-        ordering = ['category__ordering', 'category', '-created']
+        # DO NOT attempt to add 'translated__title' here.
+        ordering = ['category__ordering', ]
 
     def __str__(self):
         return self.safe_translation_getter('title', str(self.pk))
@@ -335,7 +336,7 @@ class JobListPlugin(BaseJobsPlugin):
         Return the selected JobOpening for JobListPlugin.
 
         If no JobOpening are selected, return all active events for namespace
-        and language.
+        and language, sorted by title.
         """
         if self.jobopenings.exists():
             return self.jobopenings.filter(
@@ -346,6 +347,7 @@ class JobListPlugin(BaseJobsPlugin):
                               .language(self.language)
                               .translated(self.language)
                               .active()
+                              .order_by('translations__title')
         )
 
     def __str__(self):
