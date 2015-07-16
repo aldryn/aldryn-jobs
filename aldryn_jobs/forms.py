@@ -127,9 +127,10 @@ class AutoSlugForm(TranslatableModelForm):
         language = self.get_language_code()
         app_config_filter = self.get_app_config_filter()
         # validate uniqueness
+        # translated accepts key word arguments not Q objects.
         found = self._meta.model.objects.language(language).filter(
             app_config_filter).translated(language,
-                                          Q(field_name=field)).count()
+                                          **{field_name: field}).count()
 
         if found > 0:
             self.append_to_errors(field_name, error_message)
