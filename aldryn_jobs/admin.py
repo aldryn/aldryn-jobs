@@ -170,6 +170,7 @@ class JobApplicationInline(LinkedRelatedInlineMixin, admin.TabularInline):
 
 
 class JobOpeningAdmin(AllTranslationsMixin,
+                      SortableAdminMixin,
                       VersionedPlaceholderAdminMixin,
                       FrontendEditableAdminMixin,
                       TranslatableAdmin):
