@@ -41,17 +41,24 @@ DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
 logger = logging.getLogger(__name__)
 
 
-class AutoSlugForm(TranslatableModelForm):
-
-    slug_field = 'slug'
-    slugified_field = None
-
+class AutoAppConfigFormMixin(object):
+    """
+    If there is only a single AppConfig to choose, automatically select it.
+    """
     def __init__(self, *args, **kwargs):
-        super(AutoSlugForm, self).__init__(*args, **kwargs)
+        super(AutoAppConfigFormMixin, self).__init__(*args, **kwargs)
         if 'app_config' in self.fields:
             # if has only one choice, select it by default
             if self.fields['app_config'].queryset.count() == 1:
                 self.fields['app_config'].empty_label = None
+
+
+class AutoSlugForm(TranslatableModelForm):
+    """
+    Generates slugs and ensures that the slug is unique.
+    """
+    slug_field = 'slug'
+    slugified_field = None
 
     def clean(self):
         super(AutoSlugForm, self).clean()
@@ -137,7 +144,7 @@ class AutoSlugForm(TranslatableModelForm):
         return found > 0
 
 
-class JobCategoryAdminForm(AutoSlugForm):
+class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
 
     slugified_field = 'name'
 
