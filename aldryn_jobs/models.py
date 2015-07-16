@@ -143,23 +143,23 @@ class JobCategory(TranslatableModel):
     )
 
     supervisors = models.ManyToManyField(
-        get_user_model_for_fields(), verbose_name=_('Supervisors'),
+        get_user_model_for_fields(), verbose_name=_('supervisors'),
         # FIXME: This is mis-named should be "job_categories"?
         related_name='job_opening_categories',
         help_text=_('Those people will be notified via e-mail when new '
                     'application arrives.'),
         blank=True
     )
-    app_config = models.ForeignKey(JobsConfig,
-        verbose_name=_('app_config'), related_name='categories', null=True)
+    app_config = models.ForeignKey(JobsConfig, null=True,
+        verbose_name=_('app configuration'), related_name='categories')
 
     ordering = models.IntegerField(_('Ordering'), default=0)
 
     objects = AppHookConfigTranslatableManager()
 
     class Meta:
-        verbose_name = _('Job category')
-        verbose_name_plural = _('Job categories')
+        verbose_name = _('job category')
+        verbose_name_plural = _('job categories')
         ordering = ['ordering']
 
     def __str__(self):
@@ -202,7 +202,7 @@ class JobOpening(TranslatableModel):
     )
 
     content = PlaceholderField('Job Opening Content')
-    category = models.ForeignKey(JobCategory, verbose_name=_('Category'),
+    category = models.ForeignKey(JobCategory, verbose_name=_('category'),
         related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(_('Active'), default=True)
@@ -216,8 +216,8 @@ class JobOpening(TranslatableModel):
     objects = JobOpeningsManager()
 
     class Meta:
-        verbose_name = _('Job opening')
-        verbose_name_plural = _('Job openings')
+        verbose_name = _('job opening')
+        verbose_name_plural = _('job openings')
         ordering = ['category__ordering', 'category', '-created']
 
     def __str__(self):
@@ -307,14 +307,15 @@ def cleanup_attachments(sender, instance, **kwargs):
 
 @version_controlled_content(follow=['application'])
 class JobApplicationAttachment(models.Model):
-    application = models.ForeignKey(JobApplication, related_name='attachments')
+    application = models.ForeignKey(JobApplication, related_name='attachments',
+                                    verbose_name=_('job application'))
     file = JobApplicationFileField()
 
 
 class BaseJobsPlugin(CMSPlugin):
-    app_config = models.ForeignKey(JobsConfig, verbose_name=_('app_config'),
-        null=True, help_text=_(
-            'Select appropriate add-on configuration for this plugin.'))
+    app_config = models.ForeignKey(JobsConfig,
+        verbose_name=_('app configuration'), null=True,
+        help_text=_('Select appropriate app. configuration for this plugin.'))
 
     class Meta:
         abstract = True
@@ -324,9 +325,10 @@ class BaseJobsPlugin(CMSPlugin):
 class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
     jobopenings = SortedManyToManyField(JobOpening, blank=True, null=True,
-        help_text=_("Select Job Openings to show or don't select any to show "
-                    "last job openings. Note that Job Openings form different "
-                    "app config would be ignored."))
+        verbose_name=_('job openings'),
+        help_text=_("Choose specific Job Openings to show or leave empty to "
+                    "show latest. Note that Job Openings from different "
+                    "app configs will not appear."))
 
     def job_openings(self, namespace):
         """
