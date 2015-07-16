@@ -328,9 +328,9 @@ class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
     jobopenings = SortedManyToManyField(JobOpening, blank=True, null=True,
         verbose_name=_('job openings'),
-        help_text=_("Select Job Openings to show or don't select any to show "
-                    "last job openings. Note that Job Openings form different "
-                    "app config would be ignored."))
+        help_text=_("Choose specific Job Openings to show or leave empty to "
+                    "show latest. Note that Job Openings from different "
+                    "app configs will not appear."))
 
     def job_openings(self, namespace):
         """

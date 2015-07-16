@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from django.utils.translation import ugettext as _
+
 from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.models import AppHookConfig
 from cms.models.fields import PlaceholderField
@@ -34,5 +36,5 @@ class JobsConfig(AppHookConfig):
         'jobs_list_bottom', related_name='aldryn_jobs_list_bottom')
 
     class Meta:
-        verbose_name = 'Aldryn Jobs configuration'
-        verbose_name_plural = 'Aldryn Jobs configurations'
+        verbose_name = _('Aldryn Jobs configuration')
+        verbose_name_plural = _('Aldryn Jobs configurations')
