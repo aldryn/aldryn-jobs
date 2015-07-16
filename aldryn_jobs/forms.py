@@ -41,30 +41,37 @@ DEFAULT_SEND_TO = getattr(settings, 'ALDRYN_JOBS_DEFAULT_SEND_TO', None)
 logger = logging.getLogger(__name__)
 
 
-class AutoSlugForm(TranslatableModelForm):
-
-    slug_field = 'slug'
-    slugified_field = None
-
+class AutoAppConfigFormMixin(object):
+    """
+    If there is only a single AppConfig to choose, automatically select it.
+    """
     def __init__(self, *args, **kwargs):
-        super(AutoSlugForm, self).__init__(*args, **kwargs)
+        super(AutoAppConfigFormMixin, self).__init__(*args, **kwargs)
         if 'app_config' in self.fields:
             # if has only one choice, select it by default
             if self.fields['app_config'].queryset.count() == 1:
                 self.fields['app_config'].empty_label = None
 
+
+class AutoSlugForm(TranslatableModelForm):
+    """
+    Generates slugs and ensures that the slug is unique.
+    """
+    slug_field = 'slug'
+    slugified_field = None
+
     def clean(self):
         super(AutoSlugForm, self).clean()
 
         if not self.data.get(self.slug_field):
-            slug = self.generate_slug()
+            # We cannot modify self.data directly since it is immutable
             raw_data = self.data.copy()
             # add to self.data in order to show generated slug in the
             # form in case of an error
-            raw_data[self.slug_field] = self.cleaned_data[self.slug_field] = slug  # NOQA
-
-            # We cannot modify self.data directly because it can be
-            # Immutable QueryDict
+            slug = self.generate_slug()
+            raw_data[self.slug_field] = slug
+            self.cleaned_data[self.slug_field] = slug
+            # Copy modifications back to self.data
             self.data = raw_data
         else:
             slug = self.cleaned_data[self.slug_field]
@@ -93,7 +100,7 @@ class AutoSlugForm(TranslatableModelForm):
             self._meta.model.objects.language(language).filter(
                 app_config_filter).translated(language, slug=slug)
         )
-        if self.is_edit_action():
+        if self.instance.pk:
             conflicts = conflicts.exclude(pk=self.instance.pk)
 
         try:
@@ -128,18 +135,27 @@ class AutoSlugForm(TranslatableModelForm):
         app_config_filter = self.get_app_config_filter()
         # validate uniqueness
         # translated accepts key word arguments not Q objects.
-        found = self._meta.model.objects.language(language).filter(
-            app_config_filter).translated(language,
-                                          **{field_name: field}).count()
+        found = (
+            self._meta.model.objects
+                            .exclude(pk=self.instance.pk)
+                            .language(language)
+                            .filter(app_config_filter)
+                            .translated(language, **{field_name: field})
+                            .count()
+        )
 
         if found > 0:
             self.append_to_errors(field_name, error_message)
         return found > 0
 
 
-class JobCategoryAdminForm(AutoSlugForm):
+class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
 
     slugified_field = 'name'
+
+    class Meta:
+        model = JobCategory
+        fields = ['name', 'slug', 'supervisors', 'app_config']
 
     def get_app_config_filter(self):
         app_config = self.cleaned_data['app_config']
@@ -153,26 +169,10 @@ class JobCategoryAdminForm(AutoSlugForm):
         self.validate_field_uniqueness_with_app_config('name', error_message)
         return self.cleaned_data
 
-    class Meta:
-        model = JobCategory
-        fields = ['name', 'slug', 'supervisors', 'app_config']
-
 
 class JobOpeningAdminForm(AutoSlugForm):
 
     slugified_field = 'title'
-
-    def get_app_config_filter(self):
-        app_config = self.cleaned_data['category'].app_config
-        return Q(category__app_config=app_config)
-
-    def clean(self):
-        super(JobOpeningAdminForm, self).clean()
-        error_message = _(
-            'aldryn-jobs',
-            'Opening with that title already exists for selected category.')
-        self.validate_field_uniqueness_with_app_config('title', error_message)
-        return self.cleaned_data
 
     class Meta:
         model = JobOpening
@@ -206,13 +206,33 @@ class JobOpeningAdminForm(AutoSlugForm):
             # list of explicitly set fields, category might not be present.
             pass
 
+    def get_app_config_filter(self):
+        """
+        If there is a category, returns a filter limiting the queryset to
+        objects in the same app_config, otherwise, returns an empty filter
+        (Q-object).
+        """
+        if 'category' in self.cleaned_data:
+            app_config = self.cleaned_data['category'].app_config
+            return Q(category__app_config=app_config)
+        return Q()
+
+    def clean(self):
+        super(JobOpeningAdminForm, self).clean()
+        error_message = _(
+            'aldryn-jobs',
+            'Opening with that title already exists for selected category.')
+        self.validate_field_uniqueness_with_app_config('title', error_message)
+        return self.cleaned_data
+
 
 class JobApplicationForm(forms.ModelForm):
+    FIVE_MEGABYTES = 1024 * 1024 * 5
     attachments = MultiFileField(
         max_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_COUNT', 5),
         min_num=getattr(settings, 'ALDRYN_JOBS_ATTACHMENTS_MIN_COUNT', 0),
-        max_file_size=getattr(settings,
-            'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', 1024 * 1024 * 5),
+        max_file_size=getattr(
+            settings, 'ALDRYN_JOBS_ATTACHMENTS_MAX_FILE_SIZE', FIVE_MEGABYTES),
         required=False
     )
 
