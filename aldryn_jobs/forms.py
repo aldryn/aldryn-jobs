@@ -16,7 +16,7 @@ from django.core.exceptions import (
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
-from django.utils.translation import pgettext_lazy as _, get_language, ugettext
+from django.utils.translation import gettext as _, get_language, ugettext
 
 from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
@@ -111,9 +111,9 @@ class AutoSlugForm(TranslatableModelForm):
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
             'url': conflict.get_absolute_url(),
-            'label': _('aldryn-jobs', 'the conflicting object')}
+            'label': _('the conflicting object')}
         error_message = (
-            _('aldryn-jobs', 'Conflicting slug. See %(address)s.') % {
+            _('Conflicting slug. See %(address)s.') % {
                 'address': address
             }
         )
@@ -164,7 +164,6 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
     def clean(self):
         super(JobCategoryAdminForm, self).clean()
         error_message = _(
-            'aldryn-jobs',
             'Category with that name already exists for selected app_config.')
         self.validate_field_uniqueness_with_app_config('name', error_message)
         return self.cleaned_data
@@ -220,7 +219,6 @@ class JobOpeningAdminForm(AutoSlugForm):
     def clean(self):
         super(JobOpeningAdminForm, self).clean()
         error_message = _(
-            'aldryn-jobs',
             'Opening with that title already exists for selected category.')
         self.validate_field_uniqueness_with_app_config('title', error_message)
         return self.cleaned_data
