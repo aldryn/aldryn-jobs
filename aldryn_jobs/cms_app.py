@@ -14,7 +14,6 @@ from .menu import JobCategoryMenu
 class JobsApp(CMSConfigApp):
     name = _('Jobs')
     urls = ['aldryn_jobs.urls']
-    menus = [JobCategoryMenu]
     app_config = JobsConfig
 
 apphook_pool.register(JobsApp)
