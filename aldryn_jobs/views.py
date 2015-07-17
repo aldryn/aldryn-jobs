@@ -28,7 +28,7 @@ class JobOpeningList(AppConfigMixin, ListView):
         return (
             JobOpening.objects.active()
                               .language(language)
-                              .translated(language)
+                              .active_translations(language)
                               .select_related('category')
                               .order_by('category__id')
         )
