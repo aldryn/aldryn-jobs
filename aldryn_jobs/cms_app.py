@@ -8,8 +8,6 @@ from aldryn_jobs.models import JobsConfig
 from aldryn_apphooks_config.app_base import CMSConfigApp
 from cms.apphook_pool import apphook_pool
 
-from .menu import JobCategoryMenu
-
 
 class JobsApp(CMSConfigApp):
     name = _('Jobs')
