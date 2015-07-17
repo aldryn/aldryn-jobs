@@ -2,6 +2,9 @@
 
 from __future__ import unicode_literals
 
+import reversion
+
+from django.db import transaction
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect
@@ -127,6 +130,8 @@ class JobOpeningDetail(AppConfigMixin, DetailView):
         self.form = self.get_form(form_class)
         return super(JobOpeningDetail, self).get(*args, **kwargs)
 
+    @transaction.atomic
+    @reversion.create_revision()
     def post(self, *args, **kwargs):
         """Handles application for the job."""
         if not self.object.can_apply:
