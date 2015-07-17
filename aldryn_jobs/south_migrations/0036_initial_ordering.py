@@ -9,7 +9,7 @@ class Migration(DataMigration):
     def forwards(self, orm):
         """Sets up initial ordering for django-admin-sortable2"""
         order = 1
-        for job in orm.JobOpening.objects:
+        for job in orm.JobOpening.objects.all():
             job.ordering = order
             order += 1
             job.save()
