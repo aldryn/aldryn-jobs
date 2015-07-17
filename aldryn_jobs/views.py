@@ -27,6 +27,7 @@ class JobOpeningList(AppConfigMixin, ListView):
         language = get_language_from_request(self.request, check_path=True)
         return (
             JobOpening.objects.active()
+                              .filter(category__app_config=self.config)
                               .language(language)
                               .active_translations(language)
                               .select_related('category')
