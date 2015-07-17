@@ -16,7 +16,7 @@ from .models import JobOpening
 
 class JobCategoryMenu(CMSAttachMenu):
 
-    name = _('Job Categories')
+    name = _("Job Categories Menu")
 
     def get_nodes(self, request):
         try:
