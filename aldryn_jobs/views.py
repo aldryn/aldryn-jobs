@@ -12,6 +12,7 @@ from django.views.generic import DetailView, ListView
 from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_apphooks_config.utils import get_app_instance
 from menus.utils import set_language_changer
+from parler.views import TranslatableSlugMixin
 
 from .forms import JobApplicationForm
 from .models import JobCategory, JobOpening
@@ -54,10 +55,11 @@ class CategoryJobOpeningList(JobOpeningList):
         set_language_changer(self.request, category.get_absolute_url)
 
 
-class JobOpeningDetail(AppConfigMixin, DetailView):
+class JobOpeningDetail(AppConfigMixin, TranslatableSlugMixin, DetailView):
     form_class = JobApplicationForm
     template_name = 'aldryn_jobs/jobs_detail.html'
     slug_url_kwarg = 'job_opening_slug'
+    queryset = JobOpening.objects.all()
 
     def dispatch(self, request, *args, **kwargs):
         self.request = request
@@ -65,29 +67,6 @@ class JobOpeningDetail(AppConfigMixin, DetailView):
         self.object = self.get_object()
         self.set_language_changer(self.object)
         return super(JobOpeningDetail, self).dispatch(request, *args, **kwargs)
-
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-        slug = self.kwargs.get(self.slug_url_kwarg, None)
-        slug_field = self.get_slug_field()
-        language = get_language_from_request(self.request, check_path=True)
-        queryset = (
-            queryset.filter(category__app_config__namespace=self.namespace)
-                    .language(language)
-                    .translated(language, **{slug_field: slug})
-        )
-
-        job_opening = None
-        try:
-            job_opening = queryset.get()
-        except JobOpening.DoesNotExist:
-            pass
-        finally:
-            if (not job_opening or (not job_opening.get_active() and
-                                  not self.request.user.is_staff)):
-                raise Http404(_("Opening is no longer valid."))
-        return job_opening
 
     def get_form_class(self):
         return self.form_class
@@ -110,13 +89,6 @@ class JobOpeningDetail(AppConfigMixin, DetailView):
         Returns an instance of the form to be used in this view.
         """
         return form_class(**self.get_form_kwargs())
-
-    def get_queryset(self):
-        # not active as well, see `get_object` for more detail
-        language = get_language_from_request(self.request, check_path=True)
-        return JobOpening.objects.language(language).translated(
-            language
-        ).select_related('category')
 
     def set_language_changer(self, job_opening):
         """Translate the slug while changing the language."""
