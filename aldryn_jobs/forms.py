@@ -96,6 +96,11 @@ class AutoSlugForm(TranslatableModelForm):
 
     def get_slug_conflict(self, slug, language):
         app_config_filter = self.get_app_config_filter()
+        # if get_app_config_filter returns None - app_config is not accessible
+        # and validation is not possible.
+        if app_config_filter is None:
+            return None
+
         conflicts = (
             self._meta.model.objects.language(language).filter(
                 app_config_filter).translated(language, slug=slug)
@@ -133,6 +138,9 @@ class AutoSlugForm(TranslatableModelForm):
         field = self.cleaned_data[field_name]
         language = self.get_language_code()
         app_config_filter = self.get_app_config_filter()
+        # if get_app_config_filter returns None - app_config is not accessible
+        if app_config_filter is None:
+            return False
         # validate uniqueness
         # translated accepts key word arguments not Q objects.
         found = (
@@ -158,8 +166,14 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
         fields = ['name', 'slug', 'supervisors', 'app_config']
 
     def get_app_config_filter(self):
-        app_config = self.cleaned_data['app_config']
-        return Q(app_config=app_config)
+        """
+        If there is app_config, returns a filter limiting queryset to
+        objects in same app_config, otherwise, returns None
+        """
+        if 'app_config' in self.cleaned_data:
+            app_config = self.cleaned_data['app_config']
+            return Q(app_config=app_config)
+        return None
 
     def clean(self):
         super(JobCategoryAdminForm, self).clean()
@@ -209,13 +223,12 @@ class JobOpeningAdminForm(AutoSlugForm):
     def get_app_config_filter(self):
         """
         If there is a category, returns a filter limiting the queryset to
-        objects in the same app_config, otherwise, returns an empty filter
-        (Q-object).
+        objects in the same app_config, otherwise, returns None.
         """
         if 'category' in self.cleaned_data:
             app_config = self.cleaned_data['category'].app_config
             return Q(category__app_config=app_config)
-        return Q()
+        return None
 
     def clean(self):
         super(JobOpeningAdminForm, self).clean()
