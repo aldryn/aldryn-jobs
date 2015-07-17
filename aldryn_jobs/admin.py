@@ -20,7 +20,7 @@ from cms import __version__ as cms_version
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from distutils.version import LooseVersion
 from emailit.api import send_mail
-from parler.admin import TranslatableAdmin, SortedRelatedFieldListFilter
+from parler.admin import TranslatableAdmin
 
 
 from .forms import JobCategoryAdminForm, JobOpeningAdminForm
@@ -170,6 +170,7 @@ class JobApplicationInline(LinkedRelatedInlineMixin, admin.TabularInline):
 
 
 class JobOpeningAdmin(AllTranslationsMixin,
+                      SortableAdminMixin,
                       VersionedPlaceholderAdminMixin,
                       FrontendEditableAdminMixin,
                       TranslatableAdmin):

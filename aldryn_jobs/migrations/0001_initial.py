@@ -2,19 +2,18 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-from django.conf import settings
+import cms.models.fields
 import app_data.fields
+import sortedm2m.fields
+from django.conf import settings
 import djangocms_text_ckeditor.fields
 import aldryn_jobs.models
-import sortedm2m.fields
-import cms.models.fields
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('cms', '0003_auto_20140926_2347'),
-        ('auth', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -22,27 +21,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobApplication',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
-                ('salutation', models.CharField(max_length=20, choices=[('male', 'Mr.'), ('female', 'Mrs.')], blank=True, default='male', verbose_name='Salutation')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('salutation', models.CharField(choices=[('male', 'Mr.'), ('female', 'Mrs.')], max_length=20, default='male', blank=True, verbose_name='Salutation')),
                 ('first_name', models.CharField(max_length=20, verbose_name='First name')),
                 ('last_name', models.CharField(max_length=20, verbose_name='Last name')),
                 ('email', models.EmailField(max_length=75, verbose_name='E-mail')),
                 ('cover_letter', models.TextField(blank=True, verbose_name='Cover letter')),
-                ('created', models.DateTimeField(verbose_name='created', auto_now_add=True)),
+                ('created', models.DateTimeField(auto_now_add=True, verbose_name='created')),
                 ('is_rejected', models.BooleanField(default=False, verbose_name='rejected?')),
-                ('rejection_date', models.DateTimeField(verbose_name='rejection date', null=True, blank=True)),
+                ('rejection_date', models.DateTimeField(null=True, blank=True, verbose_name='rejection date')),
             ],
             options={
+                'verbose_name_plural': 'job applications',
                 'ordering': ['-created'],
+                'verbose_name': 'job application',
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='JobApplicationAttachment',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
-                ('file', models.FileField(upload_to=aldryn_jobs.models.default_jobs_attachment_upload_to, max_length=200, null=True, blank=True)),
-                ('application', models.ForeignKey(related_name='attachments', to='aldryn_jobs.JobApplication')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('file', models.FileField(null=True, max_length=200, blank=True, upload_to=aldryn_jobs.models.default_jobs_attachment_upload_to)),
+                ('application', models.ForeignKey(verbose_name='job application', related_name='attachments', to='aldryn_jobs.JobApplication')),
             ],
             options={
             },
@@ -51,7 +52,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobCategoriesPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(serialize=False, primary_key=True, auto_created=True, parent_link=True, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(serialize=False, to='cms.CMSPlugin', parent_link=True, primary_key=True, auto_created=True)),
             ],
             options={
                 'abstract': False,
@@ -61,38 +62,38 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobCategory',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
                 ('ordering', models.IntegerField(default=0, verbose_name='Ordering')),
             ],
             options={
+                'verbose_name_plural': 'job categories',
                 'ordering': ['ordering'],
-                'verbose_name_plural': 'Job categories',
-                'verbose_name': 'Job category',
+                'verbose_name': 'job category',
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='JobCategoryTranslation',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
                 ('language_code', models.CharField(max_length=15, db_index=True, verbose_name='Language')),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
-                ('slug', models.SlugField(max_length=255, verbose_name='Slug', blank=True, help_text='Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.')),
+                ('slug', models.SlugField(help_text='Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.', max_length=255, verbose_name='Slug', blank=True)),
                 ('master', models.ForeignKey(null=True, related_name='translations', to='aldryn_jobs.JobCategory', editable=False)),
             ],
             options={
-                'db_tablespace': '',
                 'managed': True,
-                'db_table': 'aldryn_jobs_jobcategory_translation',
+                'db_tablespace': '',
                 'default_permissions': (),
-                'verbose_name': 'Job category Translation',
+                'verbose_name': 'job category Translation',
+                'db_table': 'aldryn_jobs_jobcategory_translation',
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='JobListPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(serialize=False, primary_key=True, auto_created=True, parent_link=True, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(serialize=False, to='cms.CMSPlugin', parent_link=True, primary_key=True, auto_created=True)),
             ],
             options={
                 'abstract': False,
@@ -102,67 +103,62 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobOpening',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('is_active', models.BooleanField(default=True, verbose_name='Active')),
-                ('publication_start', models.DateTimeField(verbose_name='Published since', null=True, blank=True)),
-                ('publication_end', models.DateTimeField(verbose_name='Published until', null=True, blank=True)),
+                ('publication_start', models.DateTimeField(null=True, blank=True, verbose_name='Published since')),
+                ('publication_end', models.DateTimeField(null=True, blank=True, verbose_name='Published until')),
                 ('can_apply', models.BooleanField(default=True, verbose_name='Viewer can apply for the job')),
-                ('category', models.ForeignKey(related_name='jobs', to='aldryn_jobs.JobCategory', verbose_name='Category')),
-                ('content', cms.models.fields.PlaceholderField(slotname='Job Opening Content', null=True, to='cms.Placeholder', editable=False)),
+                ('ordering', models.IntegerField(default=0, verbose_name='Ordering')),
+                ('category', models.ForeignKey(verbose_name='category', related_name='jobs', to='aldryn_jobs.JobCategory')),
+                ('content', cms.models.fields.PlaceholderField(null=True, to='cms.Placeholder', slotname='Job Opening Content', editable=False)),
             ],
             options={
-                'ordering': ['category__ordering', 'category', '-created'],
-                'verbose_name_plural': 'Job openings',
-                'verbose_name': 'Job opening',
+                'verbose_name_plural': 'job openings',
+                'ordering': ['ordering'],
+                'verbose_name': 'job opening',
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='JobOpeningTranslation',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
                 ('language_code', models.CharField(max_length=15, db_index=True, verbose_name='Language')),
                 ('title', models.CharField(max_length=255, verbose_name='Title')),
-                ('slug', models.SlugField(max_length=255, verbose_name='Slug', blank=True, help_text='Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.')),
+                ('slug', models.SlugField(help_text='Auto-generated. Used in the URL. If changed, the URL will change. Clean it to have it re-created.', max_length=255, verbose_name='Slug', blank=True)),
                 ('lead_in', djangocms_text_ckeditor.fields.HTMLField(help_text='Will be displayed in lists', blank=True, verbose_name='Lead in')),
                 ('master', models.ForeignKey(null=True, related_name='translations', to='aldryn_jobs.JobOpening', editable=False)),
             ],
             options={
-                'db_tablespace': '',
                 'managed': True,
-                'db_table': 'aldryn_jobs_jobopening_translation',
+                'db_tablespace': '',
                 'default_permissions': (),
-                'verbose_name': 'Job opening Translation',
+                'verbose_name': 'job opening Translation',
+                'db_table': 'aldryn_jobs_jobopening_translation',
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='JobsConfig',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
                 ('type', models.CharField(max_length=100, verbose_name='type')),
-                ('namespace', models.CharField(max_length=100, unique=True, default=None, verbose_name='instance namespace')),
+                ('namespace', models.CharField(max_length=100, unique=True, verbose_name='instance namespace', default=None)),
                 ('app_data', app_data.fields.AppDataField(default='{}', editable=False)),
-                ('placeholder_jobs_detail_bottom', cms.models.fields.PlaceholderField(slotname='jobs_detail_bottom', null=True, related_name='aldryn_jobs_detail_bottom', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_detail_footer', cms.models.fields.PlaceholderField(slotname='jobs_detail_footer', null=True, related_name='aldryn_jobs_detail_footer', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_detail_top', cms.models.fields.PlaceholderField(slotname='jobs_detail_top', null=True, related_name='aldryn_jobs_detail_top', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_list_bottom', cms.models.fields.PlaceholderField(slotname='jobs_list_bottom', null=True, related_name='aldryn_jobs_list_bottom', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_list_top', cms.models.fields.PlaceholderField(slotname='jobs_list_top', null=True, related_name='aldryn_jobs_list_top', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_newsletter_registration', cms.models.fields.PlaceholderField(slotname='jobs_newsletter_registration', null=True, related_name='aldryn_jobs_newsletter_registration', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_sidebar', cms.models.fields.PlaceholderField(slotname='jobs_sidebar', null=True, related_name='aldryn_jobs_sidebar', to='cms.Placeholder', editable=False)),
-                ('placeholder_jobs_top', cms.models.fields.PlaceholderField(slotname='jobs_top', null=True, related_name='aldryn_jobs_top', to='cms.Placeholder', editable=False)),
+                ('placeholder_jobs_detail_bottom', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_detail_bottom', to='cms.Placeholder', slotname='jobs_detail_bottom', editable=False)),
+                ('placeholder_jobs_detail_footer', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_detail_footer', to='cms.Placeholder', slotname='jobs_detail_footer', editable=False)),
+                ('placeholder_jobs_detail_top', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_detail_top', to='cms.Placeholder', slotname='jobs_detail_top', editable=False)),
+                ('placeholder_jobs_list_bottom', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_list_bottom', to='cms.Placeholder', slotname='jobs_list_bottom', editable=False)),
+                ('placeholder_jobs_list_top', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_list_top', to='cms.Placeholder', slotname='jobs_list_top', editable=False)),
+                ('placeholder_jobs_sidebar', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_sidebar', to='cms.Placeholder', slotname='jobs_sidebar', editable=False)),
+                ('placeholder_jobs_top', cms.models.fields.PlaceholderField(null=True, related_name='aldryn_jobs_top', to='cms.Placeholder', slotname='jobs_top', editable=False)),
             ],
             options={
-                'verbose_name_plural': 'Apphook configs',
-                'verbose_name': 'Apphook config',
-                'abstract': False,
+                'verbose_name_plural': 'Aldryn Jobs configurations',
+                'verbose_name': 'Aldryn Jobs configuration',
             },
             bases=(models.Model,),
-        ),
-        migrations.AlterUniqueTogether(
-            name='jobsconfig',
-            unique_together=set([('type', 'namespace')]),
         ),
         migrations.AlterUniqueTogether(
             name='jobopeningtranslation',
@@ -171,13 +167,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='joblistplugin',
             name='app_config',
-            field=models.ForeignKey(null=True, help_text='Select appropriate add-on configuration for this plugin.', to='aldryn_jobs.JobsConfig', verbose_name='app_config'),
+            field=models.ForeignKey(null=True, verbose_name='app configuration', help_text='Select appropriate app. configuration for this plugin.', to='aldryn_jobs.JobsConfig'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='joblistplugin',
             name='jobopenings',
-            field=sortedm2m.fields.SortedManyToManyField(help_text="Select Job Openings to show or don't select any to show last job openings. Note that Job Openings form different app config would be ignored.", to='aldryn_jobs.JobOpening', null=True, blank=True),
+            field=sortedm2m.fields.SortedManyToManyField(null=True, blank=True, to='aldryn_jobs.JobOpening', verbose_name='job openings', help_text='Choose specific Job Openings to show or leave empty to show latest. Note that Job Openings from different app configs will not appear.'),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -187,25 +183,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobcategory',
             name='app_config',
-            field=models.ForeignKey(null=True, to='aldryn_jobs.JobsConfig', verbose_name='app_config'),
+            field=models.ForeignKey(null=True, verbose_name='app configuration', related_name='categories', to='aldryn_jobs.JobsConfig'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='jobcategory',
             name='supervisors',
-            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, help_text='Those people will be notified via e-mail when new application arrives.', related_name='job_opening_categories', blank=True, verbose_name='Supervisors'),
+            field=models.ManyToManyField(related_name='job_opening_categories', help_text='Those people will be notified via e-mail when new application arrives.', blank=True, to=settings.AUTH_USER_MODEL, verbose_name='supervisors'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='jobcategoriesplugin',
             name='app_config',
-            field=models.ForeignKey(null=True, help_text='Select appropriate add-on configuration for this plugin.', to='aldryn_jobs.JobsConfig', verbose_name='app_config'),
+            field=models.ForeignKey(null=True, verbose_name='app configuration', help_text='Select appropriate app. configuration for this plugin.', to='aldryn_jobs.JobsConfig'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='jobapplication',
             name='job_opening',
-            field=models.ForeignKey(to='aldryn_jobs.JobOpening'),
+            field=models.ForeignKey(related_name='applications', to='aldryn_jobs.JobOpening'),
             preserve_default=True,
         ),
     ]

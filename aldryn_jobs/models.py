@@ -213,13 +213,15 @@ class JobOpening(TranslatableModel):
     can_apply = models.BooleanField(_('Viewer can apply for the job'),
         default=True)
 
+    ordering = models.IntegerField(_('Ordering'), default=0)
+
     objects = JobOpeningsManager()
 
     class Meta:
         verbose_name = _('job opening')
         verbose_name_plural = _('job openings')
         # DO NOT attempt to add 'translated__title' here.
-        ordering = ['category__ordering', ]
+        ordering = ['ordering', ]
 
     def __str__(self):
         return self.safe_translation_getter('title', str(self.pk))
@@ -345,9 +347,8 @@ class JobListPlugin(BaseJobsPlugin):
         return (
             JobOpening.objects.filter(category__app_config=self.app_config)
                               .language(self.language)
-                              .translated(self.language)
+                              .active_translations(self.language)
                               .active()
-                              .order_by('translations__title')
         )
 
     def __str__(self):
