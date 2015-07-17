@@ -74,6 +74,13 @@ class JobsToolbar(CMSToolbar):
 
     def populate(self):
         def can(actions, model):
+            try:
+                # Py2
+                basestring = basestring
+            except NameError:
+                # Py3
+                basestring = (str, bytes)
+
             if isinstance(actions, basestring):
                 actions = [actions]
             for action in actions:

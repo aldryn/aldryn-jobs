@@ -43,9 +43,13 @@ class CategoryJobOpeningList(JobOpeningList):
 
         category_slug = self.kwargs['category_slug']
         try:
-            self.category = JobCategory.objects.language(language).translated(
-                language, slug=category_slug
-            ).namespace(self.namespace).get()
+            self.category = (
+                JobCategory.objects
+                           .language(language)
+                           .translated(language, slug=category_slug)
+                           .namespace(self.namespace)
+                           .get()
+            )
         except JobCategory.DoesNotExist:
             raise Http404
 
