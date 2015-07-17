@@ -277,3 +277,71 @@ class JobApphookTest(JobsBaseTestCase):
                 self.assertNotIn(response, other_plugins_text)
         # make sure that we tested at least one config
         self.assertNotEqual(configs.count(), len(skipped))
+
+    def test_one_active_hook_page_shows_openings_for_its_config_only(self):
+        new_config = JobsConfig.objects.create(
+            namespace='another_apphook_not_active')
+
+        default_opening = self.create_default_job_opening()
+
+        # default apphooked page url
+        with override('en'):
+            page_url = self.page.get_absolute_url()
+            new_category = JobCategory.objects.create(
+                name='Completely different namespace',
+                slug='completely-different-namespace',
+                app_config=new_config)
+            new_opening = self.create_new_job_opening(
+                self.prepare_data(1, category=new_category))
+            default_opening_url = default_opening.get_absolute_url()
+
+        response = self.client.get(page_url)
+        # check same apphook openings and their links are present
+        self.assertContains(response, default_opening_url)
+        self.assertContains(response, default_opening.title)
+        # check other apphook openings and their links are absent
+        # doesn't makes sense to test url for new opening
+        # since it cannot be properly resolved because of absent apphook
+        self.assertNotContains(response, new_opening.title)
+
+    def test_two_active_hook_page_shows_openings_for_its_config_only(self):
+        # prepare apphook
+        new_config = JobsConfig.objects.create(
+            namespace='another_apphook_not_active')
+        new_apphook_page = self.create_page(
+            title='new apphook', slug='new-apphook',
+            namespace=new_config.namespace)
+        default_opening = self.create_default_job_opening()
+
+        # default apphooked page url
+        with override('en'):
+            default_page_url = self.page.get_absolute_url()
+            new_apphook_page_url = new_apphook_page.get_absolute_url()
+            # create new category and opening
+            new_category = JobCategory.objects.create(
+                name='Completely different namespace',
+                slug='completely-different-namespace',
+                app_config=new_config)
+            new_opening = self.create_new_job_opening(
+                self.prepare_data(1, category=new_category))
+            # prepare openings links
+            new_opening_url = new_opening.get_absolute_url()
+            default_opening_url = default_opening.get_absolute_url()
+
+        # test default page
+        response = self.client.get(default_page_url)
+        # check same apphook openings and their links are present
+        self.assertContains(response, default_opening_url)
+        self.assertContains(response, default_opening.title)
+        # check other apphook openings and their links are absent
+        self.assertNotContains(response, new_opening_url)
+        self.assertNotContains(response, new_opening.title)
+
+        # test page with new apphook
+        response = self.client.get(new_apphook_page_url)
+        # check same apphook openings and their links are present
+        self.assertContains(response, new_opening_url)
+        self.assertContains(response, new_opening.title)
+        # check other apphook openings and their links are absent
+        self.assertNotContains(response, default_opening_url)
+        self.assertNotContains(response, default_opening.title)

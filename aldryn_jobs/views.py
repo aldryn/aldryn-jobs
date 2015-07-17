@@ -24,12 +24,13 @@ class JobOpeningList(AppConfigMixin, ListView):
     def get_queryset(self):
         # have to be a method, so the language isn't cached
         language = get_language_from_request(self.request, check_path=True)
-        return (
-            JobOpening.objects.active()
-                              .language(language)
-                              .translated(language)
-                              .select_related('category')
-                              .order_by('category__id')
+        return (JobOpening.objects.filter(
+            category__app_config__namespace=self.namespace)
+            .active()
+            .language(language)
+            .translated(language)
+            .select_related('category')
+            .order_by('category__id')
         )
 
 

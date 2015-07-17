@@ -1,9 +1,7 @@
-from copy import deepcopy
-
 from django.utils.translation import override
 from cms import api
 
-from ..models import JobOpening, JobCategory, JobsConfig
+from ..models import JobCategory, JobsConfig
 
 from .base import JobsBaseTestCase
 
@@ -179,30 +177,6 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
                 jobopenings)
             plugin.save()
         return plugin
-
-    def create_new_job_opening(self, data):
-        with override('en'):
-            job_opening = JobOpening.objects.create(**data)
-        return job_opening
-
-    def prepare_data(self, replace_with=1, category=None, update_date=False):
-        values = deepcopy(self.opening_values_raw['en'])
-        # if we need to change date to something in future
-        # we should do it before call to self.make_new_values
-        if update_date:
-            values.update(self.default_publication_start)
-        # make new values adds timedelta days=number which is passed as a
-        # second argument
-        values = self.make_new_values(values, replace_with)
-        # setup category
-        if category is None:
-            values['category'] = self.default_category
-        else:
-            values['category'] = category
-        # if date was not updated - use the default one
-        if not update_date:
-            values.update(self.default_publication_start)
-        return values
 
     def test_list_plugin_shows_selected_items(self):
         # since we setting up plugin in a setUp method with default
