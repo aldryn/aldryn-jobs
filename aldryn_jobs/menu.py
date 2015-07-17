@@ -26,9 +26,10 @@ class JobCategoryMenu(CMSAttachMenu):
         language = get_language_from_request(request)
         nodes = []
         categories = (
-            JobCategory.objects.namespace(app_namespace)
-                               .language(language)
-                               .translated(language)
+            JobCategory.objects
+                       .namespace(app_namespace)
+                       .language(language)
+                       .active_translations(language)
         )
         for category in categories:
             try:
@@ -59,7 +60,7 @@ class JobOpeningMenu(CMSAttachMenu):
                       .active()
                       .filter(category__app_config__namespace=app_namespace)
                       .language(current_language)
-                      .translated(current_language)
+                      .active_translations(current_language)
         )
         for job_opening in openings:
             try:
