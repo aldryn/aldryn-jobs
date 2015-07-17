@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import (
-    ugettext_lazy as _, get_language_from_request
+    ugettext as _, get_language_from_request
 )
 from django.views.generic import DetailView, ListView
 from aldryn_apphooks_config.mixins import AppConfigMixin
