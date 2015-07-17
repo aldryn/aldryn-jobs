@@ -96,10 +96,6 @@ class AutoSlugForm(TranslatableModelForm):
 
     def get_slug_conflict(self, slug, language):
         app_config_filter = self.get_app_config_filter()
-        # if get_app_config_filter returns None - app_config is not accessible
-        # and validation is not possible.
-        if app_config_filter is None:
-            return None
 
         conflicts = (
             self._meta.model.objects.language(language).filter(
@@ -168,12 +164,12 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
     def get_app_config_filter(self):
         """
         If there is app_config, returns a filter limiting queryset to
-        objects in same app_config, otherwise, returns None
+        objects in same app_config, otherwise, returns empty filter.
         """
         if 'app_config' in self.cleaned_data:
             app_config = self.cleaned_data['app_config']
             return Q(app_config=app_config)
-        return None
+        return Q()
 
     def clean(self):
         super(JobCategoryAdminForm, self).clean()
@@ -223,12 +219,12 @@ class JobOpeningAdminForm(AutoSlugForm):
     def get_app_config_filter(self):
         """
         If there is a category, returns a filter limiting the queryset to
-        objects in the same app_config, otherwise, returns None.
+        objects in the same app_config, otherwise, returns empty filter.
         """
         if 'category' in self.cleaned_data:
             app_config = self.cleaned_data['category'].app_config
             return Q(category__app_config=app_config)
-        return None
+        return Q()
 
     def clean(self):
         super(JobOpeningAdminForm, self).clean()
