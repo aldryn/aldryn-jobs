@@ -8,6 +8,7 @@
         "standard_form",
         "aldryn_common",
         "aldryn_boilerplates",
-        "aldryn_apphooks_config"
+        "aldryn_apphooks_config".
+        "adminsortable2"
     ]
 }
