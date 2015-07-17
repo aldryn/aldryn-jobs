@@ -146,14 +146,14 @@ class JobCategory(TranslatableModel):
         get_user_model_for_fields(), verbose_name=_('supervisors'),
         # FIXME: This is mis-named should be "job_categories"?
         related_name='job_opening_categories',
-        help_text=_('Supervisors will be notified via e-mail when a new '
+        help_text=_('Supervisors will be notified via email when a new '
                     'job application arrives.'),
         blank=True
     )
     app_config = models.ForeignKey(JobsConfig, null=True,
         verbose_name=_('app configuration'), related_name='categories')
 
-    ordering = models.IntegerField(_('Ordering'), default=0)
+    ordering = models.IntegerField(_('ordering'), default=0)
 
     objects = AppHookConfigTranslatableManager()
 
@@ -205,15 +205,15 @@ class JobOpening(TranslatableModel):
     category = models.ForeignKey(JobCategory, verbose_name=_('category'),
         related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(_('Active'), default=True)
-    publication_start = models.DateTimeField(_('Published since'),
+    is_active = models.BooleanField(_('active?'), default=True)
+    publication_start = models.DateTimeField(_('published since'),
         null=True, blank=True)
-    publication_end = models.DateTimeField(_('Published until'),
+    publication_end = models.DateTimeField(_('published until'),
         null=True, blank=True)
-    can_apply = models.BooleanField(_('Viewer can apply for the job'),
+    can_apply = models.BooleanField(_('viewer can apply for the job?'),
         default=True)
 
-    ordering = models.IntegerField(_('Ordering'), default=0)
+    ordering = models.IntegerField(_('ordering'), default=0)
 
     objects = JobOpeningsManager()
 
@@ -277,12 +277,12 @@ class JobApplication(models.Model):
     )
 
     job_opening = models.ForeignKey(JobOpening, related_name='applications')
-    salutation = models.CharField(_('Salutation'),
+    salutation = models.CharField(_('salutation'),
         max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
-    first_name = models.CharField(_('First name'), max_length=20)
-    last_name = models.CharField(_('Last name'), max_length=20)
-    email = models.EmailField(_('E-mail'))
-    cover_letter = models.TextField(_('Cover letter'), blank=True)
+    first_name = models.CharField(_('first name'), max_length=20)
+    last_name = models.CharField(_('last name'), max_length=20)
+    email = models.EmailField(_('email'))
+    cover_letter = models.TextField(_('cover letter'), blank=True)
     created = models.DateTimeField(_('created'), auto_now_add=True)
     is_rejected = models.BooleanField(_('rejected?'), default=False)
     rejection_date = models.DateTimeField(_('rejection date'),
