@@ -32,6 +32,7 @@ HELPER_SETTINGS = {
         'sortedm2m',
         'easy_thumbnails',
         'djangocms_text_ckeditor',
+        'adminsortable2',
     ],
     'THUMBNAIL_PROCESSORS': (
         'easy_thumbnails.processors.colorspace',

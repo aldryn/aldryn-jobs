@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from datetime import datetime, timedelta
+from copy import deepcopy
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -247,3 +248,27 @@ class JobsBaseTestCase(TransactionTestCase):
                 new_val = value.format(replace_with)
             new_dict[key] = new_val
         return new_dict
+
+    def create_new_job_opening(self, data):
+        with override('en'):
+            job_opening = JobOpening.objects.create(**data)
+        return job_opening
+
+    def prepare_data(self, replace_with=1, category=None, update_date=False):
+        values = deepcopy(self.opening_values_raw['en'])
+        # if we need to change date to something in future
+        # we should do it before call to self.make_new_values
+        if update_date:
+            values.update(self.default_publication_start)
+        # make new values adds timedelta days=number which is passed as a
+        # second argument
+        values = self.make_new_values(values, replace_with)
+        # setup category
+        if category is None:
+            values['category'] = self.default_category
+        else:
+            values['category'] = category
+        # if date was not updated - use the default one
+        if not update_date:
+            values.update(self.default_publication_start)
+        return values
