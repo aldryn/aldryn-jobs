@@ -44,8 +44,8 @@ class CategoryJobOpeningList(JobOpeningList):
         try:
             self.category = (
                 JobCategory.objects
-                           .language(language).active_translations(
-                                language, slug=category_slug)
+                           .language(language)
+                           .active_translations(language, slug=category_slug)
                            .namespace(self.namespace)
                            .get()
             )
