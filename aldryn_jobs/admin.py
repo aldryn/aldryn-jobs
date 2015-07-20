@@ -211,7 +211,7 @@ class JobOpeningAdmin(AllTranslationsMixin,
     num_applications.admin_order_field = 'applications_count'
 
 
-class JobsConfigAdmin(BaseAppHookConfig):
+class JobsConfigAdmin(VersionedPlaceholderAdminMixin, BaseAppHookConfig):
     pass
 
 
