@@ -195,6 +195,7 @@ class JobOpening(TranslatableModel):
     translations = TranslatedFields(
         title=models.CharField(_('title'), max_length=255),
         slug=models.SlugField(_('slug'), max_length=255, blank=True,
+            unique=False, db_index=False,
             help_text=_('Auto-generated. Used in the URL. If changed, the URL '
                         'will change. Clear it to have the slug re-created.')),
         lead_in=HTMLField(_('short description'), blank=True,

@@ -10,11 +10,15 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Removing unique constraint on 'JobsConfig', fields ['type', 'namespace']
         db.delete_unique(u'aldryn_jobs_jobsconfig', ['type', 'namespace'])
+        db.add_column(u'aldryn_jobs_jobopening', 'ordering',
+              self.gf('django.db.models.fields.IntegerField')(default=0),
+              keep_default=True)
 
 
     def backwards(self, orm):
         # Adding unique constraint on 'JobsConfig', fields ['type', 'namespace']
         db.create_unique(u'aldryn_jobs_jobsconfig', ['type', 'namespace'])
+        db.delete_column(u'aldryn_jobs_jobopening', 'ordering')
 
 
     models = {
