@@ -35,6 +35,8 @@ In your project's ``settings.py`` make sure you have all of::
     'aldryn_categories',
     'aldryn_jobs',
     'aldryn_translation_tools',
+    'adminsortable2',
+    'bootstrap3',
     'emailit',
     'parler',
     'sortedm2m',
