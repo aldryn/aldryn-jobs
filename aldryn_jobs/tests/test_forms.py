@@ -17,6 +17,38 @@ class JobCategoryAdminFormTestCase(JobsBaseTestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('app_config', form.errors.keys())
 
+    def test_form_not_valid_no_data_provided_at_all(self):
+        # and it produces validation error instead of 500
+        data = {}
+        form = JobCategoryAdminForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('app_config', form.errors.keys())
+        self.assertIn('name', form.errors.keys())
+
+    def test_form_not_valid_if_only_app_config_was_selected(self):
+        # and it produces validation error instead of 500
+        data = {'app_config': self.app_config.pk}
+        form = JobCategoryAdminForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors.keys())
+
+    def test_form_not_valid_if_only_name_was_provided(self):
+        # and it produces validation error instead of 500
+        data = {'name': self.default_category_values['en']['name']}
+        form = JobCategoryAdminForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('app_config', form.errors.keys())
+
+    def test_form_not_valid_if_only_slug_was_provided(self):
+        # and it produces validation error instead of 500
+        data = {
+            'slug': 'default-category-different-slug',
+        }
+        form = JobCategoryAdminForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors.keys())
+        self.assertIn('app_config', form.errors.keys())
+
     def test_form_not_valid_for_existing_name_in_same_app_config(self):
         data = {
             'app_config': self.app_config.pk,

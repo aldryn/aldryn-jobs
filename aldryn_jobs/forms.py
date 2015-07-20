@@ -133,7 +133,7 @@ class AutoSlugForm(TranslatableModelForm):
 
     def validate_field_uniqueness_with_app_config(self, field_name,
                                                   error_message):
-        field = self.cleaned_data[field_name]
+        field = self.cleaned_data.get(field_name, '')
         language = self.get_language_code()
         app_config_filter = self.get_app_config_filter()
 
