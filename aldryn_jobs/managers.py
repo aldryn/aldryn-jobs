@@ -17,6 +17,9 @@ class JobOpeningsQuerySet(TranslatableQuerySet):
             is_active=True
         )
 
+    def namespace(self, namespace):
+        return self.filter(category__app_config__namespace=namespace)
+
 
 class JobOpeningsManager(TranslatableManager):
     def get_queryset(self):
@@ -26,3 +29,6 @@ class JobOpeningsManager(TranslatableManager):
 
     def active(self):
         return self.get_queryset().active()
+
+    def namespace(self, namespace):
+        return self.get_query_set().namespace(namespace)

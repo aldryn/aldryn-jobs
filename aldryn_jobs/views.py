@@ -30,7 +30,7 @@ class JobOpeningList(AppConfigMixin, ListView):
         language = get_language_from_request(self.request, check_path=True)
         return (
             JobOpening.objects.active()
-                              .filter(category__app_config=self.config)
+                              .namespace(self.config.namespace)
                               .language(language)
                               .active_translations(language)
                               .select_related('category')
@@ -106,6 +106,10 @@ class JobOpeningDetail(AppConfigMixin, TranslatableSlugMixin, DetailView):
         form_class = self.get_form_class()
         self.form = self.get_form(form_class)
         return super(JobOpeningDetail, self).get(*args, **kwargs)
+
+    def get_queryset(self):
+        qs = super(JobOpeningDetail, self).get_queryset()
+        return qs.namespace(self.namespace)
 
     @transaction.atomic
     @reversion.create_revision()

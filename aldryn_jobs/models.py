@@ -342,11 +342,10 @@ class JobListPlugin(BaseJobsPlugin):
         and language, sorted by title.
         """
         if self.jobopenings.exists():
-            return self.jobopenings.filter(
-                category__app_config__namespace=namespace).active()
+            return self.jobopenings.namespace(namespace).active()
 
         return (
-            JobOpening.objects.filter(category__app_config=self.app_config)
+            JobOpening.objects.namespace(self.app_config.namespace)
                               .language(self.language)
                               .active_translations(self.language)
                               .active()
