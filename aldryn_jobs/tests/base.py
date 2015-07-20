@@ -194,13 +194,17 @@ class JobsBaseTestCase(TransactionTestCase):
                                       is_superuser=True)
         return super_user
 
-    def create_default_job_category(self, translated=False):
+    def create_default_job_category(self, translated=False, config=None):
         # ensure that we always start with english, since it looks
         # like there is some issues with handling active language
         # between tests cases run
+
+        if config is None:
+            config = self.app_config
+
         with override('en'):
             job_category = JobCategory.objects.create(
-                app_config=self.app_config,
+                app_config=config,
                 **self.default_category_values['en'])
 
         # check if we need a translated job_category
@@ -210,13 +214,17 @@ class JobsBaseTestCase(TransactionTestCase):
 
         return JobCategory.objects.language('en').get(pk=job_category.pk)
 
-    def create_default_job_opening(self, translated=False):
+    def create_default_job_opening(self, translated=False, category=None):
         # ensure that we always start with english, since it looks
         # like there is some issues with handling active language
         # between tests cases run
+
+        if category is None:
+            category = self.default_category
+
         with override('en'):
             job_opening = JobOpening.objects.create(
-                category=self.default_category,
+                category=category,
                 **self.default_job_values['en'])
             api.add_plugin(
                 job_opening.content,

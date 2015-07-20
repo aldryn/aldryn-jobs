@@ -36,7 +36,10 @@ def get_jobopening_from_path(path, language, current_url=None):
                 " populating cms menu")
 
     if current_url.url_name == 'job-opening-detail':
-        job_opening = JobOpening.objects.language(language)
+        # since identical names are allowed with different namespaces -
+        # perform correct lookup.
+        job_opening = JobOpening.objects.language(
+            language).namespace(current_url.namespace)
 
         if 'category_slug' in current_url.kwargs:
             category_slug = current_url.kwargs['category_slug']

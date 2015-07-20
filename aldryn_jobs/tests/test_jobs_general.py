@@ -345,3 +345,98 @@ class JobApphookTest(JobsBaseTestCase):
         # check other apphook openings and their links are absent
         self.assertNotContains(response, default_opening_url)
         self.assertNotContains(response, default_opening.title)
+
+    def test_two_active_hook_pages_same_category_and_opening_names(self):
+        # regression for issue with two job configs (different namespace)
+        # which have same categories names/slugs and same openings title/slugs
+        new_config = JobsConfig.objects.create(
+            namespace='another_apphook_to_test')
+        new_apphook_page = self.create_page(
+            title='new apphook', slug='new-apphook',
+            namespace=new_config.namespace)
+
+        default_opening = self.create_default_job_opening(translated=True)
+
+        same_name_category = self.create_default_job_category(
+            translated=True, config=new_config)
+        same_name_opening = self.create_default_job_opening(
+            translated=True, category=same_name_category)
+
+        lead_in_text_raw = '{0} lead in for other config'
+
+        for language in ('de', 'en'):
+            # get urls
+            default_opening_url = default_opening.get_absolute_url(language)
+            same_name_opening_url = same_name_opening.get_absolute_url(language)
+
+            with override(language):
+                default_app_url = self.page.get_absolute_url()
+                other_app_url = new_apphook_page.get_absolute_url()
+            with switch_language(same_name_opening, language):
+                # change lead in to be different for other opening
+                same_name_opening.lead_in = lead_in_text_raw.format(
+                    language)
+                same_name_opening.save()
+
+            # urls should be different because namespace is different
+            self.assertNotEqual(default_app_url, other_app_url)
+
+            response_default = self.client.get(default_app_url)
+            self.assertEqual(response_default.status_code, 200)
+            self.assertContains(response_default, default_opening_url)
+
+            response_other = self.client.get(other_app_url)
+            self.assertEqual(response_other.status_code, 200)
+            self.assertContains(response_other, same_name_opening_url)
+
+            # test translated content, unfortunately we need to explicitly
+            # switch language
+            with switch_language(default_opening, language):
+                self.assertContains(response_default, default_opening.title)
+            with switch_language(same_name_opening, language):
+                self.assertContains(response_other, same_name_opening.title)
+
+    def test_detail_view_same_category_and_opening_names(self):
+        # regression for issue with two job configs (different namespace)
+        # which have same categories names/slugs and same openings title/slugs
+        new_config = JobsConfig.objects.create(
+            namespace='another_apphook_to_test')
+        self.create_page(
+            title='new apphook', slug='new-apphook',
+            namespace=new_config.namespace)
+
+        default_opening = self.create_default_job_opening(translated=True)
+
+        same_name_category = self.create_default_job_category(
+            translated=True, config=new_config)
+        same_name_opening = self.create_default_job_opening(
+            translated=True, category=same_name_category)
+
+        lead_in_text_raw = '{0} lead in for other config'
+
+        for language in ('de', 'en'):
+            # get urls
+            default_opening_url = default_opening.get_absolute_url(language)
+            same_name_opening_url = same_name_opening.get_absolute_url(language)
+            with switch_language(same_name_opening, language):
+                # change lead in to be different for other opening
+                same_name_opening.lead_in = lead_in_text_raw.format(
+                    language)
+                same_name_opening.save()
+
+            # urls should be different because namespace is different
+            self.assertNotEqual(default_opening_url, same_name_opening_url)
+
+            # default one
+            response_default = self.client.get(default_opening_url)
+            self.assertEqual(response_default.status_code, 200)
+            # same named
+            response_other = self.client.get(same_name_opening_url)
+            self.assertEqual(response_other.status_code, 200)
+            # test translatable content
+            with switch_language(default_opening, language):
+                self.assertContains(response_default, default_opening.title)
+                self.assertContains(response_default, default_opening.lead_in)
+            with switch_language(same_name_opening, language):
+                self.assertContains(response_other, same_name_opening.title)
+                self.assertContains(response_other, same_name_opening.lead_in)

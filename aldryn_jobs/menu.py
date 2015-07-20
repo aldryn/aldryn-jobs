@@ -58,7 +58,7 @@ class JobOpeningMenu(CMSAttachMenu):
         openings = (
             JobOpening.objects
                       .active()
-                      .filter(category__app_config__namespace=app_namespace)
+                      .namespace(app_namespace)
                       .language(current_language)
                       .active_translations(current_language)
         )
