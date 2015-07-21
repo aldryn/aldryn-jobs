@@ -70,7 +70,7 @@ class JobOpeningDetail(AppConfigMixin, TranslatableSlugMixin, DetailView):
     slug_url_kwarg = 'job_opening_slug'
 
     def get_queryset(self):
-        return JobOpening.objects.filter(category__app_config=self.config)
+        return JobOpening.objects.namespace(self.namespace)
 
     def dispatch(self, request, *args, **kwargs):
         self.request = request
