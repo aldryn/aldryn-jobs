@@ -21,34 +21,45 @@ from .forms import JobApplicationForm
 from .models import JobCategory, JobOpening
 
 
-class JobOpeningList(AppConfigMixin, ListView):
+class JobsBaseMixin(object):
     template_name = 'aldryn_jobs/jobs_list.html'
     model = JobOpening
 
+    def dispatch(self, request, *args, **kwargs):
+        # prepare language for misc usage
+        self.language = get_language_from_request(request, check_path=True)
+        return super(JobsBaseMixin, self).dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
-        # have to be a method, so the language isn't cached
-        language = get_language_from_request(self.request, check_path=True)
+        """
+        Base queryset returns active JobOpenings with respect to language and
+        namespace. selects related categories, no ordering.
+        """
         return (
             JobOpening.objects.active()
                               .namespace(self.config.namespace)
-                              .language(language)
-                              .active_translations(language)
+                              .language(self.language)
+                              .active_translations(self.language)
                               .select_related('category')
-                              .order_by('category__id')
         )
 
 
-class CategoryJobOpeningList(JobOpeningList):
-    def get_queryset(self):
-        qs = super(CategoryJobOpeningList, self).get_queryset()
-        language = get_language_from_request(self.request, check_path=True)
+class JobOpeningList(JobsBaseMixin, AppConfigMixin, ListView):
 
+    def get_queryset(self):
+        return super(JobOpeningList, self).get_queryset().order_by(
+            'category__ordering', 'ordering')
+
+
+class CategoryJobOpeningList(JobsBaseMixin, AppConfigMixin, ListView):
+    def get_queryset(self):
         category_slug = self.kwargs['category_slug']
         try:
             self.category = (
                 JobCategory.objects
-                           .language(language)
-                           .active_translations(language, slug=category_slug)
+                           .language(self.language)
+                           .active_translations(self.language,
+                                                slug=category_slug)
                            .namespace(self.namespace)
                            .get()
             )
@@ -56,7 +67,9 @@ class CategoryJobOpeningList(JobOpeningList):
             raise Http404
 
         self.set_language_changer(category=self.category)
-        return qs.filter(category=self.category)
+        return (super(CategoryJobOpeningList, self).get_queryset()
+                .filter(category=self.category)
+                .order_by('ordering'))
 
     def set_language_changer(self, category):
         """Translate the slug while changing the language."""
