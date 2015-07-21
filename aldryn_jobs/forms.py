@@ -96,10 +96,12 @@ class AutoSlugForm(TranslatableModelForm):
 
     def get_slug_conflict(self, slug, language):
         app_config_filter = self.get_app_config_filter()
-
         conflicts = (
-            self._meta.model.objects.language(language).filter(
-                app_config_filter).translated(language, slug=slug)
+            self._meta.model
+                      .objects
+                      .language(language)
+                      .filter(app_config_filter)
+                      .translated(language, slug=slug)
         )
         if self.instance.pk:
             conflicts = conflicts.exclude(pk=self.instance.pk)
@@ -107,7 +109,7 @@ class AutoSlugForm(TranslatableModelForm):
         try:
             return conflicts.get()
         except self._meta.model.DoesNotExist:
-            return None
+            return self._meta.model.objects.none()
 
     def report_error(self, conflict):
         address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
@@ -134,9 +136,7 @@ class AutoSlugForm(TranslatableModelForm):
         field = self.cleaned_data[field_name]
         language = self.get_language_code()
         app_config_filter = self.get_app_config_filter()
-        # if get_app_config_filter returns None - app_config is not accessible
-        if app_config_filter is None:
-            return False
+
         # validate uniqueness
         # translated accepts key word arguments not Q objects.
         found = (
