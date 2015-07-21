@@ -67,7 +67,9 @@ class JobOpeningDetail(AppConfigMixin, TranslatableSlugMixin, DetailView):
     form_class = JobApplicationForm
     template_name = 'aldryn_jobs/jobs_detail.html'
     slug_url_kwarg = 'job_opening_slug'
-    queryset = JobOpening.objects.all()
+
+    def get_queryset(self):
+        return JobOpening.objects.filter(category__app_config=self.config)
 
     def dispatch(self, request, *args, **kwargs):
         self.request = request
