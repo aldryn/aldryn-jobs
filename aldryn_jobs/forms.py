@@ -133,24 +133,32 @@ class AutoSlugForm(TranslatableModelForm):
 
     def validate_field_uniqueness_with_app_config(self, field_name,
                                                   error_message):
-        field = self.cleaned_data.get(field_name, '')
+        """
+        Validates uniqueness of field_name against app_config, if field is not
+        valid - adds error_message to form errors.
+        Returns True if field is unique, False otherwise.
+        """
+        field = self.cleaned_data.get(field_name, u'')
         language = self.get_language_code()
         app_config_filter = self.get_app_config_filter()
-
+        qs = (self._meta.model.objects
+                              .exclude(pk=self.instance.pk)
+                              .language(language)
+                              .filter(app_config_filter))
         # validate uniqueness
-        # translated accepts key word arguments not Q objects.
-        found = (
-            self._meta.model.objects
-                            .exclude(pk=self.instance.pk)
-                            .language(language)
-                            .filter(app_config_filter)
-                            .translated(language, **{field_name: field})
-                            .count()
-        )
+        if not field:
+            # do not validate, for some reasons field data is not there,
+            # most likely there is another validation error
+            found = 0
+        else:
+            # since querysets are lazy database lookup would be evaluated
+            # only if bool(field) is True.
+            # .translated accepts key word arguments not Q objects.
+            found = qs.translated(language, **{field_name: field}).count()
 
         if found > 0:
             self.append_to_errors(field_name, error_message)
-        return found > 0
+        return found == 0
 
 
 class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
