@@ -35,13 +35,10 @@ class TestAppConfigPluginsMixin(object):
         Assumes that page has that translation.
         """
         placeholder = page.placeholders.all()[0]
-        api.add_plugin(
+        plugin = api.add_plugin(
             placeholder, self.plugin_to_test, language,
             app_config=app_config, **plugin_params)
-        plugin = placeholder.get_plugins().filter(
-            language=language)[0].get_plugin_instance()[0]
-        plugin.save()
-        page.publish(self.language)
+        page.publish(language)
         return plugin
 
 
