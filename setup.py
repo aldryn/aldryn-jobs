@@ -13,20 +13,20 @@ REQUIREMENTS = [
     'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
-    'aldryn-reversion>=0.0.2',
-    'aldryn-translation-tools>=0.0.6',
+    'aldryn-reversion>=0.1.0',
+    'aldryn-translation-tools>=0.0.7',
     # aldryn categories has been added because of a migration dependency
-    # which sneaked somehow and we need it to be properly migrated
-    # also it would be used heavily in future (after a switch to this package
-    # instead of aldryn-jobs own categories).
+    # which sneaked in somehow and we need it to be properly migrated
+    # also it would be used in future (after a switch to this package
+    # instead of aldryn-jobs' own categories).
     'aldryn-categories',
     'unidecode',
     'django-multiupload>=0.3',
     'django-sortedm2m',
-    'django-admin-sortable2>=0.5.0',
+    'django-admin-sortable2>=0.5.2',
 ]
 
-py26 = sys.version_info < (2, 7, 0) and sys.version_info >= (2, 6, 5)
+py26 = sys.version_info >= (2, 6, 5) and sys.version_info < (2, 7, 0)
 if py26:
     REQUIREMENTS += [
         'Django>1.5,<1.7',
@@ -34,7 +34,7 @@ if py26:
     ]
 
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Environment :: Web Environment',
     'Framework :: Django',
     'Framework :: Django :: 1.6',
@@ -45,6 +45,8 @@ CLASSIFIERS = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.6',
     'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
     'Topic :: Software Development :: Libraries :: Application Frameworks',
