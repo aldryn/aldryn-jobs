@@ -15,10 +15,9 @@ REQUIREMENTS = [
     'aldryn-common>=0.0.4',
     'aldryn-reversion>=0.1.0',
     'aldryn-translation-tools>=0.0.7',
-    # aldryn categories has been added because of a migration dependency
-    # which sneaked in somehow and we need it to be properly migrated
-    # also it would be used in future (after a switch to this package
-    # instead of aldryn-jobs' own categories).
+    # Although we don't actually yet use Aldryn Categories, it has been added because of a
+    # migration dependency that sneaked in somehow. In any case we plan to adopt Aldryn Categories
+    # for this project in a release in the very near future.
     'aldryn-categories',
     'unidecode',
     'django-multiupload>=0.3',

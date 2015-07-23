@@ -26,11 +26,6 @@ which includes information on installation and getting started.
 It also contains `documentation for content editors and end-users
 <http://aldryn-jobs.readthedocs.org/en/latest/user/index.html>`_.
 
-IMPORTANT NOTE: ::
-
-    This repo is not ready for public use and is expected to undergo rapid
-    change before its v1.0 release.
-
 ************
 Contributing
 ************
@@ -46,4 +41,4 @@ Requirements
 ************
 
 * django CMS 3.0.12 or later
-* Django 1.6 or 1.7
+* Django 1.6.9 or 1.7.x
