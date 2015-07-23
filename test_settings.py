@@ -24,8 +24,8 @@ HELPER_SETTINGS = {
         'aldryn_reversion',
         'aldryn_common',
         'aldryn_jobs',
+        'bootstrap3',
         'reversion',
-        # TODO: findout who needs this dependency (maybe actually not this one
         'appconf',
         'filer',
         'parler',
