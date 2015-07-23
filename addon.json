@@ -9,6 +9,11 @@
         "aldryn_common",
         "aldryn_boilerplates",
         "aldryn_apphooks_config",
-        "adminsortable2"
+        "aldryn_reversion",
+        "aldryn_translation_tools",
+        "aldryn-categories",
+        "adminsortable2",
+        "bootstrap3",
+        "sortedm2m"
     ]
 }
