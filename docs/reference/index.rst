@@ -2,6 +2,16 @@
 Reference
 #########
 
+*****
+Email
+*****
+
+ALDRYN_JOBS_DEFAULT_SEND_TO
+===========================
+
+Optional, the email address to which job applications will be sent by default. Your Django project
+will need to be configured for email transfer.
+
 
 ******************
 Attachment storage

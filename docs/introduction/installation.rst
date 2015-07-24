@@ -108,3 +108,9 @@ On the Aldryn platform, the Addon is available from the `Marketplace
 
 You can also `install Aldryn Jobs into any existing Aldryn project
 <https://control.aldryn.com/control/?select_project_for_addon=aldryn-jobs>`_.
+
+At installation time on Aldryn, you will be asked to provide a ``Default send to`` value (required),
+an email address to which job applications will be sent. You can change this later if required.
+
+You will also need to install and configure **Aldryn Email Settings**, also via *Manage Addons* in
+the Control Panel.
