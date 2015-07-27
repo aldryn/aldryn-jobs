@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+1.0.1 (2015-07-27)
+------------------
+
+* Adds better documentation
+* Adds more frontend testing setup
+* Improves Aldryn compatibility
+
 1.0.0 (2015-07-22)
 ------------------
 
