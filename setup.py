@@ -6,7 +6,9 @@ from aldryn_jobs import __version__
 REQUIREMENTS = [
     'South<1.1,>=1.0.2',
     'aldryn-apphooks-config>=0.1.3',
+    'django-appdata>=0.1.4',
     'django-bootstrap3',
+    'django-cms>=3.0.12',
     'django-emailit',
     'django-parler',
     'django-standard-form',
@@ -20,10 +22,14 @@ REQUIREMENTS = [
     # plan to adopt Aldryn Categories for this project in a release in
     # the very near future.
     'aldryn-categories',
-    'unidecode',
     'django-multiupload>=0.3',
     'django-sortedm2m',
     'django-admin-sortable2>=0.5.2',
+    'unidecode',
+    'lxml',
+    'pytz',
+    'cssutils',
+    'html5lib<0.9999',
 ]
 
 py26 = sys.version_info >= (2, 6, 5) and sys.version_info < (2, 7, 0)
@@ -31,6 +37,10 @@ if py26:
     REQUIREMENTS += [
         'Django>1.5,<1.7',
         'ordereddict',
+    ]
+else:
+    REQUIREMENTS += [
+        'Django>=1.6,<1.8',
     ]
 
 CLASSIFIERS = [
