@@ -25,7 +25,7 @@ from aldryn_apphooks_config.managers.parler import (
 from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
 from cms.utils.i18n import force_language
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 from functools import partial
 from os.path import join as join_path
 from parler.models import TranslatableModel, TranslatedFields
@@ -37,11 +37,13 @@ from .cms_appconfig import JobsConfig
 from .managers import JobOpeningsManager
 from .utils import get_valid_filename
 
-strict_version = StrictVersion(get_version())
+# NOTE: We need to use LooseVersion NOT StrictVersion as Aldryn sometimes uses
+# patched versions of Django with version numbers in the form: X.Y.Z.postN
+loose_version = LooseVersion(get_version())
 
 
 def get_user_model_for_fields():
-    if strict_version < StrictVersion('1.7.0'):
+    if loose_version < LooseVersion('1.7.0'):
         return get_user_model()
     else:
         return getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -51,7 +53,7 @@ def get_user_model_for_fields():
 # avoid RegistrationError when registering models that refer to it.
 user_model = get_user_model_for_fields()
 
-if strict_version < StrictVersion('1.7.0'):
+if loose_version < LooseVersion('1.7.0'):
     # Prior to 1.7 it is pretty straight forward
     revision_manager = reversion.default_revision_manager
     if user_model not in revision_manager.get_registered_models():
