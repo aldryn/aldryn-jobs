@@ -113,4 +113,51 @@ describe('Aldryn Jobs tests: ', function () {
         });
     });
 
+    it('creates a new apphook config', function () {
+        // check if the focus is on sidebar ifarme
+        jobsPage.editPageLink.isPresent().then(function (present) {
+            if (present === false) {
+                // wait for modal iframe to appear
+                browser.wait(function () {
+                    return browser.isElementPresent(jobsPage.sideMenuIframe);
+                }, jobsPage.iframeWaitTime);
+
+                // switch to sidebar menu iframe
+                return browser.switchTo().frame(browser.findElement(By.css(
+                    '.cms_sideframe-frame iframe')));
+            }
+        }).then(function () {
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.breadcrumbsLinks.first());
+            }, jobsPage.mainElementsWaitTime);
+
+            // click the Home link in breadcrumbs
+            jobsPage.breadcrumbsLinks.first().click();
+
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.jobsAddConfigsLink);
+            }, jobsPage.mainElementsWaitTime);
+
+            jobsPage.jobsAddConfigsLink.click();
+
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.namespaceInput);
+            }, jobsPage.mainElementsWaitTime);
+
+            jobsPage.namespaceInput.sendKeys('aldryn_jobs').then(function () {
+                jobsPage.saveButton.click();
+
+                // check if Jobs configuration namespace already exists
+                return jobsPage.namespaceErrorNotification.isPresent();
+            }).then(function (present) {
+                if (present === false) {
+                    // wait for success notification
+                    browser.wait(function () {
+                        return browser.isElementPresent(jobsPage.successNotification);
+                    }, jobsPage.mainElementsWaitTime);
+                }
+            });
+        });
+    });
+
 });
