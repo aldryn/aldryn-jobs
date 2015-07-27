@@ -3,35 +3,58 @@ language: python
 sudo: false
 
 env:
-  - TOXENV=flake8
-  - TOXENV=py34-dj17-cms31-sqlite
-  - TOXENV=py34-dj17-cms30-sqlite
-  - TOXENV=py34-dj16-cms31-sqlite
-  - TOXENV=py34-dj16-cms30-sqlite
-  - TOXENV=py33-dj17-cms31-sqlite
-  - TOXENV=py33-dj17-cms30-sqlite
-  - TOXENV=py33-dj16-cms31-sqlite
-  - TOXENV=py33-dj16-cms30-sqlite
-  - TOXENV=py27-dj17-cms31-sqlite
-  - TOXENV=py27-dj17-cms30-sqlite
-  - TOXENV=py27-dj16-cms31-sqlite
-  - TOXENV=py27-dj16-cms30-sqlite
-  - TOXENV=py26-dj17-cms31-sqlite
-  - TOXENV=py26-dj17-cms30-sqlite
-  - TOXENV=py26-dj16-cms31-sqlite
-  - TOXENV=py26-dj16-cms30-sqlite
-# databases are not used yet, no appropriate setup...
-#  - TOXENV=py27-dj17-cms30-mysql
-#  - TOXENV=py27-dj17-cms30-postgres
-#  - TOXENV=py27-dj17-cms31-mysql
-#  - TOXENV=py27-dj17-cms31-postgres
+  global:
+    # encrypted Sauce Labs sub-account user name
+    - secure: iiVc2TwqQs0iCKlXETzLXlgP+LZJ7p1SFl0JyVpO/bu0X7QpbdSvGHx1OSk4DQjq90nuHdG/ist6lEW5AVPuAgxJ3kCSbPKssIwRWXAuJq1+YWB0BZgm0eswZYcmU0/vfIofe2WNJ/x8wUlAzYkOL2zlhcoKx0RFJPLFLoY9WKnqz/dy/m84fMLkCEfeRfWKkZagY7LWzOlbUyWaXA2nHlIWjyFIdOoXIxA/LlOPviIQc0vsNqVGDec96Ihxo7ymvZAtnpNu1I+Jmd4ekD34Dgd08oocViUK4oKtI661IZzlxRFGoZwVGGkX0byR2MnsF5uzuFk/3hmz5Xp88fBPrUhP2PHJjvL2mylOwbRM4rtmAakHhal8Yvdxg3IsvZms5ysWeEWCwQ7OGaYZ7PIrpwYLwYkTMiVHlwCO1BKjHAiMaU7reWVpLvos0orkDhHKShMBlcORM3WeaCPcK7ji6S8IjcTdPlj+P+YR90JQZiIkmHqwJdpA6/rWXHI6UhJ415oUrGr5+uWffYgB93ZFFfUBIsbaXGS+W8XS8bGmzsxsdxSwBC6cDfq9NGfSrv6u+4K0OsKjQnuEkxjcxcrj7Rev7UTu+qVOhaKxCny6oXH09ShjI7LCHD+8242gCsNUJW9B+6eSoB42WM1kQoQ/lBpDCoA0+ak/maefCy0qn8w=
+    # encrypted Sauce Labs sub-account token
+    - secure: AVysZRKNIVCKb2f5nOuNFfW6thQDtwT/vSFnvu0+GVKum+4ykH4HihJBsPUK+UJpFBtMZB/1Vg5wn0LNNi9UNtXU+AD87mJyOhQsofqRUEaX5VG/f4WPNlgztyXDI9Ro8/CtMBUXX7n6NUmw4EfZv2ELv7Lmr1gfXUJH6k/vDGGLSuw8fM9QlZW4Szz0QU0nTFwVThVaR9RzXRn77G5oVLcnCudd9n+aDAudIrD5wt4O0TnjQL8McQDuFNOAh8f4S4YkdfKu4XjWzICOR2L7y8qiVLnt6dhZf0+51pSFjArvPGtfPKypLi1rv0yhqMOpoFerDNEyfZSvyzfadzIX6gbME4un6GyCCsf1regVwOxYo4SJjrI3fC82AnW+RFrjxZox/7ibJ4Mav4fiuI/dZ7MkOzfzW8lrIfFdQd+KSqSV58mHJKI08hiSFFYn3lElxt9zhYjHKxlPwium4cKJi0GBhGjKdpglN+elydITiVJRaFpDm26JjwRClXDF4QL0jnHiwTW6sZCEEUJGWNvjHTMgDCgNVoromzhraJQIpU83ANP2wfLq5f0ACyVg5cmz/wdZx3sTbXAqnFkV2znRsIlsOcpP7DsAF4UfRbhtDvtpKkw/pShLm/23Fmvzg3zRUAZtXm6yo5dzNwIF8ebGCIRIMVEkaV3U71YwOBi/83s=
+    # encrypted Code Climate token
+    - secure: eegYV50fPm2nRBcjn8fniKUmiH7bnMvxNTT4mV0BQuYahKbqdCia2qpzKFzgBO187CtvI3vnmJ7sxyZtKmlNy/lBYco5tTahfeQnOCjOvk81oMnpnlIao/PLJ8soR32lCVcnkb/kaQ/7IrMszQ9BfV6XLIIb+7Job7TZxlM9USkHewhJT/7P4h9fNhuLLCD1rZpnCPXGFAW+asowY0o/G607K3zxLmCyRb52Lsu7KijW1S2C9mIbSw/wnkgbFDhzT51CN3iHNutBPfWy7l8WLrCvEp8oPxoNrC/6WY6vSJXNLZ3loERbXxawupObn3QvbVQxRVtCaTTIVaBtwO4fe5q0KYeDY2SMq3keH0x7WHMfRmRrkLk8YcuwghA7cw6otx4hxROODCoSidTMNLlx2jOojMAhENhKcEZphqOoFEToJ+pBYDtIbZbdTht45kqziZ+3LGoX4kvL3dvTK8Dai28RbIZKsLD6e75JRA07gFzKqExF3iyHri+kpoMGxydUl1FdWafgnZb7Bf0BVSsP1E70Hwmstf+9GXv77F4ggGW9xtICkAIkMbdLkkCDzSWbp7yKpxNE9nLqV9ZNgFNef6zXrYkH9REFspI5PJaxnfs4fW8hidtL4gKjLPppfPRyWVw7iChzVQ73ezXe3ryGeTe88WECUs8aVpSFn9DwbdY=
+  matrix:
+    - TOXENV=flake8
+    - TOXENV=py34-dj17-cms31-sqlite
+    - TOXENV=py34-dj17-cms30-sqlite
+    - TOXENV=py34-dj16-cms31-sqlite
+    - TOXENV=py34-dj16-cms30-sqlite
+    - TOXENV=py33-dj17-cms31-sqlite
+    - TOXENV=py33-dj17-cms30-sqlite
+    - TOXENV=py33-dj16-cms31-sqlite
+    - TOXENV=py33-dj16-cms30-sqlite
+    - TOXENV=py27-dj17-cms31-sqlite
+    - TOXENV=py27-dj17-cms30-sqlite
+    - TOXENV=py27-dj16-cms31-sqlite
+    - TOXENV=py27-dj16-cms30-sqlite
+    - TOXENV=py26-dj17-cms31-sqlite
+    - TOXENV=py26-dj17-cms30-sqlite
+    - TOXENV=py26-dj16-cms31-sqlite
+    - TOXENV=py26-dj16-cms30-sqlite
+  # databases are not used yet, no appropriate setup...
+  #  - TOXENV=py27-dj17-cms30-mysql
+  #  - TOXENV=py27-dj17-cms30-postgres
+  #  - TOXENV=py27-dj17-cms31-mysql
+  #  - TOXENV=py27-dj17-cms31-postgres
+
+cache:
+  directories:
+    - $HOME/.wheelhouse
+
+before_install:
+  - npm install -g npm
 
 install:
   - pip install tox
   - pip install coveralls
 
+before_script:
+  - npm install -g gulp
+  - npm install -g codeclimate-test-reporter
+  - npm install
+
 script:
   - tox -e $TOXENV
+
+after_script:
+  - codeclimate < tests/coverage/**/lcov.info
 
 after_success: coveralls
 

@@ -4,6 +4,8 @@ Aldryn Jobs
 
 |PyPI Version| |Build Status| |Coverage Status| |codeclimate| |requires_io|
 
+|Browser Matrix|
+
 .. |PyPI Version| image:: http://img.shields.io/pypi/v/aldryn-jobs.svg
    :target: https://pypi.python.org/pypi/aldryn-jobs
 .. |Build Status| image:: http://img.shields.io/travis/aldryn/aldryn-jobs/master.svg
@@ -16,6 +18,8 @@ Aldryn Jobs
 .. |requires_io| image:: https://requires.io/github/aldryn/aldryn-jobs/requirements.svg?branch=master
    :target: https://requires.io/github/aldryn/aldryn-jobs/requirements/?branch=master
    :alt: Requirements Status
+.. |Browser Matrix| image:: https://saucelabs.com/browser-matrix/aldryn-jobs.svg
+   :target: https://saucelabs.com/u/aldryn-jobs
 
 Aldryn Jobs is an Aldryn-compatible django CMS application for publishing
 job openings and receiving applications.
