@@ -265,6 +265,10 @@ describe('Aldryn Jobs tests: ', function () {
         // switch to default page content
         browser.switchTo().defaultContent();
 
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.testLink);
+        }, jobsPage.mainElementsWaitTime);
+
         // add jobs to the page only if it was not added before
         jobsPage.aldrynJobsBlock.isPresent().then(function (present) {
             if (present === false) {
@@ -311,6 +315,9 @@ describe('Aldryn Jobs tests: ', function () {
                 });
             }
         }).then(function () {
+            // refresh the page to see changes
+            browser.refresh();
+
             // wait for aldryn jobs block to appear
             browser.wait(function () {
                 return browser.isElementPresent(jobsPage.aldrynJobsBlock);
@@ -324,6 +331,75 @@ describe('Aldryn Jobs tests: ', function () {
 
             // validate job title
             expect(jobsPage.jobTitle.isDisplayed()).toBeTruthy();
+        });
+    });
+
+    it('deletes job opening', function () {
+        // wait for modal iframe to appear
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.sideMenuIframe);
+        }, jobsPage.iframeWaitTime);
+
+        // switch to sidebar menu iframe
+        browser.switchTo()
+            .frame(browser.findElement(By.css('.cms_sideframe-frame iframe')));
+
+        // wait for edit job opening link to appear
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.editJobOpeningLinks.first());
+        }, jobsPage.mainElementsWaitTime);
+
+        // validate edit job opening links texts to delete proper job opening
+        jobsPage.editJobOpeningLinks.first().getText().then(function (text) {
+            // wait till horizontal scrollbar will disappear and
+            // editJobOpeningLinks will become clickable
+            browser.sleep(1500);
+            if (text === jobName) {
+                return jobsPage.editJobOpeningLinks.first().click();
+            } else {
+                jobsPage.editJobOpeningLinks.get(1).getText()
+                    .then(function (text) {
+                    if (text === jobName) {
+                        return jobsPage.editJobOpeningLinks.get(1).click();
+                    } else {
+                        jobsPage.editJobOpeningLinks.get(2).getText()
+                            .then(function (text) {
+                            if (text === jobName) {
+                                return jobsPage.editJobOpeningLinks.get(2).click();
+                            }
+                        });
+                    }
+                });
+            }
+        }).then(function () {
+            // wait for delete button to appear
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.deleteButton);
+            }, jobsPage.mainElementsWaitTime);
+
+            browser.actions().mouseMove(jobsPage.saveAndContinueButton)
+                .perform();
+            return jobsPage.deleteButton.click();
+        }).then(function () {
+            // wait for confirmation button to appear
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.sidebarConfirmationButton);
+            }, jobsPage.mainElementsWaitTime);
+
+            jobsPage.sidebarConfirmationButton.click();
+
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.successNotification);
+            }, jobsPage.mainElementsWaitTime);
+
+            // validate success notification
+            expect(jobsPage.successNotification.isDisplayed()).toBeTruthy();
+
+            // switch to default page content
+            browser.switchTo().defaultContent();
+
+            // refresh the page to see changes
+            browser.refresh();
         });
     });
 
