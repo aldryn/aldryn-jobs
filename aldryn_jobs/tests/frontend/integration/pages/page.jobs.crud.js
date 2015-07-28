@@ -43,6 +43,12 @@ var jobsPage = {
     namespaceErrorNotification: element(by.css('.errors.field-namespace')),
     successNotification: element(by.css('.messagelist .success')),
 
+    // adding new category
+    jobsAddCategoriesLink: element(by.css('.model-jobcategory .addlink')),
+    nameInput: element(by.id('id_name')),
+    saveAndContinueButton: element(by.css('.submit-row [name="_continue"]')),
+    nameErrorNotification: element(by.css('.errors.field-name')),
+
     cmsLogin: function (credentials) {
         // object can contain username and password, if not set it will
         // fallback to 'admin'
