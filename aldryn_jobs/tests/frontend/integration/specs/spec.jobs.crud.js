@@ -160,4 +160,39 @@ describe('Aldryn Jobs tests: ', function () {
         });
     });
 
+    it('creates a new category', function () {
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.breadcrumbsLinks.first());
+        }, jobsPage.mainElementsWaitTime);
+
+        // click the Home link in breadcrumbs
+        jobsPage.breadcrumbsLinks.first().click();
+
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.jobsAddCategoriesLink);
+        }, jobsPage.mainElementsWaitTime);
+
+        jobsPage.jobsAddCategoriesLink.click().then(function () {
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.nameInput);
+            }, jobsPage.mainElementsWaitTime);
+
+            return jobsPage.nameInput.sendKeys('Test category');
+        }).then(function () {
+            browser.actions().mouseMove(jobsPage.saveAndContinueButton)
+                .perform();
+            jobsPage.saveButton.click();
+
+            // check if the category already exists and return the status
+            return jobsPage.nameErrorNotification.isPresent();
+        }).then(function (present) {
+            if (present === false) {
+                // wait for success notification
+                browser.wait(function () {
+                    return browser.isElementPresent(jobsPage.successNotification);
+                }, jobsPage.mainElementsWaitTime);
+            }
+        });
+    });
+
 });
