@@ -49,6 +49,18 @@ var jobsPage = {
     saveAndContinueButton: element(by.css('.submit-row [name="_continue"]')),
     nameErrorNotification: element(by.css('.errors.field-name')),
 
+    // adding new question
+    addJobOpeningsButton: element(by.css('.model-jobopening .addlink')),
+    categorySelect: element(by.id('id_category')),
+    startDateLinks: element.all(by.css(
+        '#id_publication_start_0 + .datetimeshortcuts > a')),
+    startTimeLinks: element.all(by.css(
+        '#id_publication_start_1 + .datetimeshortcuts > a')),
+    endDateInput: element(by.id('id_publication_end_0')),
+    endTimeInput: element(by.id('id_publication_end_1')),
+    editJobOpeningLinks: element.all(by.css(
+        '.results th > [href*="/aldryn_jobs/jobopening/"]')),
+
     cmsLogin: function (credentials) {
         // object can contain username and password, if not set it will
         // fallback to 'admin'
