@@ -61,6 +61,16 @@ var jobsPage = {
     editJobOpeningLinks: element.all(by.css(
         '.results th > [href*="/aldryn_jobs/jobopening/"]')),
 
+    // adding jobs block to the page
+    aldrynJobsBlock: element(by.css('.app-jobs')),
+    advancedSettingsOption: element(by.css(
+        '.cms_toolbar-item-navigation [href*="advanced-settings"]')),
+    modalIframe: element(by.css('.cms_modal-frame iframe')),
+    applicationSelect: element(by.id('application_urls')),
+    saveModalButton: element(by.css('.cms_modal-buttons .cms_btn-action')),
+    jobsOpeningLink: element(by.css('.jobs-title > a')),
+    jobTitle: element(by.css('.jobs-detail h2 > div')),
+
     cmsLogin: function (credentials) {
         // object can contain username and password, if not set it will
         // fallback to 'admin'
