@@ -261,4 +261,70 @@ describe('Aldryn Jobs tests: ', function () {
         });
     });
 
+    it('adds a new jobs block on the page', function () {
+        // switch to default page content
+        browser.switchTo().defaultContent();
+
+        // add jobs to the page only if it was not added before
+        jobsPage.aldrynJobsBlock.isPresent().then(function (present) {
+            if (present === false) {
+                // click the Page link in the top menu
+                return jobsPage.userMenus.get(1).click().then(function () {
+                    // wait for top menu dropdown options to appear
+                    browser.wait(function () {
+                        return browser.isElementPresent(jobsPage.userMenuDropdown);
+                    }, jobsPage.mainElementsWaitTime);
+
+                    jobsPage.advancedSettingsOption.click();
+
+                    // wait for modal iframe to appear
+                    browser.wait(function () {
+                        return browser.isElementPresent(jobsPage.modalIframe);
+                    }, jobsPage.iframeWaitTime);
+
+                    // switch to modal iframe
+                    browser.switchTo().frame(browser.findElement(By.css(
+                        '.cms_modal-frame iframe')));
+
+                    // wait for Application select to appear
+                    browser.wait(function () {
+                        return browser.isElementPresent(jobsPage.applicationSelect);
+                    }, jobsPage.mainElementsWaitTime);
+
+                    // set Application
+                    jobsPage.applicationSelect.click();
+                    jobsPage.applicationSelect.sendKeys('Jobs')
+                        .then(function () {
+                        jobsPage.applicationSelect.click();
+                    });
+
+                    // switch to default page content
+                    browser.switchTo().defaultContent();
+
+                    browser.wait(function () {
+                        return browser.isElementPresent(jobsPage.saveModalButton);
+                    }, jobsPage.mainElementsWaitTime);
+
+                    browser.actions().mouseMove(jobsPage.saveModalButton)
+                        .perform();
+                    return jobsPage.saveModalButton.click();
+                });
+            }
+        }).then(function () {
+            // wait for aldryn jobs block to appear
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.aldrynJobsBlock);
+            }, jobsPage.mainElementsWaitTime);
+
+            jobsPage.jobsOpeningLink.click();
+
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.jobTitle);
+            }, jobsPage.mainElementsWaitTime);
+
+            // validate job title
+            expect(jobsPage.jobTitle.isDisplayed()).toBeTruthy();
+        });
+    });
+
 });
