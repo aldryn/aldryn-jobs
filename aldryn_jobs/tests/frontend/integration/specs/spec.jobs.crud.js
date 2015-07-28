@@ -11,6 +11,9 @@
 var jobsPage = require('../pages/page.jobs.crud.js');
 
 describe('Aldryn Jobs tests: ', function () {
+    // create random job name
+    var jobName = 'Test job ' + (Math.floor(Math.random() * 10001));
+
     it('logs in to the site with valid username and password', function () {
         // go to the main page
         browser.get(jobsPage.site);
@@ -155,6 +158,10 @@ describe('Aldryn Jobs tests: ', function () {
                     browser.wait(function () {
                         return browser.isElementPresent(jobsPage.successNotification);
                     }, jobsPage.mainElementsWaitTime);
+
+                    // validate success notification
+                    expect(jobsPage.successNotification.isDisplayed())
+                        .toBeTruthy();
                 }
             });
         });
@@ -191,7 +198,66 @@ describe('Aldryn Jobs tests: ', function () {
                 browser.wait(function () {
                     return browser.isElementPresent(jobsPage.successNotification);
                 }, jobsPage.mainElementsWaitTime);
+
+                // validate success notification
+                expect(jobsPage.successNotification.isDisplayed())
+                    .toBeTruthy();
             }
+        });
+    });
+
+    it('creates a new job opening', function () {
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.breadcrumbsLinks.first());
+        }, jobsPage.mainElementsWaitTime);
+
+        // click the Home link in breadcrumbs
+        jobsPage.breadcrumbsLinks.first().click();
+
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.addJobOpeningsButton);
+        }, jobsPage.mainElementsWaitTime);
+
+        jobsPage.addJobOpeningsButton.click();
+
+        browser.wait(function () {
+            return browser.isElementPresent(jobsPage.titleInput);
+        }, jobsPage.mainElementsWaitTime);
+
+        jobsPage.titleInput.sendKeys(jobName).then(function () {
+            // set Category
+            jobsPage.categorySelect.click();
+
+            return jobsPage.categorySelect.sendKeys('Jobs / aldryn_jobs / Test category');
+        }).then(function () {
+            return jobsPage.categorySelect.click();
+        }).then(function () {
+            // click Today link
+            jobsPage.startDateLinks.first().click();
+            // click Now link
+            jobsPage.startTimeLinks.first().click();
+            // set End date
+            jobsPage.endDateInput.sendKeys('2100-07-09');
+            // set End time
+            return jobsPage.endTimeInput.sendKeys('12:34:56');
+        }).then(function () {
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.saveAndContinueButton);
+            }, jobsPage.mainElementsWaitTime);
+
+            browser.actions().mouseMove(jobsPage.saveAndContinueButton)
+                .perform();
+            jobsPage.saveButton.click();
+
+            browser.wait(function () {
+                return browser.isElementPresent(jobsPage.successNotification);
+            }, jobsPage.mainElementsWaitTime);
+
+            // validate success notification
+            expect(jobsPage.successNotification.isDisplayed()).toBeTruthy();
+            // validate edit job opening link
+            expect(jobsPage.editJobOpeningLinks.first().isDisplayed())
+                .toBeTruthy();
         });
     });
 
