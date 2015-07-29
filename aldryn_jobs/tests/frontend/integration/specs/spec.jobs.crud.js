@@ -354,18 +354,19 @@ describe('Aldryn Jobs tests: ', function () {
             // wait till horizontal scrollbar will disappear and
             // editJobOpeningLinks will become clickable
             browser.sleep(1500);
+
             if (text === jobName) {
                 return jobsPage.editJobOpeningLinks.first().click();
             } else {
-                jobsPage.editJobOpeningLinks.get(1).getText()
+                return jobsPage.editJobOpeningLinks.get(1).getText()
                     .then(function (text) {
                     if (text === jobName) {
-                        return jobsPage.editJobOpeningLinks.get(1).click();
+                        jobsPage.editJobOpeningLinks.get(1).click();
                     } else {
-                        jobsPage.editJobOpeningLinks.get(2).getText()
+                        return jobsPage.editJobOpeningLinks.get(2).getText()
                             .then(function (text) {
                             if (text === jobName) {
-                                return jobsPage.editJobOpeningLinks.get(2).click();
+                                jobsPage.editJobOpeningLinks.get(2).click();
                             }
                         });
                     }
