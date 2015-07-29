@@ -361,12 +361,12 @@ describe('Aldryn Jobs tests: ', function () {
                 return jobsPage.editJobOpeningLinks.get(1).getText()
                     .then(function (text) {
                     if (text === jobName) {
-                        jobsPage.editJobOpeningLinks.get(1).click();
+                        return jobsPage.editJobOpeningLinks.get(1).click();
                     } else {
                         return jobsPage.editJobOpeningLinks.get(2).getText()
                             .then(function (text) {
                             if (text === jobName) {
-                                jobsPage.editJobOpeningLinks.get(2).click();
+                                return jobsPage.editJobOpeningLinks.get(2).click();
                             }
                         });
                     }
