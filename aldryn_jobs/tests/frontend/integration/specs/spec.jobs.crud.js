@@ -318,9 +318,9 @@ describe('Aldryn Jobs tests: ', function () {
             // refresh the page to see changes
             browser.refresh();
 
-            // wait for aldryn jobs block to appear
+            // wait for link to appear in aldryn jobs block
             browser.wait(function () {
-                return browser.isElementPresent(jobsPage.aldrynJobsBlock);
+                return browser.isElementPresent(jobsPage.jobsOpeningLink);
             }, jobsPage.mainElementsWaitTime);
 
             jobsPage.jobsOpeningLink.click();
