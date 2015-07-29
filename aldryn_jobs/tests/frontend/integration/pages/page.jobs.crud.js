@@ -49,7 +49,7 @@ var jobsPage = {
     saveAndContinueButton: element(by.css('.submit-row [name="_continue"]')),
     nameErrorNotification: element(by.css('.errors.field-name')),
 
-    // adding new question
+    // adding new job opening
     addJobOpeningsButton: element(by.css('.model-jobopening .addlink')),
     categorySelect: element(by.id('id_category')),
     startDateLinks: element.all(by.css(
@@ -70,6 +70,10 @@ var jobsPage = {
     saveModalButton: element(by.css('.cms_modal-buttons .cms_btn-action')),
     jobsOpeningLink: element(by.css('.jobs-title > a')),
     jobTitle: element(by.css('.jobs-detail h2 > div')),
+
+    // deleting job opening
+    deleteButton: element(by.css('.deletelink-box a')),
+    sidebarConfirmationButton: element(by.css('#content [type="submit"]')),
 
     cmsLogin: function (credentials) {
         // object can contain username and password, if not set it will
