@@ -201,7 +201,7 @@ msgstr "Sie können sich für diese Stelle nicht bewerben."
 #, python-format
 msgctxt "aldryn-jobs"
 msgid "You have successfully applied for %(job)s."
-msgstr "Herzlichen Dank für ihre Bewerbung auf die Stelle %(job)s."
+msgstr "Herzlichen Dank für Ihre Bewerbung auf die Stelle %(job)s."
 
 #: templates/aldryn_jobs/jobs_detail.html:19
 msgid "Back"
@@ -211,7 +211,7 @@ msgstr "Zurück"
 #: templates/aldryn_jobs/emails/confirmation.body.txt:6
 msgctxt "aldryn-jobs"
 msgid "We will inform you about the progress."
-msgstr "Wir halten sie auf dem Laufenden."
+msgstr "Wir halten Sie auf dem Laufenden."
 
 #: templates/aldryn_jobs/emails/notification.body.txt:4
 #: templates/aldryn_jobs/emails/notification.subject.txt:2
