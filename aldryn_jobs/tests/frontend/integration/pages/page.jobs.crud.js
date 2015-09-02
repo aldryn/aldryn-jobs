@@ -52,6 +52,7 @@ var jobsPage = {
     // adding new job opening
     addJobOpeningsButton: element(by.css('.model-jobopening .addlink')),
     categorySelect: element(by.id('id_category')),
+    categoryOption: element(by.css('#id_category > option:nth-child(2)')),
     startDateLinks: element.all(by.css(
         '#id_publication_start_0 + .datetimeshortcuts > a')),
     startTimeLinks: element.all(by.css(
@@ -67,6 +68,7 @@ var jobsPage = {
         '.cms_toolbar-item-navigation [href*="advanced-settings"]')),
     modalIframe: element(by.css('.cms_modal-frame iframe')),
     applicationSelect: element(by.id('application_urls')),
+    jobsOption: element(by.css('option[value="JobsApp"]')),
     saveModalButton: element(by.css('.cms_modal-buttons .cms_btn-action')),
     jobsOpeningLink: element(by.css('.jobs-title > a')),
     jobTitle: element(by.css('.jobs-detail h2 > div')),
