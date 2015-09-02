@@ -9,6 +9,7 @@
 // #############################################################################
 // INTEGRATION TEST
 var jobsPage = require('../pages/page.jobs.crud.js');
+var cmsProtractorHelper = require('cms-protractor-helper');
 
 describe('Aldryn Jobs tests: ', function () {
     // create random job name
@@ -226,11 +227,8 @@ describe('Aldryn Jobs tests: ', function () {
 
         jobsPage.titleInput.sendKeys(jobName).then(function () {
             // set Category
-            jobsPage.categorySelect.click();
-
-            return jobsPage.categorySelect.sendKeys('Jobs / aldryn_jobs / Test category');
-        }).then(function () {
-            return jobsPage.categorySelect.click();
+            return cmsProtractorHelper.selectOption(jobsPage.categorySelect,
+                'Jobs / aldryn_jobs / Test category', jobsPage.categoryOption);
         }).then(function () {
             // click Today link
             jobsPage.startDateLinks.first().click();
@@ -270,7 +268,7 @@ describe('Aldryn Jobs tests: ', function () {
         }, jobsPage.mainElementsWaitTime);
 
         // add jobs to the page only if it was not added before
-        jobsPage.aldrynJobsBlock.isPresent().then(function (present) {
+        return jobsPage.aldrynJobsBlock.isPresent().then(function (present) {
             if (present === false) {
                 // click the Page link in the top menu
                 return jobsPage.userMenus.get(1).click().then(function () {
@@ -290,17 +288,9 @@ describe('Aldryn Jobs tests: ', function () {
                     browser.switchTo().frame(browser.findElement(By.css(
                         '.cms_modal-frame iframe')));
 
-                    // wait for Application select to appear
-                    browser.wait(function () {
-                        return browser.isElementPresent(jobsPage.applicationSelect);
-                    }, jobsPage.mainElementsWaitTime);
-
                     // set Application
-                    jobsPage.applicationSelect.click();
-                    jobsPage.applicationSelect.sendKeys('Jobs')
-                        .then(function () {
-                        jobsPage.applicationSelect.click();
-                    });
+                    cmsProtractorHelper.selectOption(jobsPage.applicationSelect,
+                        'Jobs', jobsPage.jobsOption);
 
                     // switch to default page content
                     browser.switchTo().defaultContent();
@@ -315,6 +305,8 @@ describe('Aldryn Jobs tests: ', function () {
                 });
             }
         }).then(function () {
+            cmsProtractorHelper.waitFor(jobsPage.testLink);
+
             // refresh the page to see changes
             browser.refresh();
 
