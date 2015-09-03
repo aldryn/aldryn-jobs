@@ -288,7 +288,7 @@ describe('Aldryn Jobs tests: ', function () {
                     browser.switchTo().frame(browser.findElement(By.css(
                         '.cms_modal-frame iframe')));
 
-                    // set Application
+                    // set Jobs Application
                     cmsProtractorHelper.selectOption(jobsPage.applicationSelect,
                         'Jobs', jobsPage.jobsOption);
 
