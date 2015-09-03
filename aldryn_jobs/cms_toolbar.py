@@ -50,8 +50,7 @@ def get_jobopening_from_path(path, language, current_url=None):
 
         if 'job_opening_slug' in current_url.kwargs:
             job_slug = current_url.kwargs['job_opening_slug']
-            # FIXME: is there is a reason for explicit language 'en'?
-            job_opening = job_opening.translated('en', slug=job_slug)
+            job_opening = job_opening.translated(language, slug=job_slug)
 
         if job_opening.count():
             # Let MultipleObjectsReturned propagate if it is raised
