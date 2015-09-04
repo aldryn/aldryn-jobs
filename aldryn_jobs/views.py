@@ -35,6 +35,10 @@ class JobsBaseMixin(object):
         Base queryset returns active JobOpenings with respect to language and
         namespace. selects related categories, no ordering.
         """
+        # if config is none - probably apphook relaod is in progress, or
+        # something is wrong, anyway do not fail with 500
+        if self.config is None:
+            return JobOpening.objects.none()
         return (
             JobOpening.objects.active()
                               .namespace(self.config.namespace)
