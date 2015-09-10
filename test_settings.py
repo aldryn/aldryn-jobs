@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 
 class DisableMigrations(dict):
@@ -19,11 +20,9 @@ HELPER_SETTINGS = {
         # needed for tests, since we need to reload server after apphook has
         # been added to a page, otherwise we cannot get a correct url.
         'aldryn_apphook_reload',
-        'aldryn_boilerplates',
         'aldryn_categories',
         'aldryn_reversion',
         'aldryn_common',
-        'aldryn_jobs',
         'bootstrap3',
         'reversion',
         'appconf',
@@ -95,40 +94,13 @@ HELPER_SETTINGS = {
         'cms.middleware.page.CurrentPageMiddleware',
         'cms.middleware.toolbar.ToolbarMiddleware'
     ],
-    'STATICFILES_FINDERS': [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        # important! place right before django.contrib.staticfiles.finders.AppDirectoriesFinder  # NOQA
-        'aldryn_boilerplates.staticfile_finders.AppDirectoriesFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    ],
-    'TEMPLATE_CONTEXT_PROCESSORS': (
-        'django.contrib.auth.context_processors.auth',
-        'django.contrib.messages.context_processors.messages',
-        'django.core.context_processors.i18n',
-        'django.core.context_processors.debug',
-        'django.core.context_processors.request',
-        'django.core.context_processors.media',
-        'django.core.context_processors.csrf',
-        'django.core.context_processors.tz',
-        'sekizai.context_processors.sekizai',
-        'django.core.context_processors.static',
-        'cms.context_processors.cms_settings',
-        'aldryn_boilerplates.context_processors.boilerplate'
-    ),
-    'TEMPLATE_LOADERS': (
-        'django.template.loaders.filesystem.Loader',
-        # important! place right before django.template.loaders.app_directories.Loader  # NOQA
-        'aldryn_boilerplates.template_loaders.AppDirectoriesLoader',
-        'django.template.loaders.app_directories.Loader',
-        'django.template.loaders.eggs.Loader'
-    )
     # 'EMAIL_BACKEND': 'django.core.mail.backends.locmem.EmailBackend',
 }
 
 
 def run():
     from djangocms_helper import runner
-    runner.cms('aldryn_jobs')
+    runner.cms('aldryn_jobs', extra_args=['--boilerplate'])
 
 if __name__ == "__main__":
     run()

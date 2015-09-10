@@ -14,6 +14,8 @@ env:
     - TOXENV=flake8
     - TOXENV=py34-dj17-cms31-sqlite-fe
     - TOXENV=py34-dj17-cms30-sqlite-fe
+    # FIXME: if py34 with dj16 will start to fail - delete them since dj16 supports up to py33
+    # https://docs.djangoproject.com/en/1.6/faq/install/#what-python-version-can-i-use-with-django
     - TOXENV=py34-dj16-cms31-sqlite-fe
     - TOXENV=py34-dj16-cms30-sqlite-fe
     - TOXENV=py33-dj17-cms31-sqlite-fe
@@ -24,15 +26,8 @@ env:
     - TOXENV=py27-dj17-cms30-sqlite-fe
     - TOXENV=py27-dj16-cms31-sqlite-fe
     - TOXENV=py27-dj16-cms30-sqlite-fe
-    - TOXENV=py26-dj17-cms31-sqlite-fe
-    - TOXENV=py26-dj17-cms30-sqlite-fe
     - TOXENV=py26-dj16-cms31-sqlite-fe
     - TOXENV=py26-dj16-cms30-sqlite-fe
-  # databases are not used yet, no appropriate setup...
-  #  - TOXENV=py27-dj17-cms30-mysql
-  #  - TOXENV=py27-dj17-cms30-postgres
-  #  - TOXENV=py27-dj17-cms31-mysql
-  #  - TOXENV=py27-dj17-cms31-postgres
 
 cache:
   directories:
