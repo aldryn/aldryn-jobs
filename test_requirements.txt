@@ -1,4 +1,4 @@
-djangocms-helper
+djangocms-helper>=0.9.1
 pysqlite
 pytz
 django-filer
