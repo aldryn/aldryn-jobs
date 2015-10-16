@@ -13,7 +13,7 @@ var cmsProtractorHelper = require('cms-protractor-helper');
 
 describe('Aldryn Jobs tests: ', function () {
     // create random job name
-    var jobName = 'Test job ' + (Math.floor(Math.random() * 10001));
+    var jobName = 'Test job ' + cmsProtractorHelper.randomDigits(4);
 
     it('logs in to the site with valid username and password', function () {
         // go to the main page
@@ -30,9 +30,7 @@ describe('Aldryn Jobs tests: ', function () {
             }
 
             // wait for username input to appear
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.usernameInput);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.usernameInput);
 
             // login to the site
             jobsPage.cmsLogin();
@@ -43,46 +41,34 @@ describe('Aldryn Jobs tests: ', function () {
         // click the example.com link in the top menu
         jobsPage.userMenus.first().click().then(function () {
             // wait for top menu dropdown options to appear
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.userMenuDropdown);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.userMenuDropdown);
 
             return jobsPage.administrationOptions.first().click();
         }).then(function () {
             // wait for modal iframe to appear
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.sideMenuIframe);
-            }, jobsPage.iframeWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
 
             // switch to sidebar menu iframe
             browser.switchTo().frame(browser.findElement(
                 By.css('.cms_sideframe-frame iframe')));
 
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.pagesLink);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.pagesLink);
 
             jobsPage.pagesLink.click();
 
             // wait for iframe side menu to reload
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.addConfigsButton);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.addConfigsButton);
 
             // check if the page already exists and return the status
             return jobsPage.addPageLink.isPresent();
         }).then(function (present) {
             if (present === true) {
                 // page is absent - create new page
-                browser.wait(function () {
-                    return browser.isElementPresent(jobsPage.addPageLink);
-                }, jobsPage.mainElementsWaitTime);
+                cmsProtractorHelper.waitFor(jobsPage.addPageLink);
 
                 jobsPage.addPageLink.click();
 
-                browser.wait(function () {
-                    return browser.isElementPresent(jobsPage.titleInput);
-                }, jobsPage.mainElementsWaitTime);
+                cmsProtractorHelper.waitFor(jobsPage.titleInput);
 
                 jobsPage.titleInput.sendKeys('Test').then(function () {
                     jobsPage.saveButton.click();
@@ -90,9 +76,7 @@ describe('Aldryn Jobs tests: ', function () {
                     return jobsPage.slugErrorNotification.isPresent();
                 }).then(function (present) {
                     if (present === false) {
-                        browser.wait(function () {
-                            return browser.isElementPresent(jobsPage.editPageLink);
-                        }, jobsPage.mainElementsWaitTime);
+                        cmsProtractorHelper.waitFor(jobsPage.editPageLink);
 
                         // wait till the editPageLink will become clickable
                         browser.sleep(500);
@@ -103,9 +87,7 @@ describe('Aldryn Jobs tests: ', function () {
                         // switch to default page content
                         browser.switchTo().defaultContent();
 
-                        browser.wait(function () {
-                            return browser.isElementPresent(jobsPage.testLink);
-                        }, jobsPage.mainElementsWaitTime);
+                        cmsProtractorHelper.waitFor(jobsPage.testLink);
 
                         // validate test link text
                         jobsPage.testLink.getText().then(function (title) {
@@ -122,31 +104,23 @@ describe('Aldryn Jobs tests: ', function () {
         jobsPage.editPageLink.isPresent().then(function (present) {
             if (present === false) {
                 // wait for modal iframe to appear
-                browser.wait(function () {
-                    return browser.isElementPresent(jobsPage.sideMenuIframe);
-                }, jobsPage.iframeWaitTime);
+                cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
 
                 // switch to sidebar menu iframe
                 return browser.switchTo().frame(browser.findElement(By.css(
                     '.cms_sideframe-frame iframe')));
             }
         }).then(function () {
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.breadcrumbsLinks.first());
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
 
             // click the Home link in breadcrumbs
             jobsPage.breadcrumbsLinks.first().click();
 
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.jobsAddConfigsLink);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.jobsAddConfigsLink);
 
             jobsPage.jobsAddConfigsLink.click();
 
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.namespaceInput);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.namespaceInput);
 
             jobsPage.namespaceInput.sendKeys('aldryn_jobs').then(function () {
                 jobsPage.saveButton.click();
@@ -156,9 +130,7 @@ describe('Aldryn Jobs tests: ', function () {
             }).then(function (present) {
                 if (present === false) {
                     // wait for success notification
-                    browser.wait(function () {
-                        return browser.isElementPresent(jobsPage.successNotification);
-                    }, jobsPage.mainElementsWaitTime);
+                    cmsProtractorHelper.waitFor(jobsPage.successNotification);
 
                     // validate success notification
                     expect(jobsPage.successNotification.isDisplayed())
@@ -169,21 +141,15 @@ describe('Aldryn Jobs tests: ', function () {
     });
 
     it('creates a new category', function () {
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.breadcrumbsLinks.first());
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
 
         // click the Home link in breadcrumbs
         jobsPage.breadcrumbsLinks.first().click();
 
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.jobsAddCategoriesLink);
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.jobsAddCategoriesLink);
 
         jobsPage.jobsAddCategoriesLink.click().then(function () {
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.nameInput);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.nameInput);
 
             return jobsPage.nameInput.sendKeys('Test category');
         }).then(function () {
@@ -196,9 +162,7 @@ describe('Aldryn Jobs tests: ', function () {
         }).then(function (present) {
             if (present === false) {
                 // wait for success notification
-                browser.wait(function () {
-                    return browser.isElementPresent(jobsPage.successNotification);
-                }, jobsPage.mainElementsWaitTime);
+                cmsProtractorHelper.waitFor(jobsPage.successNotification);
 
                 // validate success notification
                 expect(jobsPage.successNotification.isDisplayed())
@@ -208,22 +172,16 @@ describe('Aldryn Jobs tests: ', function () {
     });
 
     it('creates a new job opening', function () {
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.breadcrumbsLinks.first());
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
 
         // click the Home link in breadcrumbs
         jobsPage.breadcrumbsLinks.first().click();
 
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.addJobOpeningsButton);
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.addJobOpeningsButton);
 
         jobsPage.addJobOpeningsButton.click();
 
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.titleInput);
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.titleInput);
 
         jobsPage.titleInput.sendKeys(jobName).then(function () {
             // set Category
@@ -239,17 +197,13 @@ describe('Aldryn Jobs tests: ', function () {
             // set End time
             return jobsPage.endTimeInput.sendKeys('12:34:56');
         }).then(function () {
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.saveAndContinueButton);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.saveAndContinueButton);
 
             browser.actions().mouseMove(jobsPage.saveAndContinueButton)
                 .perform();
             jobsPage.saveButton.click();
 
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.successNotification);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.successNotification);
 
             // validate success notification
             expect(jobsPage.successNotification.isDisplayed()).toBeTruthy();
@@ -263,9 +217,7 @@ describe('Aldryn Jobs tests: ', function () {
         // switch to default page content
         browser.switchTo().defaultContent();
 
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.testLink);
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.testLink);
 
         // add jobs to the page only if it was not added before
         return jobsPage.aldrynJobsBlock.isPresent().then(function (present) {
@@ -273,16 +225,12 @@ describe('Aldryn Jobs tests: ', function () {
                 // click the Page link in the top menu
                 return jobsPage.userMenus.get(1).click().then(function () {
                     // wait for top menu dropdown options to appear
-                    browser.wait(function () {
-                        return browser.isElementPresent(jobsPage.userMenuDropdown);
-                    }, jobsPage.mainElementsWaitTime);
+                    cmsProtractorHelper.waitFor(jobsPage.userMenuDropdown);
 
                     jobsPage.advancedSettingsOption.click();
 
                     // wait for modal iframe to appear
-                    browser.wait(function () {
-                        return browser.isElementPresent(jobsPage.modalIframe);
-                    }, jobsPage.iframeWaitTime);
+                    cmsProtractorHelper.waitFor(jobsPage.modalIframe);
 
                     // switch to modal iframe
                     browser.switchTo().frame(browser.findElement(By.css(
@@ -295,9 +243,7 @@ describe('Aldryn Jobs tests: ', function () {
                     // switch to default page content
                     browser.switchTo().defaultContent();
 
-                    browser.wait(function () {
-                        return browser.isElementPresent(jobsPage.saveModalButton);
-                    }, jobsPage.mainElementsWaitTime);
+                    cmsProtractorHelper.waitFor(jobsPage.saveModalButton);
 
                     browser.actions().mouseMove(jobsPage.saveModalButton)
                         .perform();
@@ -311,15 +257,11 @@ describe('Aldryn Jobs tests: ', function () {
             browser.refresh();
 
             // wait for link to appear in aldryn jobs block
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.jobsOpeningLink);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.jobsOpeningLink);
 
             jobsPage.jobsOpeningLink.click();
 
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.jobTitle);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.jobTitle);
 
             // validate job title
             expect(jobsPage.jobTitle.isDisplayed()).toBeTruthy();
@@ -328,18 +270,14 @@ describe('Aldryn Jobs tests: ', function () {
 
     it('deletes job opening', function () {
         // wait for modal iframe to appear
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.sideMenuIframe);
-        }, jobsPage.iframeWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
 
         // switch to sidebar menu iframe
         browser.switchTo()
             .frame(browser.findElement(By.css('.cms_sideframe-frame iframe')));
 
         // wait for edit job opening link to appear
-        browser.wait(function () {
-            return browser.isElementPresent(jobsPage.editJobOpeningLinks.first());
-        }, jobsPage.mainElementsWaitTime);
+        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinks.first());
 
         // validate edit job opening links texts to delete proper job opening
         jobsPage.editJobOpeningLinks.first().getText().then(function (text) {
@@ -366,24 +304,18 @@ describe('Aldryn Jobs tests: ', function () {
             }
         }).then(function () {
             // wait for delete button to appear
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.deleteButton);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.deleteButton);
 
             browser.actions().mouseMove(jobsPage.saveAndContinueButton)
                 .perform();
             return jobsPage.deleteButton.click();
         }).then(function () {
             // wait for confirmation button to appear
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.sidebarConfirmationButton);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.sidebarConfirmationButton);
 
             jobsPage.sidebarConfirmationButton.click();
 
-            browser.wait(function () {
-                return browser.isElementPresent(jobsPage.successNotification);
-            }, jobsPage.mainElementsWaitTime);
+            cmsProtractorHelper.waitFor(jobsPage.successNotification);
 
             // validate success notification
             expect(jobsPage.successNotification.isDisplayed()).toBeTruthy();
