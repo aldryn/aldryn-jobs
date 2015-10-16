@@ -13,7 +13,7 @@ var cmsProtractorHelper = require('cms-protractor-helper');
 
 describe('Aldryn Jobs tests: ', function () {
     // create random job name
-    var jobName = 'Test job ' + (Math.floor(Math.random() * 10001));
+    var jobName = 'Test job ' + cmsProtractorHelper.randomDigits(4);
 
     it('logs in to the site with valid username and password', function () {
         // go to the main page
