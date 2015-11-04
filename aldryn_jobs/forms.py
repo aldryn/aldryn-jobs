@@ -53,117 +53,7 @@ class AutoAppConfigFormMixin(object):
                 self.fields['app_config'].empty_label = None
 
 
-class AutoSlugForm(TranslatableModelForm):
-    """
-    Generates slugs and ensures that the slug is unique.
-    """
-    slug_field = 'slug'
-    slugified_field = None
-
-    def clean(self):
-        super(AutoSlugForm, self).clean()
-
-        if not self.data.get(self.slug_field):
-            # We cannot modify self.data directly since it is immutable
-            raw_data = self.data.copy()
-            # add to self.data in order to show generated slug in the
-            # form in case of an error
-            slug = self.generate_slug()
-            raw_data[self.slug_field] = slug
-            self.cleaned_data[self.slug_field] = slug
-            # Copy modifications back to self.data
-            self.data = raw_data
-        else:
-            slug = self.cleaned_data[self.slug_field]
-        language_code = self.get_language_code()
-        # validate uniqueness
-        conflict = self.get_slug_conflict(slug=slug, language=language_code)
-        if conflict:
-            self.report_error(conflict=conflict)
-
-        return self.cleaned_data
-
-    def generate_slug(self):
-        content_to_slugify = self.cleaned_data.get(self.slugified_field, '')
-        return slugify(unidecode(content_to_slugify))
-
-    def get_language_code(self):
-        try:
-            language_code = self.instance.get_current_language()
-        except ObjectDoesNotExist:
-            language_code = get_language()
-        return language_code
-
-    def get_slug_conflict(self, slug, language):
-        app_config_filter = self.get_app_config_filter()
-        conflicts = (
-            self._meta.model
-                      .objects
-                      .language(language)
-                      .filter(app_config_filter)
-                      .translated(language, slug=slug)
-        )
-        if self.instance.pk:
-            conflicts = conflicts.exclude(pk=self.instance.pk)
-
-        try:
-            return conflicts.get()
-        except self._meta.model.DoesNotExist:
-            return self._meta.model.objects.none()
-
-    def report_error(self, conflict):
-        address = '<a href="%(url)s" target="_blank">%(label)s</a>' % {
-            'url': conflict.get_absolute_url(),
-            'label': _('the conflicting object')}
-        error_message = (
-            _('Conflicting slug. See %(address)s.') % {
-                'address': address
-            }
-        )
-        self.append_to_errors(field='slug', message=mark_safe(error_message))
-
-    def append_to_errors(self, field, message):
-        try:
-            self._errors[field].append(message)
-        except KeyError:
-            self._errors[field] = self.error_class([message])
-
-    def is_edit_action(self):
-        return self.instance.pk is not None
-
-    def validate_field_uniqueness_with_app_config(self, field_name,
-                                                  error_message):
-        """
-        Validates uniqueness of field_name against app_config, if field is not
-        valid - adds error_message to form errors.
-        Returns True if field is unique, False otherwise.
-        """
-        field = self.cleaned_data.get(field_name, u'')
-        language = self.get_language_code()
-        app_config_filter = self.get_app_config_filter()
-        qs = (self._meta.model.objects
-                              .exclude(pk=self.instance.pk)
-                              .language(language)
-                              .filter(app_config_filter))
-        # validate uniqueness
-        if not field:
-            # do not validate, for some reasons field data is not there,
-            # most likely there is another validation error
-            found = 0
-        else:
-            # since querysets are lazy database lookup would be evaluated
-            # only if bool(field) is True.
-            # .translated accepts key word arguments not Q objects.
-            found = qs.translated(language, **{field_name: field}).count()
-
-        if found > 0:
-            self.append_to_errors(field_name, error_message)
-        return found == 0
-
-
-class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
-
-    slugified_field = 'name'
+class JobCategoryAdminForm(AutoAppConfigFormMixin, TranslatableModelForm):
 
     class Meta:
         model = JobCategory
@@ -179,15 +69,8 @@ class JobCategoryAdminForm(AutoAppConfigFormMixin, AutoSlugForm):
             return Q(app_config=app_config)
         return Q()
 
-    def clean(self):
-        super(JobCategoryAdminForm, self).clean()
-        error_message = _(
-            'Category with that name already exists for selected app_config.')
-        self.validate_field_uniqueness_with_app_config('name', error_message)
-        return self.cleaned_data
 
-
-class JobOpeningAdminForm(AutoSlugForm):
+class JobOpeningAdminForm(TranslatableModelForm):
 
     slugified_field = 'title'
 
@@ -232,13 +115,6 @@ class JobOpeningAdminForm(AutoSlugForm):
             app_config = self.cleaned_data['category'].app_config
             return Q(category__app_config=app_config)
         return Q()
-
-    def clean(self):
-        super(JobOpeningAdminForm, self).clean()
-        error_message = _(
-            'Opening with that title already exists for selected category.')
-        self.validate_field_uniqueness_with_app_config('title', error_message)
-        return self.cleaned_data
 
 
 class JobApplicationForm(forms.ModelForm):

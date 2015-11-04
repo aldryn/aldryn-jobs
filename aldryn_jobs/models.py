@@ -21,6 +21,9 @@ from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
 )
+from aldryn_translation_tools.models import (
+    TranslationHelperMixin, TranslatedAutoSlugifyMixin,
+)
 
 from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
@@ -136,7 +139,11 @@ JobApplicationFileField = partial(
 
 @version_controlled_content(follow=['supervisors', 'app_config'])
 @python_2_unicode_compatible
-class JobCategory(TranslatableModel):
+class JobCategory(TranslatedAutoSlugifyMixin,
+                  TranslationHelperMixin,
+                  TranslatableModel):
+    slug_source_field_name = 'name'
+
     translations = TranslatedFields(
         name=models.CharField(_('name'), max_length=255),
         slug=models.SlugField(_('slug'), max_length=255, blank=True,
@@ -167,6 +174,15 @@ class JobCategory(TranslatableModel):
     def __str__(self):
         return self.safe_translation_getter('name', str(self.pk))
 
+    def _slug_exists(self, *args, **kwargs):
+        """Provide additional filtering for slug generation"""
+        qs = kwargs.get('qs', None)
+        if qs is None:
+            qs = self._get_slug_queryset()
+        # limit qs to current app_config only
+        kwargs['qs'] = qs.filter(app_config=self.app_config)
+        return super(JobCategory, self)._slug_exists(*args, **kwargs)
+
     def get_absolute_url(self, language=None):
         language = language or self.get_current_language()
         slug = self.safe_translation_getter('slug', language_code=language)
@@ -193,7 +209,11 @@ class JobCategory(TranslatableModel):
 
 @version_controlled_content(follow=['category'])
 @python_2_unicode_compatible
-class JobOpening(TranslatableModel):
+class JobOpening(TranslatedAutoSlugifyMixin,
+                 TranslationHelperMixin,
+                 TranslatableModel):
+    slug_source_field_name = 'title'
+
     translations = TranslatedFields(
         title=models.CharField(_('title'), max_length=255),
         slug=models.SlugField(_('slug'), max_length=255, blank=True,
@@ -228,6 +248,15 @@ class JobOpening(TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter('title', str(self.pk))
+
+    def _slug_exists(self, *args, **kwargs):
+        """Provide additional filtering for slug generation"""
+        qs = kwargs.get('qs', None)
+        if qs is None:
+            qs = self._get_slug_queryset()
+        # limit qs to current app_config only
+        kwargs['qs'] = qs.filter(category__app_config=self.category.app_config)
+        return super(JobOpening, self)._slug_exists(*args, **kwargs)
 
     def get_absolute_url(self, language=None):
         language = language or self.get_current_language()
