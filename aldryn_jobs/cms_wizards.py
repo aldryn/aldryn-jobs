@@ -98,9 +98,8 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
     class Meta:
         model = JobOpening
         fields = ['title', 'category', 'is_active', 'lead_in',
-                  #'publication_start', 'publication_end',
-                  'content',
-                  'can_apply', ]
+                  'publication_start', 'publication_end',
+                  'content', 'can_apply', ]
 
     def __init__(self, **kwargs):
         super(CreateJobOpeningForm, self).__init__(**kwargs)
