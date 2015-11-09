@@ -49,20 +49,6 @@ class JobCategoryAdminFormTestCase(JobsBaseTestCase):
         self.assertIn('name', form.errors.keys())
         self.assertIn('app_config', form.errors.keys())
 
-    def test_form_not_valid_for_existing_name_in_same_app_config(self):
-        data = {
-            'app_config': self.app_config.pk,
-            'name': self.default_category_values['en']['name'],
-            'slug': 'default-category-different-slug',
-        }
-        form = JobCategoryAdminForm(data)
-        self.assertFalse(form.is_valid())
-
-        self.assertIn('name', form.errors.keys())
-        self.assertIn(
-            u'Category with that name already exists for selected app_config.',
-            form.errors['name'])
-
     def test_form_valid_for_same_name_in_different_app_config(self):
         other_config = JobsConfig.objects.create(namespace='other_config')
         data = {
@@ -78,17 +64,6 @@ class JobCategoryAdminFormTestCase(JobsBaseTestCase):
         self.assertEqual(new_category.slug,
                          data['slug'])
         self.assertEqual(new_category.app_config, other_config)
-
-    def test_form_not_valid_for_same_slug_in_same_app_config(self):
-        data = {
-            'name': 'different name',
-            'slug': self.default_category_values['en']['slug'],
-            'app_config': self.app_config.pk,
-        }
-        data.update(self.default_category_values['en'])
-        form = JobCategoryAdminForm(data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('slug', form.errors.keys())
 
     def test_form_valid_for_same_slug_in_different_app_config(self):
         # depends on decision if we will remove uniqueness of slug per language
@@ -156,22 +131,6 @@ class JobOpeningAdminFormTestCase(JobsBaseTestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('category', form.errors.keys())
 
-    def test_form_not_valid_for_existing_slug_in_same_category(self):
-        self.create_default_job_opening(translated=True)
-        # provide same data as for default opening
-        data = {
-            'category': self.default_category.pk,
-            'title': self.default_job_values['en']['title'],
-            'slug': self.default_job_values['en']['slug'],
-        }
-        form = JobOpeningAdminForm(data)
-        self.assertFalse(form.is_valid())
-
-        self.assertIn('title', form.errors.keys())
-        self.assertIn(
-            u'Opening with that title already exists for selected category.',
-            form.errors['title'])
-
     def test_form_valid_for_same_name_in_different_category_app_config(self):
         self.create_default_job_opening(translated=True)
         # prepare category with other app config
@@ -192,18 +151,6 @@ class JobOpeningAdminFormTestCase(JobsBaseTestCase):
         self.assertEqual(new_opening.slug,
                          data['slug'])
         self.assertEqual(new_opening.category, other_category)
-
-    def test_form_not_valid_for_same_slug_in_same_category(self):
-        self.create_default_job_opening(translated=True)
-        data = {
-            'title': 'different title',
-            'slug': self.default_job_values['en']['slug'],
-            'category': self.default_category.pk,
-        }
-        data.update(self.default_job_values['en'])
-        form = JobOpeningAdminForm(data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('slug', form.errors.keys())
 
     def test_form_valid_for_same_slug_in_different_category(self):
         self.create_default_job_opening(translated=True)

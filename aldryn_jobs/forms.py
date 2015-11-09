@@ -9,14 +9,11 @@ from django import forms
 from django.db.models import Q
 from django.conf import settings
 from django.core.exceptions import (
-    ObjectDoesNotExist,
     ValidationError,
     ImproperlyConfigured,
 )
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import slugify
-from django.utils.safestring import mark_safe
-from django.utils.translation import gettext as _, get_language, ugettext
+from django.utils.translation import ugettext
 
 from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
@@ -26,7 +23,6 @@ from distutils.version import LooseVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
-from unidecode import unidecode
 
 
 from .models import (
