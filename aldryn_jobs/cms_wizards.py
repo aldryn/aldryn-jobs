@@ -6,6 +6,7 @@ from django import forms
 
 from cms.api import add_plugin
 from cms.utils import permissions
+from cms.utils.conf import get_cms_setting
 from cms.wizards.wizard_pool import wizard_pool
 from cms.wizards.wizard_base import Wizard
 from cms.wizards.forms import BaseFormMixin
@@ -107,6 +108,10 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
         # If there's only 1 category, don't bother show the empty label (choice)
         if JobCategory.objects.count() == 1:
             self.fields['category'].empty_label = None
+        self.fields['publication_start'].help_text = _(
+            'Date Acceptable Formats: 2015-11-11, 11/11/2015, 11/11/15')
+        self.fields['publication_end'].help_text = _(
+            'Date Acceptable Formats: 2015-11-11, 11/11/2015, 11/11/15')
 
     def save(self, commit=True):
         job_opening = super(CreateJobOpeningForm, self).save(commit=False)
@@ -114,6 +119,7 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
         # If 'content' field has value, create a TextPlugin with same and add
         # it to the PlaceholderField
         content = self.cleaned_data.get('content', '')
+        content_plugin = get_cms_setting('WIZARD_CONTENT_PLUGIN')
         if content and permissions.has_plugin_permission(
                 self.user, 'TextPlugin', 'add'):
 
@@ -124,12 +130,13 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
                 job_opening.save()
 
             if job_opening and job_opening.content:
-                add_plugin(
-                    placeholder=job_opening.content,
-                    plugin_type='TextPlugin',
-                    language=self.language_code,
-                    body=content,
-                )
+                plugin_kwargs = {
+                    'placeholder': job_opening.content,
+                    'plugin_type': content_plugin,
+                    'language': self.language_code,
+                    get_cms_setting('WIZARD_CONTENT_PLUGIN_BODY'): content,
+                }
+                add_plugin(**plugin_kwargs)
 
         if commit:
             job_opening.save()
