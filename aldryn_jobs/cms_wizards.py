@@ -109,9 +109,9 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
         if JobCategory.objects.count() == 1:
             self.fields['category'].empty_label = None
         self.fields['publication_start'].help_text = _(
-            'Date Acceptable Formats: 2015-11-11, 11/11/2015, 11/11/15')
+            'Date Acceptable Formats: 2015-11-30, 11/30/2015, 11/30/15')
         self.fields['publication_end'].help_text = _(
-            'Date Acceptable Formats: 2015-11-11, 11/11/2015, 11/11/15')
+            'Date Acceptable Formats: 2015-11-30, 11/30/2015, 11/30/15')
 
     def save(self, commit=True):
         job_opening = super(CreateJobOpeningForm, self).save(commit=False)
