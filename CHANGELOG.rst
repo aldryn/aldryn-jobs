@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+1.0.2 (2015-11-12)
+------------------
+
+* CMS 3.2 Wizards
+* Use aldryn-translation-tools >=0.2.1
+* Slug generation is done by aldryn-translation-tools
+
+
 1.0.1 (2015-07-27)
 ------------------
 
