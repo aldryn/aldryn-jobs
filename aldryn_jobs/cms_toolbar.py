@@ -106,7 +106,7 @@ class JobsToolbar(CMSToolbar):
                 self.request.path, language, current_url=current_url
             )
 
-            if can(['add', 'change'], 'jobsconfig'):
+            if jobsconfig and can(['add', 'change'], 'jobsconfig'):
                 url = admin_reverse('aldryn_jobs_jobsconfig_change',
                                     args=(jobsconfig.pk, ))
                 menu.add_modal_item(_('Configure application'), url)
