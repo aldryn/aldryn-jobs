@@ -12,6 +12,8 @@ env:
     - secure: eegYV50fPm2nRBcjn8fniKUmiH7bnMvxNTT4mV0BQuYahKbqdCia2qpzKFzgBO187CtvI3vnmJ7sxyZtKmlNy/lBYco5tTahfeQnOCjOvk81oMnpnlIao/PLJ8soR32lCVcnkb/kaQ/7IrMszQ9BfV6XLIIb+7Job7TZxlM9USkHewhJT/7P4h9fNhuLLCD1rZpnCPXGFAW+asowY0o/G607K3zxLmCyRb52Lsu7KijW1S2C9mIbSw/wnkgbFDhzT51CN3iHNutBPfWy7l8WLrCvEp8oPxoNrC/6WY6vSJXNLZ3loERbXxawupObn3QvbVQxRVtCaTTIVaBtwO4fe5q0KYeDY2SMq3keH0x7WHMfRmRrkLk8YcuwghA7cw6otx4hxROODCoSidTMNLlx2jOojMAhENhKcEZphqOoFEToJ+pBYDtIbZbdTht45kqziZ+3LGoX4kvL3dvTK8Dai28RbIZKsLD6e75JRA07gFzKqExF3iyHri+kpoMGxydUl1FdWafgnZb7Bf0BVSsP1E70Hwmstf+9GXv77F4ggGW9xtICkAIkMbdLkkCDzSWbp7yKpxNE9nLqV9ZNgFNef6zXrYkH9REFspI5PJaxnfs4fW8hidtL4gKjLPppfPRyWVw7iChzVQ73ezXe3ryGeTe88WECUs8aVpSFn9DwbdY=
   matrix:
     - TOXENV=flake8
+    - TOXENV=py34-dj18-sqlite-cms31
+    - TOXENV=py27-dj18-sqlite-cms31
     - TOXENV=py34-dj17-cms31-sqlite-fe
     - TOXENV=py34-dj17-cms30-sqlite-fe
     # FIXME: if py34 with dj16 will start to fail - delete them since dj16 supports up to py33

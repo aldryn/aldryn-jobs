@@ -32,6 +32,7 @@ HELPER_SETTINGS = {
         'easy_thumbnails',
         'djangocms_text_ckeditor',
         'adminsortable2',
+        'standard_form',
     ],
     'THUMBNAIL_PROCESSORS': (
         'easy_thumbnails.processors.colorspace',
@@ -87,7 +88,6 @@ HELPER_SETTINGS = {
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.locale.LocaleMiddleware',
-        'django.middleware.doc.XViewMiddleware',
         'django.middleware.common.CommonMiddleware',
         'cms.middleware.language.LanguageCookieMiddleware',
         'cms.middleware.user.CurrentUserMiddleware',
