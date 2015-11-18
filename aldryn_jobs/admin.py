@@ -169,9 +169,9 @@ class JobApplicationInline(LinkedRelatedInlineMixin, admin.TabularInline):
         return False
 
 
-class JobOpeningAdmin(AllTranslationsMixin,
+class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
+                      AllTranslationsMixin,
                       SortableAdminMixin,
-                      VersionedPlaceholderAdminMixin,
                       FrontendEditableAdminMixin,
                       TranslatableAdmin):
     form = JobOpeningAdminForm
