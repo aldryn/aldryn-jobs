@@ -46,7 +46,7 @@ class JobCategoryWizard(ConfigCheckMixin, Wizard):
 
 
 class JobOpeningWizard(ConfigCheckMixin, Wizard):
-    perm_string = "aldryn_jobs.add_jobapplication"
+    perm_string = "aldryn_jobs.add_jobopening"
 
     def user_has_add_permission(self, user, **kwargs):
         """
