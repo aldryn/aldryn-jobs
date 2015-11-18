@@ -15,7 +15,7 @@ REQUIREMENTS = [
     'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-boilerplates',
     'aldryn-common>=0.0.4',
-    'aldryn-reversion>=0.1.0',
+    'aldryn-reversion>=1.0.1',
     'aldryn-translation-tools>=0.2.1',
     # Although we don't actually yet use Aldryn Categories, it has been added
     # because of a migration dependency that sneaked in somehow. In any case we
@@ -40,7 +40,7 @@ if py26:
     ]
 else:
     REQUIREMENTS += [
-        'Django>=1.6,<1.8',
+        'Django>=1.6,<1.9',
     ]
 
 CLASSIFIERS = [
