@@ -1,13 +1,18 @@
 CHANGELOG
 =========
 
+1.0.3 (2015-11-19)
+------------------
+
+* Fixes for Wizard permissions
+* Finalized Django 1.8 compatibility.
+
 1.0.2 (2015-11-12)
 ------------------
 
 * CMS 3.2 Wizards
 * Use aldryn-translation-tools >=0.2.1
 * Slug generation is done by aldryn-translation-tools
-
 
 1.0.1 (2015-07-27)
 ------------------
