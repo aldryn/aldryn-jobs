@@ -4,7 +4,6 @@ from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
 REQUIREMENTS = [
-    'South<1.1,>=1.0.2',
     'aldryn-apphooks-config>=0.1.3',
     'django-appdata>=0.1.4',
     'django-bootstrap3',
