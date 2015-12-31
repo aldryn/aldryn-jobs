@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+1.0.5 (2015-12-31)
+------------------
+
+* Adds rich text editor to content creation wizard (CMS 3.2.x only)
+* Adds CMS 3.2.x compatibility
+* Fixes tests and rationalizes test matrix
+
+
 1.0.4 (2015-12-17)
 ------------------
 

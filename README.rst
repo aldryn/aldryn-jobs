@@ -2,9 +2,9 @@
 Aldryn Jobs
 ###########
 
-|PyPI Version| |Build Status| |Coverage Status| |codeclimate| |requires_io|
+|PyPI_Version| |Build_Status| |Coverage_Status| |codeclimate| |requires_io|
 
-|Browser Matrix|
+|Browser_Matrix|
 
 Aldryn Jobs is an Aldryn-compatible django CMS application for publishing
 job openings and receiving applications.
@@ -29,15 +29,15 @@ request, please review our
 Requirements
 ************
 
-* django CMS 3.0.12 or later
-* Django 1.6.9 or 1.7.x
+* django CMS 3.0.12, 3.1.x or 3.2.x
+* Django 1.6.9, 1.7.x, or 1.8.x
 
 
-.. |PyPI Version| image:: http://img.shields.io/pypi/v/aldryn-jobs.svg
+.. |PyPI_Version| image:: http://img.shields.io/pypi/v/aldryn-jobs.svg
    :target: https://pypi.python.org/pypi/aldryn-jobs
-.. |Build Status| image:: http://img.shields.io/travis/aldryn/aldryn-jobs/master.svg
+.. |Build_Status| image:: http://img.shields.io/travis/aldryn/aldryn-jobs/master.svg
    :target: https://travis-ci.org/aldryn/aldryn-jobs
-.. |Coverage Status| image:: http://img.shields.io/coveralls/aldryn/aldryn-jobs/master.svg
+.. |Coverage_Status| image:: http://img.shields.io/coveralls/aldryn/aldryn-jobs/master.svg
    :target: https://coveralls.io/r/aldryn/aldryn-jobs?branch=master
 .. |codeclimate| image:: https://codeclimate.com/github/aldryn/aldryn-jobs/badges/gpa.svg
    :target: https://codeclimate.com/github/aldryn/aldryn-jobs
@@ -45,5 +45,5 @@ Requirements
 .. |requires_io| image:: https://requires.io/github/aldryn/aldryn-jobs/requirements.svg?branch=master
    :target: https://requires.io/github/aldryn/aldryn-jobs/requirements/?branch=master
    :alt: Requirements Status
-.. |Browser Matrix| image:: https://saucelabs.com/browser-matrix/aldryn-jobs.svg
+.. |Browser_Matrix| image:: https://saucelabs.com/browser-matrix/aldryn-jobs.svg
    :target: https://saucelabs.com/u/aldryn-jobs
