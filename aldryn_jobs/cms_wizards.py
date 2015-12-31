@@ -11,6 +11,8 @@ from cms.wizards.wizard_pool import wizard_pool
 from cms.wizards.wizard_base import Wizard
 from cms.wizards.forms import BaseFormMixin
 
+from djangocms_text_ckeditor.widgets import TextEditorWidget
+from djangocms_text_ckeditor.html import clean_html
 from parler.forms import TranslatableModelForm
 
 from .cms_appconfig import JobsConfig
@@ -92,9 +94,10 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
     """
 
     content = forms.CharField(
-        label="Content", help_text=_("Optional. If provided, will be added to "
-                                    "the main body of the Opening content."),
-        required=False, widget=forms.Textarea())
+        label="Content", required=False, widget=TextEditorWidget,
+        help_text=_("Optional. If provided, will be added to the main body of "
+                    "the Opening content."),
+    )
 
     class Meta:
         model = JobOpening
@@ -118,7 +121,7 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
 
         # If 'content' field has value, create a TextPlugin with same and add
         # it to the PlaceholderField
-        content = self.cleaned_data.get('content', '')
+        content = clean_html(self.cleaned_data.get('content', ''), False)
         content_plugin = get_cms_setting('WIZARD_CONTENT_PLUGIN')
         if content and permissions.has_plugin_permission(
                 self.user, 'TextPlugin', 'add'):
