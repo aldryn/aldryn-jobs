@@ -24,6 +24,7 @@ describe('Aldryn Jobs tests: ', function () {
             if (present === true) {
                 // go to the main page
                 browser.get(jobsPage.site + '?edit');
+                browser.sleep(1000);
                 cmsProtractorHelper.waitForDisplayed(jobsPage.usernameInput);
             }
 
@@ -41,6 +42,8 @@ describe('Aldryn Jobs tests: ', function () {
         });
 
         cmsProtractorHelper.waitForDisplayed(jobsPage.userMenus.first());
+        // have to wait till animation finished
+        browser.sleep(300);
         // click the example.com link in the top menu
         jobsPage.userMenus.first().click().then(function () {
             // wait for top menu dropdown options to appear
