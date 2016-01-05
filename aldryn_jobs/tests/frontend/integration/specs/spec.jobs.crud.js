@@ -24,13 +24,8 @@ describe('Aldryn Jobs tests: ', function () {
             if (present === true) {
                 // go to the main page
                 browser.get(jobsPage.site + '?edit');
-            } else {
-                // click edit mode link
-                jobsPage.editModeLink.click();
+                cmsProtractorHelper.waitForDisplayed(jobsPage.usernameInput);
             }
-
-            // wait for username input to appear
-            cmsProtractorHelper.waitFor(jobsPage.usernameInput);
 
             // login to the site
             jobsPage.cmsLogin();
@@ -38,10 +33,18 @@ describe('Aldryn Jobs tests: ', function () {
     });
 
     it('creates a new test page', function () {
+        // close the wizard if necessary
+        jobsPage.modalCloseButton.isDisplayed().then(function (displayed) {
+            if (displayed) {
+                jobsPage.modalCloseButton.click();
+            }
+        });
+
+        cmsProtractorHelper.waitForDisplayed(jobsPage.userMenus.first());
         // click the example.com link in the top menu
         jobsPage.userMenus.first().click().then(function () {
             // wait for top menu dropdown options to appear
-            cmsProtractorHelper.waitFor(jobsPage.userMenuDropdown);
+            cmsProtractorHelper.waitForDisplayed(jobsPage.userMenuDropdown);
 
             return jobsPage.administrationOptions.first().click();
         }).then(function () {
@@ -50,7 +53,7 @@ describe('Aldryn Jobs tests: ', function () {
 
             // switch to sidebar menu iframe
             browser.switchTo().frame(browser.findElement(
-                By.css('.cms_sideframe-frame iframe')));
+                By.css('.cms-sideframe-frame iframe')));
 
             cmsProtractorHelper.waitFor(jobsPage.pagesLink);
 
@@ -108,7 +111,7 @@ describe('Aldryn Jobs tests: ', function () {
 
                 // switch to sidebar menu iframe
                 return browser.switchTo().frame(browser.findElement(By.css(
-                    '.cms_sideframe-frame iframe')));
+                    '.cms-sideframe-frame iframe')));
             }
         }).then(function () {
             cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
@@ -234,7 +237,7 @@ describe('Aldryn Jobs tests: ', function () {
 
                     // switch to modal iframe
                     browser.switchTo().frame(browser.findElement(By.css(
-                        '.cms_modal-frame iframe')));
+                        '.cms-modal-frame iframe')));
 
                     // set Jobs Application
                     cmsProtractorHelper.selectOption(jobsPage.applicationSelect,
@@ -274,7 +277,7 @@ describe('Aldryn Jobs tests: ', function () {
 
         // switch to sidebar menu iframe
         browser.switchTo()
-            .frame(browser.findElement(By.css('.cms_sideframe-frame iframe')));
+            .frame(browser.findElement(By.css('.cms-sideframe-frame iframe')));
 
         // wait for edit job opening link to appear
         cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinks.first());
