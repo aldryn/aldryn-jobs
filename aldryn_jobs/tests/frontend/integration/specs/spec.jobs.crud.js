@@ -117,10 +117,15 @@ describe('Aldryn Jobs tests: ', function () {
                     '.cms-sideframe-frame iframe')));
             }
         }).then(function () {
-            cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
+            browser.sleep(1000);
 
-            // click the Home link in breadcrumbs
-            jobsPage.breadcrumbsLinks.first().click();
+            jobsPage.breadcrumbs.isPresent().then(function (present) {
+                if (present) {
+                    // click the Home link in breadcrumbs
+                    cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
+                    jobsPage.breadcrumbsLinks.first().click();
+                }
+            });
 
             cmsProtractorHelper.waitFor(jobsPage.jobsAddConfigsLink);
 
@@ -304,13 +309,14 @@ describe('Aldryn Jobs tests: ', function () {
             .frame(browser.findElement(By.css('.cms-sideframe-frame iframe')));
 
         cmsProtractorHelper.waitFor(jobsPage.editJobOpeningsButton);
-        jobsPage.editJobOpeningsButton.click();
-
-        // wait for edit job opening link to appear
-        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinksTable);
-
-        // validate edit job opening links texts to delete proper job opening
-        jobsPage.editJobOpeningLinks.first().getText().then(function (text) {
+        browser.sleep(100);
+        jobsPage.editJobOpeningsButton.click().then(function () {
+            // wait for edit job opening link to appear
+            return cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinksTable);
+        }).then(function () {
+            // validate edit job opening links texts to delete proper job opening
+            return jobsPage.editJobOpeningLinks.first().getText();
+        }).then(function (text) {
             // wait till horizontal scrollbar will disappear and
             // editJobOpeningLinks will become clickable
             browser.sleep(1500);
