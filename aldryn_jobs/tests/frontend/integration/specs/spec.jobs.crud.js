@@ -265,6 +265,16 @@ describe('Aldryn Jobs tests: ', function () {
             // wait for link to appear in aldryn jobs block
             cmsProtractorHelper.waitFor(jobsPage.jobsOpeningLink);
 
+            // wait till animation of sideframe opening finishes
+            browser.sleep(300);
+
+            // close sideframe (it covers the link)
+            cmsProtractorHelper.waitFor(jobsPage.sideFrameClose);
+            jobsPage.sideFrameClose.click();
+
+            // wait till animation finishes
+            browser.sleep(300);
+
             jobsPage.jobsOpeningLink.click();
 
             cmsProtractorHelper.waitFor(jobsPage.jobTitle);
@@ -275,15 +285,29 @@ describe('Aldryn Jobs tests: ', function () {
     });
 
     it('deletes job opening', function () {
-        // wait for modal iframe to appear
-        cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
+        cmsProtractorHelper.waitForDisplayed(jobsPage.userMenus.first());
+        // have to wait till animation finished
+        browser.sleep(300);
+        // click the example.com link in the top menu
+        jobsPage.userMenus.first().click().then(function () {
+            // wait for top menu dropdown options to appear
+            cmsProtractorHelper.waitForDisplayed(jobsPage.userMenuDropdown);
+
+            return jobsPage.administrationOptions.first().click();
+        }).then(function () {
+            // wait for modal iframe to appear
+            cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
+        });
 
         // switch to sidebar menu iframe
         browser.switchTo()
             .frame(browser.findElement(By.css('.cms-sideframe-frame iframe')));
 
+        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningsButton);
+        jobsPage.editJobOpeningsButton.click();
+
         // wait for edit job opening link to appear
-        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinks.first());
+        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinksTable);
 
         // validate edit job opening links texts to delete proper job opening
         jobsPage.editJobOpeningLinks.first().getText().then(function (text) {
