@@ -35,8 +35,10 @@ var jobsPage = {
     slugErrorNotification: element(by.css('.errors.slug')),
     saveButton: element(by.css('.submit-row [name="_save"]')),
     editPageLink: element(by.css('.col-preview [href*="preview/"]')),
+    sideFrameClose: element(by.css('.cms-sideframe-close')),
 
     // adding new apphook config
+    breadcrumbs: element(by.css('.breadcrumbs')),
     breadcrumbsLinks: element.all(by.css('.breadcrumbs a')),
     jobsAddConfigsLink: element(by.css('.model-jobsconfig .addlink')),
     namespaceInput: element(by.id('id_namespace')),
@@ -51,6 +53,7 @@ var jobsPage = {
 
     // adding new job opening
     addJobOpeningsButton: element(by.css('.model-jobopening .addlink')),
+    editJobOpeningsButton: element(by.css('.model-jobopening .changelink')),
     categorySelect: element(by.id('id_category')),
     categoryOption: element(by.css('#id_category > option:nth-child(2)')),
     startDateLinks: element.all(by.css(
@@ -59,6 +62,7 @@ var jobsPage = {
         '#id_publication_start_1 + .datetimeshortcuts > a')),
     endDateInput: element(by.id('id_publication_end_0')),
     endTimeInput: element(by.id('id_publication_end_1')),
+    editJobOpeningLinksTable: element(by.css('.results')),
     editJobOpeningLinks: element.all(by.css(
         '.results th > [href*="/aldryn_jobs/jobopening/"]')),
 
