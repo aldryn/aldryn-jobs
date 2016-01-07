@@ -82,7 +82,7 @@ HELPER_SETTINGS = {
             },
         ],
     },
-    'ALDRYN_BOILERPLATE_NAME': 'legacy',
+    'ALDRYN_BOILERPLATE_NAME': 'bootstrap3',
     # add aldryn_apphook_reload so that pages would be restored on apphook
     # reload.
     'MIDDLEWARE_CLASSES': [
