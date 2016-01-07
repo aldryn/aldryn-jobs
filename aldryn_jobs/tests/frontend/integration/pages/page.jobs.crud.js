@@ -100,6 +100,9 @@ var jobsPage = {
         }).then(function () {
             return jobsPage.loginButton.click();
         }).then(function () {
+            // this is required for django1.6, because it doesn't redirect
+            // correctly from admin
+            browser.get(jobsPage.site);
 
             // wait for user menu to appear
             browser.wait(browser.isElementPresent(
