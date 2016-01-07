@@ -19,6 +19,7 @@ class DisableMigrations(dict):
 gettext = lambda s: s
 
 HELPER_SETTINGS = {
+    'CMS_PERMISSION': True,
     'TIME_ZONE': 'Europe/Zurich',
     'INSTALLED_APPS': [
         'aldryn_apphooks_config',
