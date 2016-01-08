@@ -24,13 +24,9 @@ describe('Aldryn Jobs tests: ', function () {
             if (present === true) {
                 // go to the main page
                 browser.get(jobsPage.site + '?edit');
-            } else {
-                // click edit mode link
-                jobsPage.editModeLink.click();
+                browser.sleep(1000);
+                cmsProtractorHelper.waitForDisplayed(jobsPage.usernameInput);
             }
-
-            // wait for username input to appear
-            cmsProtractorHelper.waitFor(jobsPage.usernameInput);
 
             // login to the site
             jobsPage.cmsLogin();
@@ -38,10 +34,20 @@ describe('Aldryn Jobs tests: ', function () {
     });
 
     it('creates a new test page', function () {
+        // close the wizard if necessary
+        jobsPage.modalCloseButton.isDisplayed().then(function (displayed) {
+            if (displayed) {
+                jobsPage.modalCloseButton.click();
+            }
+        });
+
+        cmsProtractorHelper.waitForDisplayed(jobsPage.userMenus.first());
+        // have to wait till animation finished
+        browser.sleep(300);
         // click the example.com link in the top menu
         jobsPage.userMenus.first().click().then(function () {
             // wait for top menu dropdown options to appear
-            cmsProtractorHelper.waitFor(jobsPage.userMenuDropdown);
+            cmsProtractorHelper.waitForDisplayed(jobsPage.userMenuDropdown);
 
             return jobsPage.administrationOptions.first().click();
         }).then(function () {
@@ -50,7 +56,7 @@ describe('Aldryn Jobs tests: ', function () {
 
             // switch to sidebar menu iframe
             browser.switchTo().frame(browser.findElement(
-                By.css('.cms_sideframe-frame iframe')));
+                By.css('.cms-sideframe-frame iframe')));
 
             cmsProtractorHelper.waitFor(jobsPage.pagesLink);
 
@@ -108,13 +114,18 @@ describe('Aldryn Jobs tests: ', function () {
 
                 // switch to sidebar menu iframe
                 return browser.switchTo().frame(browser.findElement(By.css(
-                    '.cms_sideframe-frame iframe')));
+                    '.cms-sideframe-frame iframe')));
             }
         }).then(function () {
-            cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
+            browser.sleep(1000);
 
-            // click the Home link in breadcrumbs
-            jobsPage.breadcrumbsLinks.first().click();
+            jobsPage.breadcrumbs.isPresent().then(function (present) {
+                if (present) {
+                    // click the Home link in breadcrumbs
+                    cmsProtractorHelper.waitFor(jobsPage.breadcrumbsLinks.first());
+                    jobsPage.breadcrumbsLinks.first().click();
+                }
+            });
 
             cmsProtractorHelper.waitFor(jobsPage.jobsAddConfigsLink);
 
@@ -234,7 +245,7 @@ describe('Aldryn Jobs tests: ', function () {
 
                     // switch to modal iframe
                     browser.switchTo().frame(browser.findElement(By.css(
-                        '.cms_modal-frame iframe')));
+                        '.cms-modal-frame iframe')));
 
                     // set Jobs Application
                     cmsProtractorHelper.selectOption(jobsPage.applicationSelect,
@@ -259,6 +270,16 @@ describe('Aldryn Jobs tests: ', function () {
             // wait for link to appear in aldryn jobs block
             cmsProtractorHelper.waitFor(jobsPage.jobsOpeningLink);
 
+            // wait till animation of sideframe opening finishes
+            browser.sleep(300);
+
+            // close sideframe (it covers the link)
+            cmsProtractorHelper.waitFor(jobsPage.sideFrameClose);
+            jobsPage.sideFrameClose.click();
+
+            // wait till animation finishes
+            browser.sleep(300);
+
             jobsPage.jobsOpeningLink.click();
 
             cmsProtractorHelper.waitFor(jobsPage.jobTitle);
@@ -269,18 +290,33 @@ describe('Aldryn Jobs tests: ', function () {
     });
 
     it('deletes job opening', function () {
-        // wait for modal iframe to appear
-        cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
+        cmsProtractorHelper.waitForDisplayed(jobsPage.userMenus.first());
+        // have to wait till animation finished
+        browser.sleep(300);
+        // click the example.com link in the top menu
+        jobsPage.userMenus.first().click().then(function () {
+            // wait for top menu dropdown options to appear
+            cmsProtractorHelper.waitForDisplayed(jobsPage.userMenuDropdown);
+
+            return jobsPage.administrationOptions.first().click();
+        }).then(function () {
+            // wait for modal iframe to appear
+            cmsProtractorHelper.waitFor(jobsPage.sideMenuIframe);
+        });
 
         // switch to sidebar menu iframe
         browser.switchTo()
-            .frame(browser.findElement(By.css('.cms_sideframe-frame iframe')));
+            .frame(browser.findElement(By.css('.cms-sideframe-frame iframe')));
 
-        // wait for edit job opening link to appear
-        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinks.first());
-
-        // validate edit job opening links texts to delete proper job opening
-        jobsPage.editJobOpeningLinks.first().getText().then(function (text) {
+        cmsProtractorHelper.waitFor(jobsPage.editJobOpeningsButton);
+        browser.sleep(100);
+        jobsPage.editJobOpeningsButton.click().then(function () {
+            // wait for edit job opening link to appear
+            return cmsProtractorHelper.waitFor(jobsPage.editJobOpeningLinksTable);
+        }).then(function () {
+            // validate edit job opening links texts to delete proper job opening
+            return jobsPage.editJobOpeningLinks.first().getText();
+        }).then(function (text) {
             // wait till horizontal scrollbar will disappear and
             // editJobOpeningLinks will become clickable
             browser.sleep(1500);

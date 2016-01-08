@@ -19,6 +19,7 @@ class DisableMigrations(dict):
 gettext = lambda s: s
 
 HELPER_SETTINGS = {
+    'CMS_PERMISSION': True,
     'TIME_ZONE': 'Europe/Zurich',
     'INSTALLED_APPS': [
         'aldryn_apphooks_config',
@@ -82,7 +83,7 @@ HELPER_SETTINGS = {
             },
         ],
     },
-    'ALDRYN_BOILERPLATE_NAME': 'legacy',
+    'ALDRYN_BOILERPLATE_NAME': 'bootstrap3',
     # add aldryn_apphook_reload so that pages would be restored on apphook
     # reload.
     'MIDDLEWARE_CLASSES': [
