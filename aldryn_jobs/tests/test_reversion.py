@@ -8,7 +8,7 @@ import six
 from django.db import transaction
 from parler.utils.context import switch_language
 
-from aldryn_reversion.core import create_revision_with_placeholders
+from aldryn_reversion.core import create_revision
 
 from ..models import JobCategory, JobOpening, JobApplication
 from .base import JobsBaseTestCase
@@ -294,14 +294,13 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 2
         content_en_2 = self.plugin_values_raw['en'].format(2)
         with transaction.atomic():
-            with reversion.create_revision():
-                language = job_opening.get_current_language()
-                plugins = job_opening.content.get_plugins().filter(
-                    language=language)
-                plugin = plugins[0].get_plugin_instance()[0]
-                plugin.body = content_en_2
-                plugin.save()
-                create_revision_with_placeholders(job_opening)
+            language = job_opening.get_current_language()
+            plugins = job_opening.content.get_plugins().filter(
+                language=language)
+            plugin = plugins[0].get_plugin_instance()[0]
+            plugin.body = content_en_2
+            plugin.save()
+            create_revision(job_opening)
         self.assertEqual(len(reversion.get_for_object(job_opening)), 2)
 
         with switch_language(job_opening, 'en'):
