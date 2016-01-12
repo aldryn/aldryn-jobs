@@ -32,7 +32,7 @@ from distutils.version import LooseVersion
 from functools import partial
 from os.path import join as join_path
 from parler.models import TranslatableModel, TranslatedFields
-from reversion.revisions import RegistrationError
+from reversion.revisions import default_revision_manager, RegistrationError
 from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
@@ -106,7 +106,7 @@ else:
     # and try to register, if we have a registration error - that means that
     # it has been registered already
     try:
-        reversion.register(user_model_object)
+        default_revision_manager.register(user_model_object)
     except RegistrationError:
         pass
 

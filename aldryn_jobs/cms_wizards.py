@@ -15,7 +15,8 @@ from cms.wizards.forms import BaseFormMixin
 from djangocms_text_ckeditor.widgets import TextEditorWidget
 from djangocms_text_ckeditor.html import clean_html
 from parler.forms import TranslatableModelForm
-from reversion import create_revision, set_user, set_comment
+
+from reversion.revisions import revision_context_manager
 
 from .cms_appconfig import JobsConfig
 from .models import JobCategory, JobOpening
@@ -92,11 +93,11 @@ class CreateJobCategoryForm(BaseFormMixin, TranslatableModelForm):
         category = super(CreateJobCategoryForm, self).save(commit=False)
 
         with transaction.atomic():
-            with create_revision():
+            with revision_context_manager.create_revision():
                 category.save()
                 if self.user:
-                    set_user(self.user)
-                set_comment(ugettext("Initial version."))
+                    revision_context_manager.set_user(self.user)
+                revision_context_manager.set_comment(ugettext("Initial version."))
 
         return category
 
@@ -156,11 +157,11 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
                 add_plugin(**plugin_kwargs)
 
         with transaction.atomic():
-            with create_revision():
+            with revision_context_manager.create_revision():
                 job_opening.save()
                 if self.user:
-                    set_user(self.user)
-                set_comment(ugettext("Initial version."))
+                    revision_context_manager.set_user(self.user)
+                revision_context_manager.set_comment(ugettext("Initial version."))
 
         return job_opening
 
