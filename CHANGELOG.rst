@@ -1,10 +1,14 @@
 CHANGELOG
 =========
 
-1.0.6 (2016-01-09)
+1.0.7 (2016-01-12)
 ------------------
 
 * Adds support for reversion with wizards
+
+1.0.6 (2016-01-09)
+------------------
+
 * Cleans-up and updates test config
 * Frontend/integration tests updated to use CMS 3.2
 

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.utils.translation import ugettext_lazy as _
 from django import forms
+from django.db import transaction
+from django.utils.translation import ugettext_lazy as _, ugettext
 
 from cms.api import add_plugin
 from cms.utils import permissions
@@ -14,6 +15,7 @@ from cms.wizards.forms import BaseFormMixin
 from djangocms_text_ckeditor.widgets import TextEditorWidget
 from djangocms_text_ckeditor.html import clean_html
 from parler.forms import TranslatableModelForm
+from reversion import create_revision, set_user, set_comment
 
 from .cms_appconfig import JobsConfig
 from .models import JobCategory, JobOpening
@@ -86,6 +88,18 @@ class CreateJobCategoryForm(BaseFormMixin, TranslatableModelForm):
             self.fields['app_config'].widget = forms.HiddenInput()
             self.fields['app_config'].initial = app_configs[0].pk
 
+    def save(self, commit=True):
+        category = super(CreateJobCategoryForm, self).save(commit=False)
+
+        with transaction.atomic():
+            with create_revision():
+                category.save()
+                if self.user:
+                    set_user(self.user)
+                set_comment(ugettext("Initial version."))
+
+        return category
+
 
 class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
     """
@@ -141,10 +155,15 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
                 }
                 add_plugin(**plugin_kwargs)
 
-        if commit:
-            job_opening.save()
+        with transaction.atomic():
+            with create_revision():
+                job_opening.save()
+                if self.user:
+                    set_user(self.user)
+                set_comment(ugettext("Initial version."))
 
         return job_opening
+
 
 job_category_wizard = JobCategoryWizard(
     title=_(u"New job category"),
