@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import reversion
-
 from django.db import transaction
 from django.contrib import messages
 from django.http import Http404
@@ -16,6 +14,7 @@ from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_apphooks_config.utils import get_app_instance
 from menus.utils import set_language_changer
 from parler.views import TranslatableSlugMixin
+from reversion.revisions import revision_context_manager
 
 from .forms import JobApplicationForm
 from .models import JobCategory, JobOpening
@@ -129,7 +128,7 @@ class JobOpeningDetail(AppConfigMixin, TranslatableSlugMixin, DetailView):
         return qs.namespace(self.namespace)
 
     @transaction.atomic
-    @reversion.create_revision()
+    @revision_context_manager.create_revision()
     def post(self, *args, **kwargs):
         """Handles application for the job."""
         if not self.object.can_apply:

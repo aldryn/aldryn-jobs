@@ -16,7 +16,7 @@ class DisableMigrations(dict):
     def __getitem__(self, item):
         return "notmigrations"
 
-gettext = lambda s: s
+gettext = lambda s: s  # flake8: noqa
 
 HELPER_SETTINGS = {
     'CMS_PERMISSION': True,
