@@ -97,7 +97,8 @@ class CreateJobCategoryForm(BaseFormMixin, TranslatableModelForm):
                 category.save()
                 if self.user:
                     revision_context_manager.set_user(self.user)
-                revision_context_manager.set_comment(ugettext("Initial version."))
+                revision_context_manager.set_comment(
+                    ugettext("Initial version."))
 
         return category
 
@@ -161,7 +162,8 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
                 job_opening.save()
                 if self.user:
                     revision_context_manager.set_user(self.user)
-                revision_context_manager.set_comment(ugettext("Initial version."))
+                revision_context_manager.set_comment(
+                    ugettext("Initial version."))
 
         return job_opening
 
