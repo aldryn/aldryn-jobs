@@ -17,10 +17,11 @@ env:
     #   FE strategy: only test on Django/CMS combinations, but place tests on
     #                different Python ENVs if possible.
     - TOXENV=flake8
+    - TOXENV=py34-dj19-sqlite-cms32-fe
+    - TOXENV=py34-dj19-sqlite-cms32
+    - TOXENV=py27-dj19-sqlite-cms32
     - TOXENV=py34-dj18-sqlite-cms32-fe
-    - TOXENV=py34-dj18-sqlite-cms31
     - TOXENV=py27-dj18-sqlite-cms32
-    - TOXENV=py27-dj18-sqlite-cms31
     - TOXENV=py34-dj17-sqlite-cms32
     - TOXENV=py34-dj17-sqlite-cms31
     - TOXENV=py34-dj17-sqlite-cms30

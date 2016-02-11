@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import reversion
@@ -12,11 +11,15 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.utils.encoding import force_text, python_2_unicode_compatible
-from django.utils.importlib import import_module
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from djangocms_text_ckeditor.fields import HTMLField
 
+try:
+    from django.utils.importlib import import_module
+except ImportError:
+    from importlib import import_module
+
+from djangocms_text_ckeditor.fields import HTMLField
 from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
@@ -359,7 +362,7 @@ class BaseJobsPlugin(CMSPlugin):
 @python_2_unicode_compatible
 class JobListPlugin(BaseJobsPlugin):
     """ Store job list for JobListPlugin. """
-    jobopenings = SortedManyToManyField(JobOpening, blank=True, null=True,
+    jobopenings = SortedManyToManyField(JobOpening, blank=True,
         verbose_name=_('job openings'),
         help_text=_("Choose specific Job Openings to show or leave empty to "
                     "show latest. Note that Job Openings from different "

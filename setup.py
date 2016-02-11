@@ -39,7 +39,7 @@ if py26:
     ]
 else:
     REQUIREMENTS += [
-        'Django>=1.6,<1.9',
+        'Django>=1.6,<1.10',
     ]
 
 CLASSIFIERS = [
