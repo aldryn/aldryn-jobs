@@ -175,12 +175,19 @@ class JobApplicationForm(forms.ModelForm):
                   template_base='aldryn_jobs/emails/confirmation')
 
     def send_staff_notifications(self):
-        recipients = self.instance.job_opening.get_notification_emails()
+        recipients = list(self.instance.job_opening.get_notification_emails())
         if DEFAULT_SEND_TO:
             recipients += [DEFAULT_SEND_TO]
+
+        app_label = self._meta.model._meta.app_label
+        try:
+            model_name = self._meta.model._meta.model_name
+        except AttributeError:
+            # Django < 1.9
+            model_name = self._meta.model._meta.module_name
+
         admin_change_form = reverse(
-            'admin:%s_%s_change' % (self._meta.model._meta.app_label,
-                                    self._meta.model._meta.module_name),
+            'admin:{}_{}_change'.format(app_label, model_name),
             args=(self.instance.pk,)
         )
 

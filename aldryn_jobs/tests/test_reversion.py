@@ -2,13 +2,17 @@
 
 from __future__ import unicode_literals
 
-import reversion
+try:
+    from reversion.revisions import create_revision, get_for_object
+except ImportError:
+    # django-reversion < 1.9
+    from reversion import create_revision, get_for_object
 import six
 
 from django.db import transaction
 from parler.utils.context import switch_language
 
-from aldryn_reversion.core import create_revision
+from aldryn_reversion.core import create_revision as aldryn_create_revision
 
 from ..models import JobCategory, JobOpening, JobApplication
 from .base import JobsBaseTestCase
@@ -34,7 +38,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
     def create_revision(self, obj, content=None, **kwargs):
         with transaction.atomic():
-            with reversion.create_revision():
+            with create_revision():
                 # populate event with new values
                 for property, value in six.iteritems(kwargs):
                     setattr(obj, property, value)
@@ -55,45 +59,45 @@ class ReversionTestCase(JobsBaseTestCase):
         """
         # get by position, since reversion_id is not reliable,
         version = list(reversed(
-            reversion.get_for_object(
+            get_for_object(
                 object_with_revision)))[revision_number - 1]
         version.revision.revert()
 
     # Following tests does not covers translations!
     def test_revision_is_created_on_job_category_object_create(self):
         with transaction.atomic():
-            with reversion.create_revision():
+            with create_revision():
                 job_category = JobCategory.objects.create(
                     app_config=self.app_config,
                     **self.category_values_raw['en'])
-        self.assertEqual(len(reversion.get_for_object(job_category)), 1)
+        self.assertEqual(len(get_for_object(job_category)), 1)
 
     def test_revision_is_created_on_job_opening_object_created(self):
         with transaction.atomic():
-            with reversion.create_revision():
+            with create_revision():
                 job_opening = JobOpening.objects.create(
                     category=self.default_category,
                     **self.opening_values_raw['en'])
-        self.assertEqual(len(reversion.get_for_object(job_opening)), 1)
+        self.assertEqual(len(get_for_object(job_opening)), 1)
 
     def test_category_revision_is_created(self):
         category = JobCategory.objects.create(
             app_config=self.app_config,
             **self.category_values_raw['en'])
-        self.assertEqual(len(reversion.get_for_object(category)), 0)
+        self.assertEqual(len(get_for_object(category)), 0)
         new_values_en_1 = self.make_new_values(
             self.category_values_raw['en'], 1)
         self.create_revision(category, **new_values_en_1)
-        self.assertEqual(len(reversion.get_for_object(category)), 1)
+        self.assertEqual(len(get_for_object(category)), 1)
 
     def test_job_opening_revision_is_created(self):
         job_opening = self.create_default_job_opening()
-        self.assertEqual(len(reversion.get_for_object(job_opening)), 0)
+        self.assertEqual(len(get_for_object(job_opening)), 0)
 
         new_values_en_1 = self.make_new_values(
             self.default_job_values['en'], 1)
         self.create_revision(job_opening, **new_values_en_1)
-        self.assertEqual(len(reversion.get_for_object(job_opening)), 1)
+        self.assertEqual(len(get_for_object(job_opening)), 1)
 
     def test_category_with_one_revision_contains_latest_values(self):
         category = JobCategory.objects.create(
@@ -289,7 +293,7 @@ class ReversionTestCase(JobsBaseTestCase):
         content_en_1 = self.plugin_values_raw['en'].format(1)
         self.create_revision(job_opening, content=content_en_1)
 
-        self.assertEqual(len(reversion.get_for_object(job_opening)), 1)
+        self.assertEqual(len(get_for_object(job_opening)), 1)
 
         # revision 2
         content_en_2 = self.plugin_values_raw['en'].format(2)
@@ -300,8 +304,8 @@ class ReversionTestCase(JobsBaseTestCase):
             plugin = plugins[0].get_plugin_instance()[0]
             plugin.body = content_en_2
             plugin.save()
-            create_revision(job_opening)
-        self.assertEqual(len(reversion.get_for_object(job_opening)), 2)
+            aldryn_create_revision(job_opening)
+        self.assertEqual(len(get_for_object(job_opening)), 2)
 
         with switch_language(job_opening, 'en'):
             url = job_opening.get_absolute_url()
@@ -318,7 +322,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
     def test_category_revert_revision_correct_for_diverged_translations(self):
         category = self.default_category
-        self.assertEqual(len(reversion.get_for_object(category)), 0)
+        self.assertEqual(len(get_for_object(category)), 0)
         # revision 1: en 1, de 0
         new_values = self.make_new_values(self.category_values_raw['en'], 1)
         with switch_language(category, 'en'):
@@ -355,7 +359,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
     def test_opening_revert_revision_correct_for_diverged_translations(self):
         opening = self.create_default_job_opening(translated=True)
-        self.assertEqual(len(reversion.get_for_object(opening)), 0)
+        self.assertEqual(len(get_for_object(opening)), 0)
         initial_values = {
             'category': self.default_category,
             'is_active': True,
@@ -410,7 +414,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
     def test_opening_revert_revision_serves_for_diverged_translations(self):
         opening = self.create_default_job_opening(translated=True)
-        self.assertEqual(len(reversion.get_for_object(opening)), 0)
+        self.assertEqual(len(get_for_object(opening)), 0)
 
         # revision 1: en 1, de 0
         new_values_en_1 = self.make_new_values(self.opening_values_raw['en'], 1)
@@ -464,7 +468,7 @@ class ReversionTestCase(JobsBaseTestCase):
 
     def test_opening_is_reverted_if_fk_object_was_deleted(self):
         opening = self.create_default_job_opening(translated=True)
-        self.assertEqual(len(reversion.get_for_object(opening)), 0)
+        self.assertEqual(len(get_for_object(opening)), 0)
 
         # revision 1: en 1, de 0
         category_1 = self.default_category
@@ -499,12 +503,12 @@ class ReversionTestCase(JobsBaseTestCase):
         application = JobApplication.objects.create(
             job_opening=job_opening,
             **self.application_default_values)
-        self.assertEqual(len(reversion.get_for_object(application)), 0)
+        self.assertEqual(len(get_for_object(application)), 0)
 
         # revision 1
         new_values_1 = self.make_new_values(self.application_values_raw, 1)
         self.create_revision(application, **new_values_1)
-        self.assertEqual(len(reversion.get_for_object(application)), 1)
+        self.assertEqual(len(get_for_object(application)), 1)
 
     def test_job_application_contains_latest_values(self):
         job_opening = self.create_default_job_opening()
@@ -515,7 +519,7 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_1 = self.make_new_values(self.application_values_raw, 1)
         self.create_revision(application, **new_values_1)
-        self.assertEqual(len(reversion.get_for_object(application)), 1)
+        self.assertEqual(len(get_for_object(application)), 1)
 
         application = JobApplication.objects.get(pk=application.pk)
         for prop in new_values_1.keys():
@@ -528,7 +532,7 @@ class ReversionTestCase(JobsBaseTestCase):
             **self.make_new_values(self.opening_values_raw['en'], 2))
         new_values_2['job_opening'] = new_opening
         self.create_revision(application, **new_values_2)
-        self.assertEqual(len(reversion.get_for_object(application)), 2)
+        self.assertEqual(len(get_for_object(application)), 2)
 
         application = JobApplication.objects.get(pk=application.pk)
         for prop in new_values_2.keys():
@@ -542,7 +546,7 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_1 = self.make_new_values(self.application_values_raw, 1)
         self.create_revision(application, **new_values_1)
-        self.assertEqual(len(reversion.get_for_object(application)), 1)
+        self.assertEqual(len(get_for_object(application)), 1)
 
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
@@ -551,7 +555,7 @@ class ReversionTestCase(JobsBaseTestCase):
             **self.make_new_values(self.opening_values_raw['en'], 2))
         new_values_2['job_opening'] = new_opening
         self.create_revision(application, **new_values_2)
-        self.assertEqual(len(reversion.get_for_object(application)), 2)
+        self.assertEqual(len(get_for_object(application)), 2)
 
         # revert to 1
         self.revert_to(application, 1)
@@ -569,7 +573,7 @@ class ReversionTestCase(JobsBaseTestCase):
         # revision 1
         new_values_1 = self.make_new_values(self.application_values_raw, 1)
         self.create_revision(application, **new_values_1)
-        self.assertEqual(len(reversion.get_for_object(application)), 1)
+        self.assertEqual(len(get_for_object(application)), 1)
 
         # revision 2
         new_values_2 = self.make_new_values(self.application_values_raw, 2)
@@ -578,7 +582,7 @@ class ReversionTestCase(JobsBaseTestCase):
             **self.make_new_values(self.opening_values_raw['en'], 2))
         new_values_2['job_opening'] = new_opening
         self.create_revision(application, **new_values_2)
-        self.assertEqual(len(reversion.get_for_object(application)), 2)
+        self.assertEqual(len(get_for_object(application)), 2)
 
         # delete initial opening
         with transaction.atomic():
