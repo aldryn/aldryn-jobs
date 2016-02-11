@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+1.0.9 (2016-02-11)
+------------------
+
+* Add Django 1.9 compatibility
+* Clean up test environments
+
+
 1.0.8 (2016-01-12)
 ------------------
 
