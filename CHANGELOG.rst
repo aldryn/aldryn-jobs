@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+1.0.10 (2016-02-17)
+-------------------
+
+* Auto-setup default appconfig
+* Pretty name in admin
+
+
 1.0.9 (2016-02-11)
 ------------------
 
