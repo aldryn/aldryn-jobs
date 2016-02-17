@@ -177,11 +177,11 @@ job_category_wizard = JobCategoryWizard(
 
 wizard_pool.register(job_category_wizard)
 
-job_category_wizard = JobOpeningWizard(
+job_opening_wizard = JobOpeningWizard(
     title=_(u"New job opening"),
     weight=550,
     form=CreateJobOpeningForm,
     description=_(u"Create a new job opening.")
 )
 
-wizard_pool.register(job_category_wizard)
+wizard_pool.register(job_opening_wizard)
