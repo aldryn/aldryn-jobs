@@ -1,12 +1,12 @@
 {% extends "aldryn_jobs/fullwidth.html" %}
 {% load i18n cms_tags apphooks_config_tags %}
 
+{% block breadcrumb %}{% endblock %}
+
 {% block jobs_content %}
-    {% render_placeholder view.config.placeholder_jobs_detail_top %}
     <div class="aldryn-jobs-detail">
         {% include "aldryn_jobs/includes/job.html" with job_opening=object detail_view="true" %}
     </div>
-    {% render_placeholder view.config.placeholder_jobs_detail_bottom %}
 {% endblock %}
 
 {% block jobs_footer %}
@@ -21,5 +21,4 @@
             </li>
         </ul>
     </div>
-    {% render_placeholder view.config.placeholder_jobs_detail_footer %}
 {% endblock jobs_footer %}
