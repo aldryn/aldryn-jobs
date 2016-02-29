@@ -1,0 +1,32 @@
+{% load i18n cms_tags %}
+
+<article>
+    <h3>
+        {% if not detail_view %}
+            <a href="{{ job_opening.get_absolute_url }}">{% render_model job_opening "title" %}</a>
+        {% else %}
+            {% render_model job_opening "title" %}
+        {% endif %}
+
+        {% if user.is_staff and not job_opening.get_active %}
+            <span>{% trans "inactive" %}</span>
+        {% endif %}
+    </h3>
+
+    <p>
+        <a href="{{ job_opening.category.get_absolute_url }}">{{ job_opening.category }}</a>
+        {% if job_opening.publication_start %}
+            &nbsp; {{ job_opening.publication_start|date  }}
+        {% endif %}
+    </p>
+
+    {% render_model job_opening "lead_in" "lead_in" safe %}
+
+    {% if detail_view %}
+        {% render_placeholder job_opening.content %}
+    {% endif %}
+
+    {% if detail_view and job_opening.can_apply %}
+        {% include "aldryn_jobs/includes/application.html" %}
+    {% endif %}
+</article>

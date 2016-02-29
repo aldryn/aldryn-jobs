@@ -1,0 +1,30 @@
+{% load i18n %}
+
+{% if plugin_configuration_error %}
+    {% if request.user.is_staff or request.user.is_superuser %}
+        <p>{{ plugin_configuration_error }}</p>
+    {% endif %}
+{% else %}
+    <p>
+        {% blocktrans count counter=vacancies_count %}
+            Showing {{ vacancies_count }} job opening
+        {% plural %}
+            Showing {{ vacancies_count }} job openings
+        {% endblocktrans %}
+    </p>
+
+    <ul>
+        {% for vacancy in vacancies %}
+            <li>
+                <a href="{{ vacancy.get_absolute_url }}">
+                    {{ vacancy }}
+                    {% if vacancy.start %}
+                        <span>{{ vacancy.start|date }}</span>
+                    {% endif %}
+                </a>
+            </li>
+        {% empty %}
+            <li>{% trans "No items available" %}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

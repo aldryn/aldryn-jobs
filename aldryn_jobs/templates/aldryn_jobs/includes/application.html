@@ -1,0 +1,16 @@
+{% load i18n bootstrap3 %}
+
+<form method="post"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <fieldset>
+        <legend>{% trans "Apply for this job" %}</legend>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">{% trans "Submit" %}</button>
+    </fieldset>
+</form>
