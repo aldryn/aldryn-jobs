@@ -5,7 +5,7 @@ CHANGELOG
 1.1.0 (UNRELEASED)
 -------------------
 
-* Add stripped default django templates to `/aldryn_newsblog/templates`
+* Add stripped default django templates to `/aldryn_jobs/templates`
 * Remove unused render_placeholder configs
 * Add static_placeholders where necessary
 * Simplify templates
