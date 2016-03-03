@@ -30,11 +30,11 @@ var jobsPage = {
     sideMenuIframe: element(by.css('.cms-sideframe-frame iframe')),
     pagesLink: element(by.css('.model-page > th > a')),
     addConfigsButton: element(by.css('.object-tools .addlink')),
-    addPageLink: element(by.css('.sitemap-noentry .addlink')),
+    addPageLink: element(by.css('.object-tools .addlink')),
     titleInput: element(by.id('id_title')),
     slugErrorNotification: element(by.css('.errors.slug')),
     saveButton: element(by.css('.submit-row [name="_save"]')),
-    editPageLink: element(by.css('.col-preview [href*="preview/"]')),
+    editPageLink: element(by.css('.cms-tree-item-preview [href*="preview/"]')),
     sideFrameClose: element(by.css('.cms-sideframe-close')),
 
     // adding new apphook config
