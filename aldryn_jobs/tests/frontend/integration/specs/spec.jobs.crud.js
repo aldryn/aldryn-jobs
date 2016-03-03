@@ -292,7 +292,7 @@ describe('Aldryn Jobs tests: ', function () {
     it('deletes job opening', function () {
         cmsProtractorHelper.waitForDisplayed(jobsPage.userMenus.first());
         // have to wait till animation finished
-        browser.sleep(300);
+        browser.sleep(1000);
         // click the example.com link in the top menu
         jobsPage.userMenus.first().click().then(function () {
             // wait for top menu dropdown options to appear

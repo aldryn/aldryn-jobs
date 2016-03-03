@@ -67,15 +67,15 @@ var jobsPage = {
         '.results th > [href*="/aldryn_jobs/jobopening/"]')),
 
     // adding jobs block to the page
-    aldrynJobsBlock: element(by.css('.app-jobs')),
+    aldrynJobsBlock: element(by.css('article')),
     advancedSettingsOption: element(by.css(
         '.cms-toolbar-item-navigation [href*="advanced-settings"]')),
     modalIframe: element(by.css('.cms-modal-frame iframe')),
     applicationSelect: element(by.id('application_urls')),
     jobsOption: element(by.css('option[value="JobsApp"]')),
     saveModalButton: element(by.css('.cms-modal-buttons .cms-btn-action')),
-    jobsOpeningLink: element(by.css('.aldryn-jobs-article > h3 > a')),
-    jobTitle: element(by.css('.aldryn-jobs-detail h3 > div')),
+    jobsOpeningLink: element(by.css('article > h3 > a')),
+    jobTitle: element(by.css('article h3 > a')),
 
     // deleting job opening
     deleteButton: element(by.css('.deletelink-box a')),
