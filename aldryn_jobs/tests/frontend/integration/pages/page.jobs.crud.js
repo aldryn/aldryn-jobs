@@ -75,7 +75,7 @@ var jobsPage = {
     jobsOption: element(by.css('option[value="JobsApp"]')),
     saveModalButton: element(by.css('.cms-modal-buttons .cms-btn-action')),
     jobsOpeningLink: element(by.css('article > h3 > a')),
-    jobTitle: element(by.css('article h3 > a')),
+    jobTitle: element(by.css('article h3 > div')),
 
     // deleting job opening
     deleteButton: element(by.css('.deletelink-box a')),
