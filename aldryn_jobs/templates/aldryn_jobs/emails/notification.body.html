@@ -1,0 +1,15 @@
+{% extends "emailit/base_email.body.html" %}
+{% load i18n absolute %}
+
+{% block content %}{% site "admin:aldryn_jobs_jobapplication_change" job_application.pk as job_application_admin_url %}
+    <a href="{{ job_application_admin_url }}">{{ job_application_admin_url }}</a>
+    <p>
+        {{ job_application.salutation }}
+        {{ job_application.first_name }}
+        {{ job_application.last_name }}<br>
+        {{ job_application.email }}
+    </p>
+    <p>
+        {{ job_application.cover_letter|linebreaksbr }}
+    </p>
+{% endblock %}

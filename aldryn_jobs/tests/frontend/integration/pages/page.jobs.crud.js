@@ -30,11 +30,11 @@ var jobsPage = {
     sideMenuIframe: element(by.css('.cms-sideframe-frame iframe')),
     pagesLink: element(by.css('.model-page > th > a')),
     addConfigsButton: element(by.css('.object-tools .addlink')),
-    addPageLink: element(by.css('.sitemap-noentry .addlink')),
+    addPageLink: element(by.css('.object-tools .addlink')),
     titleInput: element(by.id('id_title')),
     slugErrorNotification: element(by.css('.errors.slug')),
     saveButton: element(by.css('.submit-row [name="_save"]')),
-    editPageLink: element(by.css('.col-preview [href*="preview/"]')),
+    editPageLink: element(by.css('.cms-tree-item-preview [href*="preview/"]')),
     sideFrameClose: element(by.css('.cms-sideframe-close')),
 
     // adding new apphook config
@@ -67,15 +67,15 @@ var jobsPage = {
         '.results th > [href*="/aldryn_jobs/jobopening/"]')),
 
     // adding jobs block to the page
-    aldrynJobsBlock: element(by.css('.app-jobs')),
+    aldrynJobsBlock: element(by.css('article')),
     advancedSettingsOption: element(by.css(
         '.cms-toolbar-item-navigation [href*="advanced-settings"]')),
     modalIframe: element(by.css('.cms-modal-frame iframe')),
     applicationSelect: element(by.id('application_urls')),
     jobsOption: element(by.css('option[value="JobsApp"]')),
     saveModalButton: element(by.css('.cms-modal-buttons .cms-btn-action')),
-    jobsOpeningLink: element(by.css('.aldryn-jobs-article > h3 > a')),
-    jobTitle: element(by.css('.aldryn-jobs-detail h3 > div')),
+    jobsOpeningLink: element(by.css('article > h3 > a')),
+    jobTitle: element(by.css('article h3 > div')),
 
     // deleting job opening
     deleteButton: element(by.css('.deletelink-box a')),

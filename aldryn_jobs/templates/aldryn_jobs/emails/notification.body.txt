@@ -1,0 +1,15 @@
+{% extends "emailit/base_email.body.txt" %}{% load i18n absolute %}
+
+{% block content %}{% site "admin:aldryn_jobs_jobapplication_change" job_application.pk as job_application_admin_url %}
+{% blocktrans with applicant=job_application job=job_application.job_opening context "aldryn-jobs" %}{{ applicant }} has just applied for {{ job }}.{% endblocktrans %}
+
+{{ job_application_admin_url }}
+
+{{ job_application.salutation }} {{ job_application.first_name }} {{ job_application.last_name }}<br/>
+{{ job_application.email }}
+
+=====
+{{ job_application.cover_letter }}
+=====
+
+{% endblock %}

@@ -83,7 +83,6 @@ HELPER_SETTINGS = {
             },
         ],
     },
-    'ALDRYN_BOILERPLATE_NAME': 'bootstrap3',
     # add aldryn_apphook_reload so that pages would be restored on apphook
     # reload.
     'MIDDLEWARE_CLASSES': [
@@ -116,7 +115,7 @@ if cms_version < LooseVersion('3.2.0'):
 
 def run():
     from djangocms_helper import runner
-    runner.cms('aldryn_jobs', extra_args=['--boilerplate'])
+    runner.cms('aldryn_jobs', extra_args=[])
 
 if __name__ == "__main__":
     run()
