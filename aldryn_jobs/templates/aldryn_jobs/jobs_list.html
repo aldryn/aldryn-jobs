@@ -1,0 +1,15 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n cms_tags %}
+
+{% block jobs_content %}
+    {% regroup object_list by category as categories %}
+    {% for category in categories %}
+        {% for job_opening in category.list %}
+            {% include "aldryn_jobs/includes/job.html" %}
+        {% empty %}
+            <p>{% trans "No items available" %}</p>
+        {% endfor %}
+    {% empty %}
+        <p>{% trans "No items available" %}</p>
+    {% endfor %}
+{% endblock %}

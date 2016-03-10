@@ -1,0 +1,8 @@
+{% extends "aldryn_jobs/base.html" %}
+{% load i18n apphooks_config_tags %}
+
+{% block jobs_content %}
+    {% include "aldryn_jobs/includes/job.html" with job_opening=object detail_view="true" %}
+
+    <p><a href="{% namespace_url 'job-opening-list' %}">{% trans "Back to Overview" %}</a></p>
+{% endblock %}

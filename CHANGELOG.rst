@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+
+1.1.0 (2016-03-10)
+-------------------
+
+* Add stripped default django templates to `/aldryn_jobs/templates`
+* Remove unused render_placeholder configs
+* Add static_placeholders where necessary
+* Simplify templates
+
+
 1.0.10 (2016-02-17)
 -------------------
 

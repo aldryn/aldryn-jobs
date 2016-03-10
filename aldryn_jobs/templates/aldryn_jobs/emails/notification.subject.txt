@@ -1,0 +1,2 @@
+{% load i18n %}
+{% blocktrans with applicant=job_application job=job_application.job_opening context "aldryn-jobs" %}{{ applicant }} has just applied for {{ job }}.{% endblocktrans %}
