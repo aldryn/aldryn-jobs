@@ -44,35 +44,35 @@ msgstr ""
 
 #: admin.py:95
 msgid "Personal information"
-msgstr "Persönliche Informationen"
+msgstr ""
 
 #: admin.py:98
 msgid "Cover letter & attachments"
-msgstr "Begleitschreiben und Anhänge"
+msgstr ""
 
 #: admin.py:138
 msgid "Attachments"
-msgstr "Anhänge"
+msgstr ""
 
 #: admin.py:150 admin.py:184
 msgid "Translatable fields"
-msgstr "Übersetzbare Felder"
+msgstr ""
 
 #: admin.py:153
 msgid "Supervisors"
-msgstr "Vorgesetzte"
+msgstr ""
 
 #: admin.py:156 admin.py:187
 msgid "Options"
-msgstr "Optionen"
+msgstr ""
 
 #: admin.py:190
 msgid "Publication period"
-msgstr "Veröffentlichungszeitraum"
+msgstr ""
 
 #: admin.py:200
 msgid "Content"
-msgstr "Inhalt"
+msgstr ""
 
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.html:5
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.txt:6
@@ -80,7 +80,7 @@ msgstr "Inhalt"
 #: templates/aldryn_jobs/emails/confirmation.body.txt:6
 msgctxt "aldryn-jobs"
 msgid "We will inform you about the progress."
-msgstr "Wir halten Sie auf dem Laufenden."
+msgstr ""
 
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.txt:4
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.subject.txt:2
@@ -89,7 +89,7 @@ msgstr "Wir halten Sie auf dem Laufenden."
 #, python-format
 msgctxt "aldryn-jobs"
 msgid "You have successfully applied for %(job)s."
-msgstr "Herzlichen Dank für Ihre Bewerbung auf die Stelle %(job)s."
+msgstr ""
 
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/notification.body.txt:4
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/notification.subject.txt:2
@@ -98,7 +98,7 @@ msgstr "Herzlichen Dank für Ihre Bewerbung auf die Stelle %(job)s."
 #, python-format
 msgctxt "aldryn-jobs"
 msgid "%(applicant)s has just applied for %(job)s."
-msgstr "%(applicant)s hat sich für die Stelle %(job)s beworben."
+msgstr ""
 
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/rejection_letter.body.html:5
 #: templates/aldryn_jobs/emails/rejection_letter.body.html:5
@@ -219,16 +219,16 @@ msgstr ""
 #: boilerplates/legacy/templates/aldryn_jobs/includes/jobs_items.html:15
 #: boilerplates/legacy/templates/aldryn_jobs/plugins/latest_entries.html:13
 msgid "There are currently no job openings."
-msgstr "Es gibt zurzeit keine offenen Stellen"
+msgstr ""
 
 #: boilerplates/legacy/templates/aldryn_jobs/jobs_detail.html:19
 msgid "Back"
-msgstr "Zurück"
+msgstr ""
 
 #: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_app.py:13
 #: cms_toolbar.py:98
 msgid "Jobs"
-msgstr "Stellen"
+msgstr ""
 
 #: cms_appconfig.py:39
 msgid "Aldryn Jobs configuration"
@@ -252,7 +252,7 @@ msgstr ""
 
 #: cms_plugins.py:55
 msgid "Job List"
-msgstr "Stellenliste"
+msgstr ""
 
 #: cms_toolbar.py:112
 msgid "Configure application"
@@ -342,8 +342,6 @@ msgid ""
 "Auto-generated. Used in the URL. If changed, the URL will change. Clear it "
 "to have the slug re-created."
 msgstr ""
-"Automatisch generiert. Wird in der URL verwendet. Falls geändert, ändert "
-"sich auch die URL. Entfernen um Slug neu zu generieren."
 
 #: models.py:158
 msgid "supervisors"
@@ -412,11 +410,11 @@ msgstr ""
 
 #: models.py:310
 msgid "Mr."
-msgstr "Herr"
+msgstr ""
 
 #: models.py:311
 msgid "Mrs."
-msgstr "Frau"
+msgstr ""
 
 #: models.py:315
 msgid "salutation"
@@ -436,7 +434,7 @@ msgstr ""
 
 #: models.py:320
 msgid "cover letter"
-msgstr "Anschreiben"
+msgstr ""
 
 #: models.py:321
 msgid "created"
@@ -469,6 +467,7 @@ msgid ""
 msgstr ""
 
 #: models.py:398
+#, python-format
 msgid "%s categories"
 msgstr ""
 
@@ -487,8 +486,9 @@ msgstr[1] ""
 
 #: views.py:136
 msgid "You can't apply for this job."
-msgstr "Sie können sich für diese Stelle nicht bewerben."
+msgstr ""
 
 #: views.py:144
+#, python-format
 msgid "You have successfully applied for %(job)s."
-msgstr "Herzlichen Dank für Ihre Bewerbung auf die Stelle %(job)s."
+msgstr ""
