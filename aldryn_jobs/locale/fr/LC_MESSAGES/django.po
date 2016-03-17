@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-16 12:19+0200\n"
+"POT-Creation-Date: 2016-03-17 14:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,196 +18,81 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: admin.py:22
-msgid "Personal information"
+#: admin.py:48
+#, python-brace-format
+msgid "Successfully sent {0} rejection email(s)."
 msgstr ""
 
-#: admin.py:25
-msgid "Cover letter & attachments"
+#: admin.py:52
+#, python-brace-format
+msgid "Successfully deleted {0} application(s) and sent rejection email."
 msgstr ""
 
-#: admin.py:40
-msgid "Attachments"
-msgstr ""
-
-#: admin.py:52 admin.py:70
-msgid "Translatable fields"
-msgstr ""
-
-#: admin.py:55 models.py:75
-msgid "Supervisors"
-msgstr ""
-
-#: admin.py:73
-msgid "Options"
+#: admin.py:65
+#, python-brace-format
+msgid "Send rejection e-mail {0}"
 msgstr ""
 
 #: admin.py:76
+#, python-brace-format
+msgid "Send rejection e-mail and delete application {0}"
+msgstr ""
+
+#: admin.py:92
+msgid "Job Opening"
+msgstr ""
+
+#: admin.py:95
+msgid "Personal information"
+msgstr ""
+
+#: admin.py:98
+msgid "Cover letter & attachments"
+msgstr ""
+
+#: admin.py:138
+msgid "Attachments"
+msgstr ""
+
+#: admin.py:150 admin.py:184
+msgid "Translatable fields"
+msgstr ""
+
+#: admin.py:153
+msgid "Supervisors"
+msgstr ""
+
+#: admin.py:156 admin.py:187
+msgid "Options"
+msgstr ""
+
+#: admin.py:190
 msgid "Publication period"
 msgstr ""
 
-#: admin.py:86
+#: admin.py:200
 msgid "Content"
 msgstr ""
 
-#: cms_app.py:12 cms_toolbar.py:20 templates/aldryn_jobs/jobs_list.html:6
-msgid "Jobs"
-msgstr ""
-
-#: cms_plugins.py:13
-msgid "Job List"
-msgstr ""
-
-#: cms_toolbar.py:22
-msgid "Add Job Offer"
-msgstr ""
-
-#: cms_toolbar.py:27
-msgid "Edit Job Offer"
-msgstr ""
-
-#: forms.py:72
-msgid "the conflicting object"
-msgstr ""
-
-#: forms.py:73
-#, python-format
-msgid "Conflicting slug. See %(address)s."
-msgstr ""
-
-#: menu.py:17
-msgid "Job Categories"
-msgstr ""
-
-#: menu.py:37
-msgid "Job Offers Menu"
-msgstr ""
-
-#: models.py:68
-msgid "Name"
-msgstr ""
-
-#: models.py:69 models.py:131
-msgid "Slug"
-msgstr ""
-
-#: models.py:70 models.py:132
-msgid ""
-"Auto-generated. Used in the URL. If changed, the URL will change. Clean it "
-"to have it re-created."
-msgstr ""
-
-#: models.py:76
-msgid "Those people will be notified via e-mail when new application arrives."
-msgstr ""
-
-#: models.py:79
-msgid "Ordering"
-msgstr ""
-
-#: models.py:82
-msgid "Job category"
-msgstr ""
-
-#: models.py:83
-msgid "Job categories"
-msgstr ""
-
-#: models.py:130
-msgid "Title"
-msgstr ""
-
-#: models.py:134
-msgid "Lead in"
-msgstr ""
-
-#: models.py:134
-msgid "Will be displayed in lists"
-msgstr ""
-
-#: models.py:139
-msgid "Category"
-msgstr ""
-
-#: models.py:141
-msgid "Active"
-msgstr ""
-
-#: models.py:142
-msgid "Published since"
-msgstr ""
-
-#: models.py:143
-msgid "Published until"
-msgstr ""
-
-#: models.py:144
-msgid "Viewer can apply for the job"
-msgstr ""
-
-#: models.py:150
-msgid "Job offer"
-msgstr ""
-
-#: models.py:151
-msgid "Job offers"
-msgstr ""
-
-#: models.py:186
-msgid "Mr."
-msgstr ""
-
-#: models.py:187
-msgid "Mrs."
-msgstr ""
-
-#: models.py:192
-msgid "Salutation"
-msgstr ""
-
-#: models.py:198
-msgid "First name"
-msgstr "Prénom"
-
-#: models.py:199
-msgid "Last name"
-msgstr "Nom"
-
-#: models.py:200
-msgid "E-mail"
-msgstr ""
-
-#: models.py:201
-msgid "Cover letter"
-msgstr ""
-
-#: views.py:57
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.html:5
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.txt:6
+#: templates/aldryn_jobs/emails/confirmation.body.html:5
+#: templates/aldryn_jobs/emails/confirmation.body.txt:6
 msgctxt "aldryn-jobs"
-msgid "Offer is not longer valid."
+msgid "We will inform you about the progress."
 msgstr ""
 
-#: views.py:101
-msgctxt "aldryn-jobs"
-msgid "You can't apply for this job."
-msgstr ""
-
-#: views.py:109 templates/aldryn_jobs/emails/confirmation.body.txt:4
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.txt:4
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.subject.txt:2
+#: templates/aldryn_jobs/emails/confirmation.body.txt:4
 #: templates/aldryn_jobs/emails/confirmation.subject.txt:2
 #, python-format
 msgctxt "aldryn-jobs"
 msgid "You have successfully applied for %(job)s."
 msgstr ""
 
-#: templates/aldryn_jobs/jobs_detail.html:19
-msgid "Back"
-msgstr ""
-
-#: templates/aldryn_jobs/emails/confirmation.body.html:4
-#: templates/aldryn_jobs/emails/confirmation.body.txt:6
-msgctxt "aldryn-jobs"
-msgid "We will inform you about the progress."
-msgstr ""
-
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/notification.body.txt:4
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/notification.subject.txt:2
 #: templates/aldryn_jobs/emails/notification.body.txt:4
 #: templates/aldryn_jobs/emails/notification.subject.txt:2
 #, python-format
@@ -215,15 +100,395 @@ msgctxt "aldryn-jobs"
 msgid "%(applicant)s has just applied for %(job)s."
 msgstr ""
 
-#: templates/aldryn_jobs/includes/jobs_application.html:5
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/rejection_letter.body.html:5
+#: templates/aldryn_jobs/emails/rejection_letter.body.html:5
+#, python-format
+msgctxt "aldryn-jobs"
+msgid ""
+"\n"
+"        <p>Dear %(salutation)s %(first_name)s %(last_name)s</p>\n"
+"    "
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/rejection_letter.body.html:9
+#: templates/aldryn_jobs/emails/rejection_letter.body.html:9
+msgctxt "aldryn-jobs"
+msgid ""
+"\n"
+"        <p>\n"
+"            Due to the large quantity of applications received,\n"
+"            it was a difficult task to short-list candidates and after "
+"careful\n"
+"            consideration we have decided not to take your application any "
+"further.\n"
+"            If you are still interested in employment with us, all our job "
+"openings\n"
+"            are listed on our website, which is updated regularly.\n"
+"            We are sorry that we cannot help you on this occasion,\n"
+"            but would like to take this opportunity to thank you for the\n"
+"            interest you have shown in us and to wish you every success\n"
+"            with your future career.\n"
+"        </p>\n"
+"\n"
+"        <p>Kind regards</p>\n"
+"        <p>Your HR team</p>\n"
+"    "
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/rejection_letter.body.txt:4
+#: templates/aldryn_jobs/emails/rejection_letter.body.txt:4
+#, python-format
+msgctxt "aldryn-jobs"
+msgid ""
+"\n"
+"Dear %(salutation)s %(first_name)s %(last_name)s"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/rejection_letter.body.txt:7
+#: templates/aldryn_jobs/emails/rejection_letter.body.txt:7
+msgctxt "aldryn-jobs"
+msgid ""
+"Due to the large quantity of applications received, it was a difficult task "
+"to short-list candidates and after careful consideration we have decided not "
+"to take your application any further.\n"
+"If you are still interested in employment with us, all our job openings are "
+"listed on our website, which is updated regularly.\n"
+"We are sorry that we cannot help you on this occasion, but would like to "
+"take this opportunity to thank you for the interest you have shown in us and "
+"to wish you every success with your future career.\n"
+"\n"
+"Kind regards\n"
+"Your HR team"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/emails/rejection_letter.subject.txt:2
+#: templates/aldryn_jobs/emails/rejection_letter.subject.txt:2
+msgctxt "aldryn-jobs"
+msgid "Your application"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/includes/application.html:13
+#: boilerplates/legacy/templates/aldryn_jobs/includes/jobs_application.html:5
+#: templates/aldryn_jobs/includes/application.html:11
 msgid "Apply for this job"
 msgstr ""
 
-#: templates/aldryn_jobs/includes/jobs_items.html:11
+#: boilerplates/bootstrap3/templates/aldryn_jobs/includes/application.html:18
+#: templates/aldryn_jobs/includes/application.html:14
+msgid "Submit"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/includes/job.html:12
+#: templates/aldryn_jobs/includes/job.html:12
+msgid "inactive"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/jobs_detail.html:18
+#: templates/aldryn_jobs/jobs_detail.html:7
+msgid "Back to Overview"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/jobs_list.html:11
+#: boilerplates/bootstrap3/templates/aldryn_jobs/jobs_list.html:14
+#: boilerplates/bootstrap3/templates/aldryn_jobs/plugins/categories_list.html:16
+#: boilerplates/bootstrap3/templates/aldryn_jobs/plugins/latest_entries.html:26
+#: templates/aldryn_jobs/jobs_list.html:10
+#: templates/aldryn_jobs/jobs_list.html:13
+#: templates/aldryn_jobs/plugins/categories_list.html:17
+#: templates/aldryn_jobs/plugins/latest_entries.html:27
+msgid "No items available"
+msgstr ""
+
+#: boilerplates/bootstrap3/templates/aldryn_jobs/plugins/latest_entries.html:10
+#, python-format
+msgid ""
+"\n"
+"                Showing %(vacancies_count)s job opening\n"
+"            "
+msgid_plural ""
+"\n"
+"                Showing %(vacancies_count)s job openings\n"
+"            "
+msgstr[0] ""
+msgstr[1] ""
+
+#: boilerplates/legacy/templates/aldryn_jobs/includes/jobs_items.html:11
 msgid "read more"
 msgstr ""
 
-#: templates/aldryn_jobs/includes/jobs_items.html:15
-#: templates/aldryn_jobs/plugins/latest_entries.html:8
+#: boilerplates/legacy/templates/aldryn_jobs/includes/jobs_items.html:15
+#: boilerplates/legacy/templates/aldryn_jobs/plugins/latest_entries.html:13
 msgid "There are currently no job openings."
+msgstr ""
+
+#: boilerplates/legacy/templates/aldryn_jobs/jobs_detail.html:19
+msgid "Back"
+msgstr ""
+
+#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_app.py:13
+#: cms_toolbar.py:98
+msgid "Jobs"
+msgstr ""
+
+#: cms_appconfig.py:39
+msgid "Aldryn Jobs configuration"
+msgstr ""
+
+#: cms_appconfig.py:40
+msgid "Aldryn Jobs configurations"
+msgstr ""
+
+#: cms_plugins.py:33
+msgid ""
+"There is an error in plugin configuration: selected Job config is not "
+"available. Please switch to edit mode and change plugin app_config settings "
+"to use valid config. Also note that aldryn-jobs should be used at least once "
+"as an apphook for that config."
+msgstr ""
+
+#: cms_plugins.py:47
+msgid "Categories list"
+msgstr ""
+
+#: cms_plugins.py:55
+msgid "Job List"
+msgstr ""
+
+#: cms_toolbar.py:112
+msgid "Configure application"
+msgstr ""
+
+#: cms_toolbar.py:118
+msgid "Edit category"
+msgstr ""
+
+#: cms_toolbar.py:123
+msgid "Add new category"
+msgstr ""
+
+#: cms_toolbar.py:131
+msgid "Edit job opening"
+msgstr ""
+
+#: cms_toolbar.py:133
+msgid "Add new job opening"
+msgstr ""
+
+#: cms_wizards.py:101 cms_wizards.py:166
+msgid "Initial version."
+msgstr ""
+
+#: cms_wizards.py:114
+msgid ""
+"Optional. If provided, will be added to the main body of the Opening content."
+msgstr ""
+
+#: cms_wizards.py:131 cms_wizards.py:133
+msgid "Date Acceptable Formats: 2015-11-30, 11/30/2015, 11/30/15"
+msgstr ""
+
+#: cms_wizards.py:172
+msgid "New job category"
+msgstr ""
+
+#: cms_wizards.py:175
+msgid "Create a new job category."
+msgstr ""
+
+#: cms_wizards.py:181
+msgid "New job opening"
+msgstr ""
+
+#: cms_wizards.py:184
+msgid "Create a new job opening."
+msgstr ""
+
+#: forms.py:228
+msgid "Cannot work properly when config class is not provided."
+msgstr ""
+
+#: forms.py:255
+#, python-brace-format
+msgid ""
+"Following {0} exists but either pages are not published, or there is no "
+"apphook. To use them - attach them or publish pages to which they are "
+"attached:"
+msgstr ""
+
+#: forms.py:287
+msgid ""
+"Seems that selected Job config is not plugged to any page, or maybe that "
+"page is not published.Please select Job config that is being used."
+msgstr ""
+
+#: menu.py:19
+msgid "Job Categories Menu"
+msgstr ""
+
+#: menu.py:47
+msgid "Job Openings Menu"
+msgstr ""
+
+#: models.py:151
+msgid "name"
+msgstr ""
+
+#: models.py:152 models.py:222
+msgid "slug"
+msgstr ""
+
+#: models.py:153 models.py:224
+msgid ""
+"Auto-generated. Used in the URL. If changed, the URL will change. Clear it "
+"to have the slug re-created."
+msgstr ""
+
+#: models.py:158
+msgid "supervisors"
+msgstr ""
+
+#: models.py:161
+msgid ""
+"Supervisors will be notified via email when a new job application arrives."
+msgstr ""
+
+#: models.py:166 models.py:355
+msgid "app configuration"
+msgstr ""
+
+#: models.py:168 models.py:242
+msgid "ordering"
+msgstr ""
+
+#: models.py:173
+msgid "job category"
+msgstr ""
+
+#: models.py:174
+msgid "job categories"
+msgstr ""
+
+#: models.py:221
+msgid "title"
+msgstr ""
+
+#: models.py:226
+msgid "short description"
+msgstr ""
+
+#: models.py:227
+msgid "This text will be displayed in lists."
+msgstr ""
+
+#: models.py:231
+msgid "category"
+msgstr ""
+
+#: models.py:234
+msgid "active?"
+msgstr ""
+
+#: models.py:235
+msgid "published since"
+msgstr ""
+
+#: models.py:237
+msgid "published until"
+msgstr ""
+
+#: models.py:239
+msgid "viewer can apply for the job?"
+msgstr ""
+
+#: models.py:247
+msgid "job opening"
+msgstr ""
+
+#: models.py:248 models.py:366
+msgid "job openings"
+msgstr ""
+
+#: models.py:310
+msgid "Mr."
+msgstr ""
+
+#: models.py:311
+msgid "Mrs."
+msgstr ""
+
+#: models.py:315
+msgid "salutation"
+msgstr ""
+
+#: models.py:317
+msgid "first name"
+msgstr ""
+
+#: models.py:318
+msgid "last name"
+msgstr ""
+
+#: models.py:319
+msgid "email"
+msgstr ""
+
+#: models.py:320
+msgid "cover letter"
+msgstr ""
+
+#: models.py:321
+msgid "created"
+msgstr ""
+
+#: models.py:322
+msgid "rejected?"
+msgstr ""
+
+#: models.py:323
+msgid "rejection date"
+msgstr ""
+
+#: models.py:328 models.py:349
+msgid "job application"
+msgstr ""
+
+#: models.py:329
+msgid "job applications"
+msgstr ""
+
+#: models.py:356
+msgid "Select appropriate app. configuration for this plugin."
+msgstr ""
+
+#: models.py:367
+msgid ""
+"Choose specific Job Openings to show or leave empty to show latest. Note "
+"that Job Openings from different app configs will not appear."
+msgstr ""
+
+#: models.py:398
+#, python-format
+msgid "%s categories"
+msgstr ""
+
+#: templates/aldryn_jobs/plugins/latest_entries.html:9
+#, python-format
+msgid ""
+"\n"
+"            Showing %(vacancies_count)s job opening\n"
+"        "
+msgid_plural ""
+"\n"
+"            Showing %(vacancies_count)s job openings\n"
+"        "
+msgstr[0] ""
+msgstr[1] ""
+
+#: views.py:136
+msgid "You can't apply for this job."
+msgstr ""
+
+#: views.py:144
+#, python-format
+msgid "You have successfully applied for %(job)s."
 msgstr ""
