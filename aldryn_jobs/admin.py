@@ -188,7 +188,7 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
                 'fields': ['category', 'is_active', 'can_apply']
             }),
             (_('Publication period'), {
-                'fields': ['publication_start', 'publication_end']
+                'fields': [('publication_start', 'publication_end')]
             })
         ]
 
