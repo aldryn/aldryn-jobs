@@ -368,7 +368,7 @@ class JobListPlugin(BaseJobsPlugin):
                     "show latest. Note that Job Openings from different "
                     "app configs will not appear."))
 
-    def job_openings(self, namespace):
+    def get_job_openings(self, namespace):
         """
         Return the selected JobOpening for JobListPlugin.
 
