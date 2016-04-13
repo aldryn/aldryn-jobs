@@ -379,7 +379,7 @@ class JobListPlugin(BaseJobsPlugin):
             return self.jobopenings.namespace(namespace).active()
 
         return (
-            JobOpening.objects.namespace(self.app_config.namespace)
+            JobOpening.objects.namespace(namespace)
                               .language(self.language)
                               .active_translations(self.language)
                               .active()
