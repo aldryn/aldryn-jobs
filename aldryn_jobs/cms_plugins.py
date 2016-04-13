@@ -62,7 +62,7 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
         if namespace == '' or context.get('plugin_configuration_error', False):
             vacancies = JobOpening.objects.none()
         else:
-            vacancies = instance.job_openings(namespace)
+            vacancies = instance.get_job_openings(namespace)
         context['vacancies'] = vacancies
         context['vacancies_count'] = len(vacancies)
         return context
