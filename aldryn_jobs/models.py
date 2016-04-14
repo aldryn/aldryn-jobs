@@ -209,6 +209,11 @@ class JobCategory(TranslatedAutoSlugifyMixin,
     def get_notification_emails(self):
         return self.supervisors.values_list('email', flat=True)
 
+    # We keep this 'count' name for compatibility in templates:
+    # there used to be annotate() call with the same property name.
+    def count(self):
+        return self.jobs.active().count()
+
 
 @version_controlled_content(follow=['category'])
 @python_2_unicode_compatible
@@ -400,10 +405,6 @@ class JobCategoriesPlugin(BaseJobsPlugin):
 
     @property
     def categories(self):
-        return (
-            JobCategory.objects
-                       .namespace(self.app_config.namespace)
-                       .annotate(count=models.Count('jobs'))
-                       .filter(count__gte=1)
-                       .order_by('ordering', '-count')
-        )
+        categories_qs = JobCategory.objects.namespace(
+            self.app_config.namespace).order_by('ordering')
+        return (category for category in categories_qs if category.count())
