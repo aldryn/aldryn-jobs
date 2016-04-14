@@ -392,10 +392,11 @@ class JobListPlugin(BaseJobsPlugin):
         self.jobopenings = oldinstance.jobopenings.all()
 
 
+@python_2_unicode_compatible
 class JobCategoriesPlugin(BaseJobsPlugin):
 
     def __str__(self):
-        return _('%s categories') % (self.app_config.get_app_title(), )
+        return _('%s categories') % (self.app_config.namespace,)
 
     @property
     def categories(self):
