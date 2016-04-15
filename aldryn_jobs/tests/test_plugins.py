@@ -1,7 +1,11 @@
+from datetime import timedelta
+
 from django.utils.translation import override
+from django.utils.timezone import now
+
 from cms import api
 
-from ..models import JobCategory, JobsConfig
+from ..models import JobCategory, JobsConfig, JobOpening
 
 from .base import JobsBaseTestCase
 
@@ -139,15 +143,57 @@ class TestJobCategoriesListPlugin(TestAppConfigPluginsMixin,
 
     def setUp(self):
         super(TestJobCategoriesListPlugin, self).setUp()
-        # create plugin for both languages
-        self.create_plugin(self.plugin_page, 'en', self.app_config)
-        self.create_plugin(self.plugin_page, 'de', self.app_config)
+        self.plugin_en = self.create_plugin(
+            self.plugin_page, 'en', self.app_config)
+
+        with override('en'):
+            self.another_category = JobCategory.objects.create(
+                name='Another category',
+                app_config=self.app_config)
+            self.empty_category = JobCategory.objects.create(
+                name='Empty category',
+                app_config=self.app_config)
 
     def create_plugin(self, page, language, app_config,
                       **plugin_params):
         plugin = self._create_plugin(
             page, language, app_config, **plugin_params)
         return plugin
+
+    def test_categories_list_plugin_counters(self):
+        """Test JobCategory plugin job openings count"""
+
+        with override('en'):
+            JobOpening.objects.create(
+                title='job active',
+                category=self.default_category)
+            JobOpening.objects.create(
+                title='job inactive',
+                is_active=False,
+                category=self.default_category)
+            JobOpening.objects.create(
+                title='job future',
+                publication_start=now() + timedelta(days=1),
+                category=self.default_category)
+            JobOpening.objects.create(
+                title='job past',
+                publication_start=now() - timedelta(days=2),
+                publication_end=now() - timedelta(days=1),
+                category=self.default_category)
+            JobOpening.objects.create(
+                title='job in another category',
+                category=self.another_category)
+            page_url = self.plugin_page.get_absolute_url()
+
+        response = self.client.get(page_url)
+
+        self.assertContains(response, self.default_category.name)
+        self.assertContains(response, self.another_category.name)
+        self.assertNotContains(response, self.empty_category.name)
+
+        self.assertEquals(self.default_category.count(), 1)
+        self.assertEquals(self.another_category.count(), 1)
+        self.assertEquals(self.empty_category.count(), 0)
 
 
 class TestJobListPlugin(TestAppConfigPluginsMixin,
