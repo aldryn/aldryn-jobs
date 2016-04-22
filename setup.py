@@ -22,7 +22,7 @@ REQUIREMENTS = [
     # the very near future.
     'aldryn-categories',
     'django-multiupload>=0.3',
-    'django-sortedm2m',
+    'django-sortedm2m>=1.2.2',
     'django-admin-sortable2>=0.5.2',
     'unidecode',
     'lxml',
