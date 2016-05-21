@@ -9,6 +9,7 @@ from parler.managers import TranslatableManager, TranslatableQuerySet
 
 
 class JobOpeningsQuerySet(TranslatableQuerySet):
+
     def active(self):
         now = timezone.now()
         return self.filter(
@@ -22,13 +23,12 @@ class JobOpeningsQuerySet(TranslatableQuerySet):
 
 
 class JobOpeningsManager(TranslatableManager):
+
     def get_queryset(self):
         return JobOpeningsQuerySet(self.model, using=self.db)
-
-    get_query_set = get_queryset
 
     def active(self):
         return self.get_queryset().active()
 
     def namespace(self, namespace):
-        return self.get_query_set().namespace(namespace)
+        return self.get_queryset().namespace(namespace)

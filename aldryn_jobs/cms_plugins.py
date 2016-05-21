@@ -25,8 +25,10 @@ class NameSpaceCheckMixin(object):
         # check if we have a valid app_config that is app hooked to a page.
         # so that we won't have a 500 error if page with that app hook
         # was deleted.
-        namespace = (instance.app_config.namespace if instance.app_config
-                     else '')
+        if instance.app_config:
+            namespace = instance.app_config.namespace
+        else:
+            namespace = ''
 
         if not namespace_is_apphooked(namespace):
             context['plugin_configuration_error'] = _(
@@ -57,8 +59,10 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
 
     def render(self, context, instance, placeholder):
         context = super(JobList, self).render(context, instance, placeholder)
-        namespace = (instance.app_config.namespace if instance.app_config
-                     else '')
+        if instance.app_config:
+            namespace = instance.app_config.namespace
+        else:
+            namespace = ''
         if namespace == '' or context.get('plugin_configuration_error', False):
             vacancies = JobOpening.objects.none()
         else:
@@ -66,6 +70,7 @@ class JobList(NameSpaceCheckMixin, CMSPluginBase):
         context['vacancies'] = vacancies
         context['vacancies_count'] = len(vacancies)
         return context
+
 
 plugin_pool.register_plugin(JobCategoriesList)
 plugin_pool.register_plugin(JobList)

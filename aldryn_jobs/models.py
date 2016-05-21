@@ -394,6 +394,7 @@ class JobListPlugin(BaseJobsPlugin):
         return force_text(self.pk)
 
     def copy_relations(self, oldinstance):
+        self.app_config = oldinstance.app_config
         self.jobopenings = oldinstance.jobopenings.all()
 
 
@@ -408,3 +409,6 @@ class JobCategoriesPlugin(BaseJobsPlugin):
         categories_qs = JobCategory.objects.namespace(
             self.app_config.namespace).order_by('ordering')
         return (category for category in categories_qs if category.count())
+
+    def copy_relations(self, oldinstance):
+        self.app_config = oldinstance.app_config

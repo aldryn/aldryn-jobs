@@ -16,9 +16,9 @@ from aldryn_translation_tools.admin import (
     AllTranslationsMixin,
     LinkedRelatedInlineMixin,
 )
-from cms import __version__ as cms_version
+
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
-from distutils.version import LooseVersion
+
 from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
 
@@ -34,6 +34,7 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
     #
     # Info: Using mass rejection on many JobApplications can lead to a timeout,
     # since SMTPs are not known to be fast
+    qs_count = len(queryset)
 
     for application in queryset:
         context = {'job_application': application, }
@@ -42,7 +43,6 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
                   language=lang_code.lower())
 
     # 2. update status or delete objects
-    qs_count = queryset.count()
     if not delete_application:
         queryset.update(is_rejected=True, rejection_date=now())
         success_msg = _("Successfully sent {0} rejection email(s).").format(
@@ -58,6 +58,7 @@ def _send_rejection_email(modeladmin, request, queryset, lang_code='',
 
 
 class SendRejectionEmail(object):
+
     def __init__(self, lang_code=''):
         super(SendRejectionEmail, self).__init__()
         self.lang_code = lang_code.upper()
@@ -70,6 +71,7 @@ class SendRejectionEmail(object):
 
 
 class SendRejectionEmailAndDelete(SendRejectionEmail):
+
     def __init__(self, lang_code=''):
         super(SendRejectionEmailAndDelete, self).__init__(lang_code)
         self.name = 'send_rejection_and_delete_{0}'.format(self.lang_code)
@@ -191,13 +193,6 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
                 'fields': [('publication_start', 'publication_end')]
             })
         ]
-
-        if LooseVersion(cms_version) < LooseVersion('3.0'):
-            content_fieldset = {
-                'classes': ['plugin-holder', 'plugin-holder-nopage'],
-                'fields': ['content']
-            }
-            fieldsets.append((_('Content'), content_fieldset))
         return fieldsets
 
     def get_queryset(self, request):

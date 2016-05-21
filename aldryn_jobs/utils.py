@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
-
 from os.path import splitext
-from django.core.urlresolvers import reverse, NoReverseMatch
 
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.text import get_valid_filename as get_valid_filename_django
 from django.template.defaultfilters import slugify
 

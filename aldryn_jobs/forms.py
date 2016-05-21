@@ -17,13 +17,10 @@ from django.utils.translation import ugettext
 
 from aldryn_apphooks_config.utils import setup_config
 from app_data import AppDataForm
-from cms import __version__ as cms_version
 from cms.models import Page
-from distutils.version import LooseVersion
 from emailit.api import send_mail
 from multiupload.fields import MultiFileField
 from parler.forms import TranslatableModelForm
-
 
 from .models import (
     JobApplication, JobApplicationAttachment, JobCategory, JobOpening,
@@ -83,9 +80,6 @@ class JobOpeningAdminForm(TranslatableModelForm):
             'publication_end'
         ]
 
-        if LooseVersion(cms_version) < LooseVersion('3.0'):
-            fields.append('content')
-
     def __init__(self, *args, **kwargs):
         super(JobOpeningAdminForm, self).__init__(*args, **kwargs)
 
@@ -140,15 +134,15 @@ class JobApplicationForm(forms.ModelForm):
         ]
 
     def save(self, commit=True):
-        super(JobApplicationForm, self).save(commit=False)
-        self.instance.job_opening = self.job_opening
+        instance = super(JobApplicationForm, self).save(commit=False)
+        instance.job_opening = self.job_opening
 
         if commit:
-            self.instance.save()
+            instance.save()
 
         for attachment in self.cleaned_data['attachments']:
             att = JobApplicationAttachment(
-                application=self.instance, file=attachment)
+                application=instance, file=attachment)
             att.save()
 
         # additional actions while applying for the job
@@ -166,7 +160,7 @@ class JobApplicationForm(forms.ModelForm):
             # prevent the form from ultimately getting saved here.
             logger.exception('Could not send a staff notifications!')
 
-        return self.instance
+        return instance
 
     def send_confirmation_email(self):
         context = {'job_application': self.instance}

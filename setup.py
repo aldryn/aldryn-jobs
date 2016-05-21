@@ -13,7 +13,7 @@ REQUIREMENTS = [
     'django-standard-form',
     'djangocms-text-ckeditor>= 1.0.10',
     'aldryn-boilerplates',
-    'aldryn-common>=0.0.4',
+    'aldryn-common>=0.1.3',
     'aldryn-reversion>=1.0.1',
     'aldryn-translation-tools>=0.2.1',
     # Although we don't actually yet use Aldryn Categories, it has been added
@@ -21,7 +21,7 @@ REQUIREMENTS = [
     # plan to adopt Aldryn Categories for this project in a release in
     # the very near future.
     'aldryn-categories',
-    'django-multiupload>=0.3',
+    'django-multiupload>=0.5.1',
     'django-sortedm2m>=1.2.2',
     'django-admin-sortable2>=0.5.2',
     'unidecode',
@@ -48,6 +48,8 @@ CLASSIFIERS = [
     'Framework :: Django',
     'Framework :: Django :: 1.6',
     'Framework :: Django :: 1.7',
+    'Framework :: Django :: 1.8',
+    'Framework :: Django :: 1.9',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
@@ -56,6 +58,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
     'Topic :: Software Development :: Libraries :: Application Frameworks',
