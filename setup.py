@@ -28,7 +28,7 @@ REQUIREMENTS = [
     'lxml',
     'pytz',
     'cssutils',
-    'html5lib<0.9999',
+    'html5lib<=0.9999999',
 ]
 
 py26 = sys.version_info >= (2, 6, 5) and sys.version_info < (2, 7, 0)
