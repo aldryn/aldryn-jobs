@@ -48,4 +48,8 @@ class TestJobsWizard(JobsBaseTestCase):
         url = question.get_absolute_url('en')
         response = self.client.get(url)
         self.assertContains(response, 'Ninja coder', status_code=200)
-        self.assertContains(response, '<p>Needs skills in Python/Django.</p>', status_code=200)
+        self.assertContains(
+            response,
+            '<p>Needs skills in Python/Django.</p>',
+            status_code=200,
+        )
