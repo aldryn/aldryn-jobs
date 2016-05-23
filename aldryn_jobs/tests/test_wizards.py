@@ -5,8 +5,6 @@ from distutils.version import LooseVersion
 
 import cms
 
-from aldryn_jobs.cms_wizards import CreateJobOpeningForm
-
 from .base import JobsBaseTestCase
 
 if sys.version_info < (2, 7):
@@ -29,6 +27,9 @@ class TestJobsWizard(JobsBaseTestCase):
         )
 
     def test_job_opening_wizard(self):
+        # Import here to avoid logic wizard machinery
+        from aldryn_jobs.cms_wizards import CreateJobOpeningForm
+
         data = {
             'title': 'Ninja coder',
             'lead_in': 'Ninja coder wanted',
