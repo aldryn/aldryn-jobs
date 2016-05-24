@@ -138,9 +138,23 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
         # If 'content' field has value, create a TextPlugin with same and add
         # it to the PlaceholderField
         content = clean_html(self.cleaned_data.get('content', ''), False)
-        content_plugin = get_cms_setting('WIZARD_CONTENT_PLUGIN')
+
+        try:
+            # CMS >= 3.3.x
+            content_plugin = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN')
+        except KeyError:
+            # CMS <= 3.2.x
+            content_plugin = get_cms_setting('WIZARD_CONTENT_PLUGIN')
+
+        try:
+            # CMS >= 3.3.x
+            content_field = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN_BODY')
+        except KeyError:
+            # CMS <= 3.2.x
+            content_field = get_cms_setting('WIZARD_CONTENT_PLUGIN_BODY')
+
         if content and permissions.has_plugin_permission(
-                self.user, 'TextPlugin', 'add'):
+                self.user, content_plugin, 'add'):
 
             # If the job_opening has not been saved, then there will be no
             # Placeholder set-up for this question yet, so, ensure we have saved
@@ -153,7 +167,7 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
                     'placeholder': job_opening.content,
                     'plugin_type': content_plugin,
                     'language': self.language_code,
-                    get_cms_setting('WIZARD_CONTENT_PLUGIN_BODY'): content,
+                    content_field: content,
                 }
                 add_plugin(**plugin_kwargs)
 
