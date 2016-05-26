@@ -2,8 +2,16 @@ CHANGELOG
 =========
 
 
+1.2.0 (2016-05-26)
+------------------
+
+* Added support for django CMS 3.3
+* Added support for Python 3.5
+* Fixed issues with the JobList plugin
+
+
 1.1.0 (2016-03-10)
--------------------
+------------------
 
 * Add stripped default django templates to `/aldryn_jobs/templates`
 * Remove unused render_placeholder configs
