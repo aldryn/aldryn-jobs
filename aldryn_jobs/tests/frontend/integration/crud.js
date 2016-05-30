@@ -17,7 +17,7 @@ casper.test.tearDown(function (done) {
         .run(done);
 });
 
-casper.test.begin('Test test 1', function (test) {
+casper.test.begin('Test test', function (test) {
     casper
         .start(globals.adminUrl)
         .waitUntilVisible('#content', function () {
