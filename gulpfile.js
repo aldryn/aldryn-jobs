@@ -49,16 +49,8 @@ gulp.task('lint', function () {
 
 // #############################################################################
 // TESTS
-gulp.task('tests', ['tests:unit', 'tests:lint', 'tests:integration']);
+gulp.task('tests', ['tests:lint', 'tests:integration']);
 gulp.task('tests:lint', ['lint']);
-gulp.task('tests:unit', function (done) {
-    var server = new KarmaServer({
-        configFile: PROJECT_PATH.tests + '/karma.conf.js',
-        singleRun: true
-    }, done);
-
-    server.start();
-});
 
 // gulp tests:integration [--clean] [--screenshots] [--tests=loginAdmin,toolbar]
 gulp.task('tests:integration', integrationTests({
@@ -69,14 +61,6 @@ gulp.task('tests:integration', integrationTests({
     serverCommand: 'test_settings.py server',
     logger: gutil.log.bind(gutil)
 }));
-
-gulp.task('tests:unit:watch', function () {
-    var server = new KarmaServer({
-        configFile: PROJECT_PATH.tests + '/karma.conf.js'
-    });
-
-    server.start();
-});
 
 // #############################################################################
 // COMMANDS
