@@ -23,6 +23,7 @@ casper.test.begin('Creation / deletion of the apphook', function (test) {
         .start(globals.adminUrl)
         .waitUntilVisible('#content', function () {
             test.assertVisible('#content', 'Admin loaded');
+
             this.click(
                 xPath(cms.getXPathForAdminSection({
                     section: 'Aldryn Jobs',
