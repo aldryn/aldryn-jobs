@@ -146,6 +146,7 @@ class JobCategoryAdmin(VersionedPlaceholderAdminMixin,
     form = JobCategoryAdminForm
     list_display = ['__str__', 'app_config']
     filter_horizontal = ['supervisors']
+    change_list_template = 'admin/aldryn_jobs/change_list.html'
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -180,6 +181,7 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
     list_display = ['__str__', 'category', 'num_applications', ]
     frontend_editable_fields = ('title', 'lead_in')
     inlines = [JobApplicationInline, ]
+    change_list_template = 'admin/aldryn_jobs/change_list.html'
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
