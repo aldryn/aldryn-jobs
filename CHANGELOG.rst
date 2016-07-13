@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+1.2.1 (Unreleased)
+------------------
+
+* Fixed categories and openings not being sortable
+
 
 1.2.0 (2016-05-26)
 ------------------
