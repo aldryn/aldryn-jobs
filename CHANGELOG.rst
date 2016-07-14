@@ -1,9 +1,11 @@
 CHANGELOG
 =========
 
-1.2.1 (Unreleased)
+1.2.1 (2016-07-14)
 ------------------
 
+* Added transifex configuration
+* Updated translation strings
 * Fixed categories and openings not being sortable
 * Added support for django CMS 3.3.1+
 
