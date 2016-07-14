@@ -5,6 +5,7 @@ CHANGELOG
 ------------------
 
 * Fixed categories and openings not being sortable
+* Added support for django CMS 3.3.1+
 
 
 1.2.0 (2016-05-26)

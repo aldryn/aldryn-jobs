@@ -216,7 +216,7 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
         if jobopenings is not None:
             # we need to update plugin configuration model with correct group
             # it is located under it's own manager
-            plugin.joblistplugin.jobopenings.add(
+            plugin.aldryn_jobs_joblistplugin.jobopenings.add(
                 jobopenings)
             plugin.save()
         return plugin
@@ -235,7 +235,7 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
     def test_list_plugin_doesnt_shows_delayed_openings(self):
         new_opening = self.create_new_job_opening(
             self.prepare_data(1, update_date=True))
-        self.plugin_en.joblistplugin.jobopenings.add(new_opening)
+        self.plugin_en.aldryn_jobs_joblistplugin.jobopenings.add(new_opening)
         self.plugin_en.save()
         self.plugin_page.publish('en')
         with override('en'):
@@ -262,7 +262,7 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
             app_config=new_config)
         new_opening = self.create_new_job_opening(
             self.prepare_data(1, category=new_category))
-        self.plugin_en.joblistplugin.jobopenings.add(new_opening)
+        self.plugin_en.aldryn_jobs_joblistplugin.jobopenings.add(new_opening)
         self.plugin_en.app_config = new_config
         self.plugin_en.save()
         self.plugin_page.publish('en')

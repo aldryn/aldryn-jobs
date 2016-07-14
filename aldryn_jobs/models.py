@@ -321,7 +321,7 @@ class JobApplication(models.Model):
         max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
     first_name = models.CharField(_('first name'), max_length=20)
     last_name = models.CharField(_('last name'), max_length=20)
-    email = models.EmailField(_('email'))
+    email = models.EmailField(_('email'), max_length=254)
     cover_letter = models.TextField(_('cover letter'), blank=True)
     created = models.DateTimeField(_('created'), auto_now_add=True)
     is_rejected = models.BooleanField(_('rejected?'), default=False)
@@ -355,23 +355,25 @@ class JobApplicationAttachment(models.Model):
     file = JobApplicationFileField()
 
 
-class BaseJobsPlugin(CMSPlugin):
+@python_2_unicode_compatible
+class JobListPlugin(CMSPlugin):
+    """ Store job list for JobListPlugin. """
+
+    cmsplugin_ptr = models.OneToOneField(
+        CMSPlugin, related_name='aldryn_jobs_joblistplugin', parent_link=True)
+
     app_config = models.ForeignKey(JobsConfig,
         verbose_name=_('app configuration'), null=True,
         help_text=_('Select appropriate app. configuration for this plugin.'))
 
-    class Meta:
-        abstract = True
-
-
-@python_2_unicode_compatible
-class JobListPlugin(BaseJobsPlugin):
-    """ Store job list for JobListPlugin. """
     jobopenings = SortedManyToManyField(JobOpening, blank=True,
         verbose_name=_('job openings'),
         help_text=_("Choose specific Job Openings to show or leave empty to "
                     "show latest. Note that Job Openings from different "
                     "app configs will not appear."))
+
+    def __str__(self):
+        return force_text(self.pk)
 
     def get_job_openings(self, namespace):
         """
@@ -390,16 +392,21 @@ class JobListPlugin(BaseJobsPlugin):
                               .active()
         )
 
-    def __str__(self):
-        return force_text(self.pk)
-
     def copy_relations(self, oldinstance):
         self.app_config = oldinstance.app_config
         self.jobopenings = oldinstance.jobopenings.all()
 
 
 @python_2_unicode_compatible
-class JobCategoriesPlugin(BaseJobsPlugin):
+class JobCategoriesPlugin(CMSPlugin):
+
+    cmsplugin_ptr = models.OneToOneField(
+        CMSPlugin, related_name='aldryn_jobs_jobcategoriesplugin',
+        parent_link=True)
+
+    app_config = models.ForeignKey(JobsConfig,
+        verbose_name=_('app configuration'), null=True,
+        help_text=_('Select appropriate app. configuration for this plugin.'))
 
     def __str__(self):
         return _('%s categories') % (self.app_config.namespace,)
