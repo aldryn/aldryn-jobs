@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-17 14:42+0200\n"
+"POT-Creation-Date: 2016-07-14 10:17-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,50 +27,46 @@ msgstr ""
 msgid "Successfully deleted {0} application(s) and sent rejection email."
 msgstr ""
 
-#: admin.py:65
+#: admin.py:66
 #, python-brace-format
 msgid "Send rejection e-mail {0}"
 msgstr ""
 
-#: admin.py:76
+#: admin.py:78
 #, python-brace-format
 msgid "Send rejection e-mail and delete application {0}"
 msgstr ""
 
-#: admin.py:92
+#: admin.py:94
 msgid "Job Opening"
 msgstr ""
 
-#: admin.py:95
+#: admin.py:97
 msgid "Personal information"
 msgstr ""
 
-#: admin.py:98
+#: admin.py:100
 msgid "Cover letter & attachments"
 msgstr ""
 
-#: admin.py:138
+#: admin.py:140
 msgid "Attachments"
 msgstr ""
 
-#: admin.py:150 admin.py:184
+#: admin.py:153 admin.py:188
 msgid "Translatable fields"
 msgstr ""
 
-#: admin.py:153
+#: admin.py:156
 msgid "Supervisors"
 msgstr ""
 
-#: admin.py:156 admin.py:187
+#: admin.py:159 admin.py:191
 msgid "Options"
 msgstr ""
 
-#: admin.py:190
+#: admin.py:194
 msgid "Publication period"
-msgstr ""
-
-#: admin.py:200
-msgid "Content"
 msgstr ""
 
 #: boilerplates/bootstrap3/templates/aldryn_jobs/emails/confirmation.body.html:5
@@ -237,7 +233,7 @@ msgstr ""
 msgid "Aldryn Jobs configurations"
 msgstr ""
 
-#: cms_plugins.py:33
+#: cms_plugins.py:35
 msgid ""
 "There is an error in plugin configuration: selected Job config is not "
 "available. Please switch to edit mode and change plugin app_config settings "
@@ -245,11 +241,11 @@ msgid ""
 "as an apphook for that config."
 msgstr ""
 
-#: cms_plugins.py:47
+#: cms_plugins.py:49
 msgid "Categories list"
 msgstr ""
 
-#: cms_plugins.py:55
+#: cms_plugins.py:57
 msgid "Job List"
 msgstr ""
 
@@ -273,7 +269,7 @@ msgstr ""
 msgid "Add new job opening"
 msgstr ""
 
-#: cms_wizards.py:101 cms_wizards.py:166
+#: cms_wizards.py:101 cms_wizards.py:180
 msgid "Initial version."
 msgstr ""
 
@@ -286,27 +282,27 @@ msgstr ""
 msgid "Date Acceptable Formats: 2015-11-30, 11/30/2015, 11/30/15"
 msgstr ""
 
-#: cms_wizards.py:172
+#: cms_wizards.py:186
 msgid "New job category"
 msgstr ""
 
-#: cms_wizards.py:175
+#: cms_wizards.py:189
 msgid "Create a new job category."
 msgstr ""
 
-#: cms_wizards.py:181
+#: cms_wizards.py:195
 msgid "New job opening"
 msgstr ""
 
-#: cms_wizards.py:184
+#: cms_wizards.py:198
 msgid "Create a new job opening."
 msgstr ""
 
-#: forms.py:228
+#: forms.py:222
 msgid "Cannot work properly when config class is not provided."
 msgstr ""
 
-#: forms.py:255
+#: forms.py:249
 #, python-brace-format
 msgid ""
 "Following {0} exists but either pages are not published, or there is no "
@@ -314,7 +310,7 @@ msgid ""
 "attached:"
 msgstr ""
 
-#: forms.py:287
+#: forms.py:281
 msgid ""
 "Seems that selected Job config is not plugged to any page, or maybe that "
 "page is not published.Please select Job config that is being used."
@@ -332,11 +328,11 @@ msgstr ""
 msgid "name"
 msgstr ""
 
-#: models.py:152 models.py:222
+#: models.py:152 models.py:227
 msgid "slug"
 msgstr ""
 
-#: models.py:153 models.py:224
+#: models.py:153 models.py:229
 msgid ""
 "Auto-generated. Used in the URL. If changed, the URL will change. Clear it "
 "to have the slug re-created."
@@ -351,11 +347,11 @@ msgid ""
 "Supervisors will be notified via email when a new job application arrives."
 msgstr ""
 
-#: models.py:166 models.py:355
+#: models.py:166 models.py:360
 msgid "app configuration"
 msgstr ""
 
-#: models.py:168 models.py:242
+#: models.py:168 models.py:247
 msgid "ordering"
 msgstr ""
 
@@ -367,107 +363,112 @@ msgstr ""
 msgid "job categories"
 msgstr ""
 
-#: models.py:221
+#: models.py:226
 msgid "title"
 msgstr ""
 
-#: models.py:226
+#: models.py:231
 msgid "short description"
 msgstr ""
 
-#: models.py:227
+#: models.py:232
 msgid "This text will be displayed in lists."
 msgstr ""
 
-#: models.py:231
+#: models.py:236
 msgid "category"
 msgstr ""
 
-#: models.py:234
+#: models.py:239
 msgid "active?"
 msgstr ""
 
-#: models.py:235
+#: models.py:240
 msgid "published since"
 msgstr ""
 
-#: models.py:237
+#: models.py:242
 msgid "published until"
 msgstr ""
 
-#: models.py:239
+#: models.py:244
 msgid "viewer can apply for the job?"
 msgstr ""
 
-#: models.py:247
+#: models.py:252
 msgid "job opening"
 msgstr ""
 
-#: models.py:248 models.py:366
+#: models.py:253 models.py:371
 msgid "job openings"
 msgstr ""
 
-#: models.py:310
+#: models.py:315
 msgid "Mr."
 msgstr ""
 
-#: models.py:311
+#: models.py:316
 msgid "Mrs."
 msgstr ""
 
-#: models.py:315
+#: models.py:320
 msgid "salutation"
 msgstr ""
 
-#: models.py:317
+#: models.py:322
 msgid "first name"
 msgstr ""
 
-#: models.py:318
+#: models.py:323
 msgid "last name"
 msgstr ""
 
-#: models.py:319
+#: models.py:324
 msgid "email"
 msgstr ""
 
-#: models.py:320
+#: models.py:325
 msgid "cover letter"
 msgstr ""
 
-#: models.py:321
+#: models.py:326
 msgid "created"
 msgstr ""
 
-#: models.py:322
+#: models.py:327
 msgid "rejected?"
 msgstr ""
 
-#: models.py:323
+#: models.py:328
 msgid "rejection date"
 msgstr ""
 
-#: models.py:328 models.py:349
+#: models.py:333 models.py:354
 msgid "job application"
 msgstr ""
 
-#: models.py:329
+#: models.py:334
 msgid "job applications"
 msgstr ""
 
-#: models.py:356
+#: models.py:361
 msgid "Select appropriate app. configuration for this plugin."
 msgstr ""
 
-#: models.py:367
+#: models.py:372
 msgid ""
 "Choose specific Job Openings to show or leave empty to show latest. Note "
 "that Job Openings from different app configs will not appear."
 msgstr ""
 
-#: models.py:398
+#: models.py:405
 #, python-format
 msgid "%s categories"
+msgstr ""
+
+#: templates/admin/aldryn_jobs/change_list.html:7
+#, python-format
+msgid "Recover deleted %(name)s"
 msgstr ""
 
 #: templates/aldryn_jobs/plugins/latest_entries.html:9
