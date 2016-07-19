@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='joblistplugin',
             name='cmsplugin_ptr',
-            field=models.OneToOneField(parent_link=True, related_name='aldryn_jobs_jobslistplugin', primary_key=True, serialize=False, to='cms.CMSPlugin'),
+            field=models.OneToOneField(parent_link=True, related_name='aldryn_jobs_joblistplugin', primary_key=True, serialize=False, to='cms.CMSPlugin'),
         ),
         migrations.AlterField(
             model_name='joblistplugin',
