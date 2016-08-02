@@ -20,7 +20,7 @@ var argv = require('minimist')(process.argv.slice(2)); // eslint-disable-line
 // SETTINGS
 var PROJECT_ROOT = __dirname;
 var PROJECT_PATH = {
-    js: PROJECT_ROOT + '/aldryn_jobs/boilerplates/bootstrap3/static/js/',
+    js: PROJECT_ROOT + '/aldryn_jobs/boilerplates/bootstrap3/static/js',
     tests: PROJECT_ROOT + '/aldryn_jobs/tests/frontend'
 };
 

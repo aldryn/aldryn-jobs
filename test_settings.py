@@ -27,6 +27,7 @@ HELPER_SETTINGS = {
         # been added to a page, otherwise we cannot get a correct url.
         'aldryn_apphook_reload',
         'aldryn_categories',
+        'aldryn_translation_tools',
         'aldryn_reversion',
         'aldryn_common',
         'bootstrap3',
