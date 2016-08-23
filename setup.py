@@ -7,7 +7,7 @@ REQUIREMENTS = [
     'aldryn-apphooks-config>=0.1.3',
     'django-appdata>=0.1.4',
     'django-bootstrap3',
-    'django-cms>=3.0.12',
+    'django-cms>=3.2',
     'django-emailit',
     'django-parler',
     'django-standard-form',
