@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aldryn Jobs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 10:17-0400\n"
-"PO-Revision-Date: 2016-07-14 14:20+0000\n"
-"Last-Translator: Martin Koistinen <mkoistinen@gmail.com>\n"
+"POT-Creation-Date: 2016-08-23 16:13-0400\n"
+"PO-Revision-Date: 2016-07-16 19:31+0000\n"
+"Last-Translator: Frigory33 <chironsylvain@orange.fr>\n"
 "Language-Team: French (http://www.transifex.com/divio/aldryn-jobs/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -203,7 +203,7 @@ msgstr[1] "\n%(vacancies_count)s offres d'emploi affichées"
 
 #: boilerplates/legacy/templates/aldryn_jobs/includes/jobs_items.html:11
 msgid "read more"
-msgstr "lire plus"
+msgstr "en savoir plus"
 
 #: boilerplates/legacy/templates/aldryn_jobs/includes/jobs_items.html:15
 #: boilerplates/legacy/templates/aldryn_jobs/plugins/latest_entries.html:13
@@ -214,8 +214,8 @@ msgstr "Il n'y a actuellement aucune offre d'emploi."
 msgid "Back"
 msgstr "Retour"
 
-#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_app.py:13
-#: cms_toolbar.py:98
+#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_apps.py:13
+#: cms_toolbars.py:98
 msgid "Jobs"
 msgstr "Emplois"
 
@@ -233,7 +233,7 @@ msgid ""
 "available. Please switch to edit mode and change plugin app_config settings "
 "to use valid config. Also note that aldryn-jobs should be used at least once"
 " as an apphook for that config."
-msgstr "Il y a une erreur dans la configuration du greffon : la configuration d'emploi sélectionnée n'est pas disponible. Veuillez passer en mode édition et changer les réglages app_config du greffon pour rendre votre configuration valide. Notez aussi que les emplois Aldryn devraient être utilisées au moins une fois en tant qu'accroche d'application pour cette configuration."
+msgstr "Il y a une erreur dans la configuration du greffon : la configuration d'emploi sélectionnée n'est pas disponible. Veuillez passer en mode édition et changer les réglages app_config du greffon pour rendre votre configuration valide. Notez aussi que les emplois Aldryn devraient être utilisés au moins une fois en tant qu'accroche d'application pour cette configuration."
 
 #: cms_plugins.py:49
 msgid "Categories list"
@@ -243,23 +243,23 @@ msgstr "Liste des catégories"
 msgid "Job List"
 msgstr "Liste des emplois"
 
-#: cms_toolbar.py:112
+#: cms_toolbars.py:112
 msgid "Configure application"
 msgstr "Configurer la candidature"
 
-#: cms_toolbar.py:118
+#: cms_toolbars.py:118
 msgid "Edit category"
 msgstr "Modifier la catégorie"
 
-#: cms_toolbar.py:123
+#: cms_toolbars.py:123
 msgid "Add new category"
 msgstr "Ajouter une nouvelle catégorie"
 
-#: cms_toolbar.py:131
+#: cms_toolbars.py:131
 msgid "Edit job opening"
 msgstr "Modifier l'offre d'emploi"
 
-#: cms_toolbar.py:133
+#: cms_toolbars.py:133
 msgid "Add new job opening"
 msgstr "Ajouter une nouvelle offre d'emploi"
 
@@ -342,7 +342,7 @@ msgid ""
 "Supervisors will be notified via email when a new job application arrives."
 msgstr "Les superviseurs seront notifiés par courriel à l'arrivée d'une nouvelle candidature."
 
-#: models.py:166 models.py:360
+#: models.py:166 models.py:366 models.py:408
 msgid "app configuration"
 msgstr "configuration de l’application"
 
@@ -394,7 +394,7 @@ msgstr "le lecteur peut candidater à l'emploi ?"
 msgid "job opening"
 msgstr "offre d'emploi"
 
-#: models.py:253 models.py:371
+#: models.py:253 models.py:370
 msgid "job openings"
 msgstr "offres d'emploi"
 
@@ -446,17 +446,17 @@ msgstr "offre d'emploi"
 msgid "job applications"
 msgstr "offres d'emploi"
 
-#: models.py:361
+#: models.py:367 models.py:409
 msgid "Select appropriate app. configuration for this plugin."
 msgstr "Sélectionnez une configuration d'application appropriée pour ce greffon."
 
-#: models.py:372
+#: models.py:371
 msgid ""
 "Choose specific Job Openings to show or leave empty to show latest. Note "
 "that Job Openings from different app configs will not appear."
 msgstr "Choisissez des offres d'emploi spécifiques à afficher ou laissez vide pour afficher les plus récentes. Notez que les offres d'emploi de différentes configurations d'applications n'apparaîtront pas."
 
-#: models.py:405
+#: models.py:412
 #, python-format
 msgid "%s categories"
 msgstr "%s catégories"
@@ -464,7 +464,7 @@ msgstr "%s catégories"
 #: templates/admin/aldryn_jobs/change_list.html:7
 #, python-format
 msgid "Recover deleted %(name)s"
-msgstr ""
+msgstr "Restaurer %(name)s supprimé·e·s"
 
 #: templates/aldryn_jobs/plugins/latest_entries.html:9
 #, python-format

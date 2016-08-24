@@ -10,9 +10,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aldryn Jobs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 10:17-0400\n"
-"PO-Revision-Date: 2016-07-14 14:20+0000\n"
-"Last-Translator: Martin Koistinen <mkoistinen@gmail.com>\n"
+"POT-Creation-Date: 2016-08-23 16:13-0400\n"
+"PO-Revision-Date: 2016-08-23 20:13+0000\n"
+"Last-Translator: Paulo Alvarado <paulo.alvarado@divio.ch>\n"
 "Language-Team: German (http://www.transifex.com/divio/aldryn-jobs/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -215,8 +215,8 @@ msgstr "Es gibt zurzeit keine offenen Stellen"
 msgid "Back"
 msgstr "Zurück"
 
-#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_app.py:13
-#: cms_toolbar.py:98
+#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_apps.py:13
+#: cms_toolbars.py:98
 msgid "Jobs"
 msgstr "Stellen"
 
@@ -244,23 +244,23 @@ msgstr "Kategorieliste"
 msgid "Job List"
 msgstr "Stellenliste"
 
-#: cms_toolbar.py:112
+#: cms_toolbars.py:112
 msgid "Configure application"
 msgstr "Konfiguiere Applikation"
 
-#: cms_toolbar.py:118
+#: cms_toolbars.py:118
 msgid "Edit category"
 msgstr "Bearbeite Kategorie"
 
-#: cms_toolbar.py:123
+#: cms_toolbars.py:123
 msgid "Add new category"
 msgstr "Kategorie hinzufügen"
 
-#: cms_toolbar.py:131
+#: cms_toolbars.py:131
 msgid "Edit job opening"
 msgstr "Bearbeite offene Stelle"
 
-#: cms_toolbar.py:133
+#: cms_toolbars.py:133
 msgid "Add new job opening"
 msgstr "Erstelle eine offene Stelle."
 
@@ -343,7 +343,7 @@ msgid ""
 "Supervisors will be notified via email when a new job application arrives."
 msgstr "Vorgesetzte werden notifiziert via Email when eine neue Bewerbung vorhanden ist."
 
-#: models.py:166 models.py:360
+#: models.py:166 models.py:366 models.py:408
 msgid "app configuration"
 msgstr "Applikationskonfiguration"
 
@@ -395,7 +395,7 @@ msgstr "Sie können sich für diese Stelle  bewerben?"
 msgid "job opening"
 msgstr "offene Stelle"
 
-#: models.py:253 models.py:371
+#: models.py:253 models.py:370
 msgid "job openings"
 msgstr "offene Stellen"
 
@@ -447,17 +447,17 @@ msgstr "Bewerbung"
 msgid "job applications"
 msgstr "Bewerbungen"
 
-#: models.py:361
+#: models.py:367 models.py:409
 msgid "Select appropriate app. configuration for this plugin."
 msgstr "Wähle angemessene Applikationskonfigurationen für dieses Plugin."
 
-#: models.py:372
+#: models.py:371
 msgid ""
 "Choose specific Job Openings to show or leave empty to show latest. Note "
 "that Job Openings from different app configs will not appear."
 msgstr "Wähle einen spezifischene offene Stelle. Leer lassen zeigt nie neuste Stelle. Beachte das verschiedene offene Stellen von verschiedenen \"app configs\" nicht erscheinen."
 
-#: models.py:405
+#: models.py:412
 #, python-format
 msgid "%s categories"
 msgstr "%s Kategorien"
@@ -477,8 +477,8 @@ msgid_plural ""
 "\n"
 "            Showing %(vacancies_count)s job openings\n"
 "        "
-msgstr[0] "\n            Showing %(vacancies_count)s job opening\n        "
-msgstr[1] "\n            Showing %(vacancies_count)s job openings\n        "
+msgstr[0] ""
+msgstr[1] ""
 
 #: views.py:136
 msgid "You can't apply for this job."

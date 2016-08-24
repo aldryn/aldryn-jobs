@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+1.2.2 (UNRELEASED)
+------------------
+
+* Fixed related_name inconsistency with django CMS 3.3.1
+* Dropped support for djangoCMS < 3.2
+* Introduced support for djangoCMS 3.4.0
+
+
 1.2.1 (2016-07-14)
 ------------------
 

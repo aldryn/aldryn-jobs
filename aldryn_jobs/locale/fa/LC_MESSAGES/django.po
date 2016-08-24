@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aldryn Jobs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-14 10:17-0400\n"
+"POT-Creation-Date: 2016-08-23 16:13-0400\n"
 "PO-Revision-Date: 2016-07-14 14:20+0000\n"
 "Last-Translator: Martin Koistinen <mkoistinen@gmail.com>\n"
 "Language-Team: Persian (http://www.transifex.com/divio/aldryn-jobs/language/fa/)\n"
@@ -211,8 +211,8 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_app.py:13
-#: cms_toolbar.py:98
+#: boilerplates/legacy/templates/aldryn_jobs/jobs_list.html:6 cms_apps.py:13
+#: cms_toolbars.py:98
 msgid "Jobs"
 msgstr ""
 
@@ -240,23 +240,23 @@ msgstr ""
 msgid "Job List"
 msgstr ""
 
-#: cms_toolbar.py:112
+#: cms_toolbars.py:112
 msgid "Configure application"
 msgstr ""
 
-#: cms_toolbar.py:118
+#: cms_toolbars.py:118
 msgid "Edit category"
 msgstr ""
 
-#: cms_toolbar.py:123
+#: cms_toolbars.py:123
 msgid "Add new category"
 msgstr ""
 
-#: cms_toolbar.py:131
+#: cms_toolbars.py:131
 msgid "Edit job opening"
 msgstr ""
 
-#: cms_toolbar.py:133
+#: cms_toolbars.py:133
 msgid "Add new job opening"
 msgstr ""
 
@@ -339,7 +339,7 @@ msgid ""
 "Supervisors will be notified via email when a new job application arrives."
 msgstr ""
 
-#: models.py:166 models.py:360
+#: models.py:166 models.py:366 models.py:408
 msgid "app configuration"
 msgstr ""
 
@@ -391,7 +391,7 @@ msgstr ""
 msgid "job opening"
 msgstr ""
 
-#: models.py:253 models.py:371
+#: models.py:253 models.py:370
 msgid "job openings"
 msgstr ""
 
@@ -443,17 +443,17 @@ msgstr ""
 msgid "job applications"
 msgstr ""
 
-#: models.py:361
+#: models.py:367 models.py:409
 msgid "Select appropriate app. configuration for this plugin."
 msgstr ""
 
-#: models.py:372
+#: models.py:371
 msgid ""
 "Choose specific Job Openings to show or leave empty to show latest. Note "
 "that Job Openings from different app configs will not appear."
 msgstr ""
 
-#: models.py:405
+#: models.py:412
 #, python-format
 msgid "%s categories"
 msgstr ""
