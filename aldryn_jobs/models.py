@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import reversion
-
 from django import get_version
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,13 +12,7 @@ from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-try:
-    from django.utils.importlib import import_module
-except ImportError:
-    from importlib import import_module
-
 from djangocms_text_ckeditor.fields import HTMLField
-from aldryn_reversion.core import version_controlled_content
 from aldryn_apphooks_config.managers.parler import (
     AppHookConfigTranslatableManager
 )
@@ -35,7 +27,6 @@ from distutils.version import LooseVersion
 from functools import partial
 from os.path import join as join_path
 from parler.models import TranslatableModel, TranslatedFields
-from reversion.revisions import default_revision_manager, RegistrationError
 from sortedm2m.fields import SortedManyToManyField
 from uuid import uuid4
 
@@ -58,60 +49,6 @@ def get_user_model_for_fields():
 # relation for EventCoordinator model, if not - register it to
 # avoid RegistrationError when registering models that refer to it.
 user_model = get_user_model_for_fields()
-
-if loose_version < LooseVersion('1.7.0'):
-    # Prior to 1.7 it is pretty straight forward
-    revision_manager = reversion.default_revision_manager
-    if user_model not in revision_manager.get_registered_models():
-        reversion.register(user_model)
-else:
-    # otherwise it is a pain, but thanks to solution of getting model from
-    # https://github.com/django-oscar/django-oscar/commit/c479a1983f326a9b059e157f85c32d06a35728dd  # NOQA
-    # we can do almost the same thing from the different side.
-    from django.apps import apps
-    from django.apps.config import MODELS_MODULE_NAME
-    from django.core.exceptions import AppRegistryNotReady
-
-    def get_model(app_label, model_name):
-        """
-        Fetches a Django model using the app registry.
-        This doesn't require that an app with the given app label exists,
-        which makes it safe to call when the registry is being populated.
-        All other methods to access models might raise an exception about the
-        registry not being ready yet.
-        Raises LookupError if model isn't found.
-        """
-        try:
-            return apps.get_model(app_label, model_name)
-        except AppRegistryNotReady:
-            if apps.apps_ready and not apps.models_ready:
-                # If this function is called while `apps.populate()` is
-                # loading models, ensure that the module that defines the
-                # target model has been imported and try looking the model up
-                # in the app registry. This effectively emulates
-                # `from path.to.app.models import Model` where we use
-                # `Model = get_model('app', 'Model')` instead.
-                app_config = apps.get_app_config(app_label)
-                # `app_config.import_models()` cannot be used here because it
-                # would interfere with `apps.populate()`.
-                import_module('%s.%s' % (app_config.name, MODELS_MODULE_NAME))
-                # In order to account for case-insensitivity of model_name,
-                # look up the model through a private API of the app registry.
-                return apps.get_registered_model(app_label, model_name)
-            else:
-                # This must be a different case (e.g. the model really doesn't
-                # exist). We just re-raise the exception.
-                raise
-
-    # now get the real user model
-    model_app_name, model_model = user_model.split('.')
-    user_model_object = get_model(model_app_name, model_model)
-    # and try to register, if we have a registration error - that means that
-    # it has been registered already
-    try:
-        default_revision_manager.register(user_model_object)
-    except RegistrationError:
-        pass
 
 
 def default_jobs_attachment_upload_to(instance, filename):
@@ -140,7 +77,6 @@ JobApplicationFileField = partial(
 )
 
 
-@version_controlled_content(follow=['supervisors', 'app_config'])
 @python_2_unicode_compatible
 class JobCategory(TranslatedAutoSlugifyMixin,
                   TranslationHelperMixin,
@@ -149,7 +85,8 @@ class JobCategory(TranslatedAutoSlugifyMixin,
 
     translations = TranslatedFields(
         name=models.CharField(_('name'), max_length=255),
-        slug=models.SlugField(_('slug'), max_length=255, blank=True,
+        slug=models.SlugField(
+            _('slug'), max_length=255, blank=True,
             help_text=_('Auto-generated. Used in the URL. If changed, the URL '
                         'will change. Clear it to have the slug re-created.'))
     )
@@ -162,7 +99,8 @@ class JobCategory(TranslatedAutoSlugifyMixin,
                     'job application arrives.'),
         blank=True
     )
-    app_config = models.ForeignKey(JobsConfig, null=True,
+    app_config = models.ForeignKey(
+        JobsConfig, null=True,
         verbose_name=_('app configuration'), related_name='categories')
 
     ordering = models.IntegerField(_('ordering'), default=0)
@@ -215,7 +153,6 @@ class JobCategory(TranslatedAutoSlugifyMixin,
         return self.jobs.active().count()
 
 
-@version_controlled_content(follow=['category'])
 @python_2_unicode_compatible
 class JobOpening(TranslatedAutoSlugifyMixin,
                  TranslationHelperMixin,
@@ -224,25 +161,23 @@ class JobOpening(TranslatedAutoSlugifyMixin,
 
     translations = TranslatedFields(
         title=models.CharField(_('title'), max_length=255),
-        slug=models.SlugField(_('slug'), max_length=255, blank=True,
+        slug=models.SlugField(
+            _('slug'), max_length=255, blank=True,
             unique=False, db_index=False,
             help_text=_('Auto-generated. Used in the URL. If changed, the URL '
                         'will change. Clear it to have the slug re-created.')),
-        lead_in=HTMLField(_('short description'), blank=True,
+        lead_in=HTMLField(
+            _('short description'), blank=True,
             help_text=_('This text will be displayed in lists.'))
     )
 
     content = PlaceholderField('Job Opening Content')
-    category = models.ForeignKey(JobCategory, verbose_name=_('category'),
-        related_name='jobs')
+    category = models.ForeignKey(JobCategory, verbose_name=_('category'), related_name='jobs')
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(_('active?'), default=True)
-    publication_start = models.DateTimeField(_('published since'),
-        null=True, blank=True)
-    publication_end = models.DateTimeField(_('published until'),
-        null=True, blank=True)
-    can_apply = models.BooleanField(_('viewer can apply for the job?'),
-        default=True)
+    publication_start = models.DateTimeField(_('published since'), null=True, blank=True)
+    publication_end = models.DateTimeField(_('published until'), null=True, blank=True)
+    can_apply = models.BooleanField(_('viewer can apply for the job?'), default=True)
 
     ordering = models.IntegerField(_('ordering'), default=0)
 
@@ -304,7 +239,6 @@ class JobOpening(TranslatedAutoSlugifyMixin,
         return self.category.get_notification_emails()
 
 
-@version_controlled_content(follow=['job_opening'])
 @python_2_unicode_compatible
 class JobApplication(models.Model):
     # FIXME: Gender is not the same as salutation.
@@ -317,16 +251,14 @@ class JobApplication(models.Model):
     )
 
     job_opening = models.ForeignKey(JobOpening, related_name='applications')
-    salutation = models.CharField(_('salutation'),
-        max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
+    salutation = models.CharField(_('salutation'), max_length=20, blank=True, choices=SALUTATION_CHOICES, default=MALE)
     first_name = models.CharField(_('first name'), max_length=20)
     last_name = models.CharField(_('last name'), max_length=20)
     email = models.EmailField(_('email'), max_length=254)
     cover_letter = models.TextField(_('cover letter'), blank=True)
     created = models.DateTimeField(_('created'), auto_now_add=True)
     is_rejected = models.BooleanField(_('rejected?'), default=False)
-    rejection_date = models.DateTimeField(_('rejection date'),
-        null=True, blank=True)
+    rejection_date = models.DateTimeField(_('rejection date'), null=True, blank=True)
 
     class Meta:
         ordering = ['-created']
@@ -348,7 +280,6 @@ def cleanup_attachments(sender, instance, **kwargs):
             attachment.file.delete(False)
 
 
-@version_controlled_content(follow=['application'])
 class JobApplicationAttachment(models.Model):
     application = models.ForeignKey(JobApplication, related_name='attachments',
                                     verbose_name=_('job application'))
@@ -362,11 +293,13 @@ class JobListPlugin(CMSPlugin):
     cmsplugin_ptr = models.OneToOneField(
         CMSPlugin, related_name='aldryn_jobs_joblistplugin', parent_link=True)
 
-    app_config = models.ForeignKey(JobsConfig,
+    app_config = models.ForeignKey(
+        JobsConfig,
         verbose_name=_('app configuration'), null=True,
         help_text=_('Select appropriate app. configuration for this plugin.'))
 
-    jobopenings = SortedManyToManyField(JobOpening, blank=True,
+    jobopenings = SortedManyToManyField(
+        JobOpening, blank=True,
         verbose_name=_('job openings'),
         help_text=_("Choose specific Job Openings to show or leave empty to "
                     "show latest. Note that Job Openings from different "
@@ -404,7 +337,8 @@ class JobCategoriesPlugin(CMSPlugin):
         CMSPlugin, related_name='aldryn_jobs_jobcategoriesplugin',
         parent_link=True)
 
-    app_config = models.ForeignKey(JobsConfig,
+    app_config = models.ForeignKey(
+        JobsConfig,
         verbose_name=_('app configuration'), null=True,
         help_text=_('Select appropriate app. configuration for this plugin.'))
 

@@ -11,13 +11,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from adminsortable2.admin import SortableAdminMixin
 from aldryn_apphooks_config.admin import BaseAppHookConfig
-from aldryn_reversion.admin import VersionedPlaceholderAdminMixin
 from aldryn_translation_tools.admin import (
     AllTranslationsMixin,
     LinkedRelatedInlineMixin,
 )
 
-from cms.admin.placeholderadmin import FrontendEditableAdminMixin
+from cms.admin.placeholderadmin import PlaceholderAdminMixin, FrontendEditableAdminMixin
 
 from emailit.api import send_mail
 from parler.admin import TranslatableAdmin
@@ -83,7 +82,7 @@ class SendRejectionEmailAndDelete(SendRejectionEmail):
                               lang_code=self.lang_code, delete_application=True)
 
 
-class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
+class JobApplicationAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
     list_display = ['__str__', 'job_opening', 'created', 'is_rejected',
                     'rejection_date', ]
     list_filter = ['job_opening', 'is_rejected']
@@ -140,13 +139,12 @@ class JobApplicationAdmin(VersionedPlaceholderAdminMixin, admin.ModelAdmin):
     get_attachment_address.short_description = _('Attachments')
 
 
-class JobCategoryAdmin(VersionedPlaceholderAdminMixin,
+class JobCategoryAdmin(PlaceholderAdminMixin,
                        SortableAdminMixin, AllTranslationsMixin,
                        TranslatableAdmin):
     form = JobCategoryAdminForm
     list_display = ['__str__', 'app_config']
     filter_horizontal = ['supervisors']
-    change_list_template = 'admin/aldryn_jobs/change_list.html'
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -172,7 +170,7 @@ class JobApplicationInline(LinkedRelatedInlineMixin, admin.TabularInline):
         return False
 
 
-class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
+class JobOpeningAdmin(PlaceholderAdminMixin,
                       AllTranslationsMixin,
                       SortableAdminMixin,
                       FrontendEditableAdminMixin,
@@ -181,7 +179,6 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
     list_display = ['__str__', 'category', 'num_applications', ]
     frontend_editable_fields = ('title', 'lead_in')
     inlines = [JobApplicationInline, ]
-    change_list_template = 'admin/aldryn_jobs/change_list.html'
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -208,7 +205,7 @@ class JobOpeningAdmin(VersionedPlaceholderAdminMixin,
     num_applications.admin_order_field = 'applications_count'
 
 
-class JobsConfigAdmin(VersionedPlaceholderAdminMixin, BaseAppHookConfig):
+class JobsConfigAdmin(PlaceholderAdminMixin, BaseAppHookConfig):
     pass
 
 

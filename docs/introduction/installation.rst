@@ -31,7 +31,6 @@ In your project's ``settings.py`` make sure you have all of::
     'aldryn_common',
     'aldryn_boilerplates',
     'aldryn_apphooks_config',
-    'aldryn_reversion',
     'aldryn_categories',
     'aldryn_jobs',
     'aldryn_translation_tools',
@@ -52,7 +51,7 @@ Aldryn Boilerplates
 ===================
 
 This application uses (and will install) `Aldryn Boilerplates <https://github.com/aldryn/aldryn-boilerplates>`_,
-which requires some basic configuration to get you started. 
+which requires some basic configuration to get you started.
 
 Edit your settings so that they conform to::
 

@@ -14,7 +14,6 @@ from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_apphooks_config.utils import get_app_instance
 from menus.utils import set_language_changer
 from parler.views import TranslatableSlugMixin
-from reversion.revisions import revision_context_manager
 
 from .forms import JobApplicationForm
 from .models import JobCategory, JobOpening
@@ -128,12 +127,10 @@ class JobOpeningDetail(AppConfigMixin, TranslatableSlugMixin, DetailView):
         return qs.namespace(self.namespace)
 
     @transaction.atomic
-    @revision_context_manager.create_revision()
     def post(self, *args, **kwargs):
         """Handles application for the job."""
         if not self.object.can_apply:
-            messages.success(self.request,
-                _("You can't apply for this job."))
+            messages.success(self.request, _("You can't apply for this job."))
             return redirect(self.object.get_absolute_url())
 
         form_class = self.get_form_class()
