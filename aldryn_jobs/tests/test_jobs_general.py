@@ -6,7 +6,7 @@ from parler.utils.context import switch_language
 
 from cms import api
 from cms.models import Placeholder
-from cms.utils import get_cms_setting
+from cms.utils.conf import get_cms_setting
 from cms.utils.i18n import force_language
 from cms.test_utils.testcases import CMSTestCase
 
@@ -279,9 +279,7 @@ class JobApphookTest(JobsBaseTestCase):
         self.assertNotEqual(configs.count(), len(skipped))
 
     def test_one_active_hook_page_shows_openings_for_its_config_only(self):
-        new_config = JobsConfig.objects.create(
-            namespace='another_apphook_not_active')
-
+        new_config = self.create_config(namespace='another_apphook_not_active')
         default_opening = self.create_default_job_opening()
 
         # default apphooked page url
@@ -306,12 +304,11 @@ class JobApphookTest(JobsBaseTestCase):
 
     def test_two_active_hook_page_shows_openings_for_its_config_only(self):
         # prepare apphook
-        new_config = JobsConfig.objects.create(
-            namespace='another_apphook_not_active')
-        new_apphook_page = self.create_page(
-            title='new apphook', slug='new-apphook',
-            namespace=new_config.namespace)
+        new_config = self.create_config(namespace='another_apphook_not_active')
+        new_apphook_page = self.create_page(title='new apphook', slug='new-apphook', namespace=new_config.namespace)
         default_opening = self.create_default_job_opening()
+
+        self.reload_urls()
 
         # default apphooked page url
         with override('en'):
@@ -349,11 +346,8 @@ class JobApphookTest(JobsBaseTestCase):
     def test_two_active_hook_pages_same_category_and_opening_names(self):
         # regression for issue with two job configs (different namespace)
         # which have same categories names/slugs and same openings title/slugs
-        new_config = JobsConfig.objects.create(
-            namespace='another_apphook_to_test')
-        new_apphook_page = self.create_page(
-            title='new apphook', slug='new-apphook',
-            namespace=new_config.namespace)
+        new_config = self.create_config(namespace='another_apphook_to_test')
+        new_apphook_page = self.create_page(title='new apphook', slug='new-apphook', namespace=new_config.namespace)
 
         default_opening = self.create_default_job_opening(translated=True)
 
@@ -399,8 +393,7 @@ class JobApphookTest(JobsBaseTestCase):
     def test_detail_view_same_category_and_opening_names(self):
         # regression for issue with two job configs (different namespace)
         # which have same categories names/slugs and same openings title/slugs
-        new_config = JobsConfig.objects.create(
-            namespace='another_apphook_to_test')
+        new_config = self.create_config(namespace='another_apphook_to_test')
         self.create_page(
             title='new apphook', slug='new-apphook',
             namespace=new_config.namespace)

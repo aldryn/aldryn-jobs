@@ -93,7 +93,7 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
     translated fields that we need to access, so, we use TranslatableModelForm
     """
 
-    content = forms.CharField(
+    job_opening_content = forms.CharField(
         label="Content", required=False, widget=TextEditorWidget,
         help_text=_("Optional. If provided, will be added to the main body of "
                     "the Opening content."),
@@ -103,7 +103,7 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
         model = JobOpening
         fields = ['title', 'category', 'is_active', 'lead_in',
                   'publication_start', 'publication_end',
-                  'content', 'can_apply', ]
+                  'job_opening_content', 'can_apply', ]
 
     def __init__(self, **kwargs):
         super(CreateJobOpeningForm, self).__init__(**kwargs)
@@ -119,25 +119,23 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
     def save(self, commit=True):
         job_opening = super(CreateJobOpeningForm, self).save(commit=False)
 
-        # If 'content' field has value, create a TextPlugin with same and add
+        # If 'job_opening_content' field has value, create a TextPlugin with same and add
         # it to the PlaceholderField
-        content = clean_html(self.cleaned_data.get('content', ''), False)
+        job_opening_content = clean_html(self.cleaned_data.get('job_opening_content', ''), False)
 
         try:
-            # CMS >= 3.3.x
             content_plugin = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN')
         except KeyError:
-            # CMS <= 3.2.x
+            # COMPAT: CMS3.2
             content_plugin = get_cms_setting('WIZARD_CONTENT_PLUGIN')
 
         try:
-            # CMS >= 3.3.x
             content_field = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN_BODY')
         except KeyError:
-            # CMS <= 3.2.x
+            # COMPAT: CMS3.2
             content_field = get_cms_setting('WIZARD_CONTENT_PLUGIN_BODY')
 
-        if content and permissions.has_plugin_permission(
+        if job_opening_content and permissions.has_plugin_permission(
                 self.user, content_plugin, 'add'):
 
             # If the job_opening has not been saved, then there will be no
@@ -151,7 +149,7 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
                     'placeholder': job_opening.content,
                     'plugin_type': content_plugin,
                     'language': self.language_code,
-                    content_field: content,
+                    content_field: job_opening_content,
                 }
                 add_plugin(**plugin_kwargs)
 

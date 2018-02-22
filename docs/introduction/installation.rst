@@ -43,9 +43,6 @@ In your project's ``settings.py`` make sure you have all of::
 
 listed in ``INSTALLED_APPS``, *after* ``'cms'``.
 
-.. note::
-   If you are using Django 1.6, add ``south`` to  ``INSTALLED_APPS``.
-
 
 Aldryn Boilerplates
 ===================

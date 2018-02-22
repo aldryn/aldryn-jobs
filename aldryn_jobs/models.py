@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django import get_version
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -39,16 +38,10 @@ from .utils import get_valid_filename
 loose_version = LooseVersion(get_version())
 
 
-def get_user_model_for_fields():
-    if loose_version < LooseVersion('1.7.0'):
-        return get_user_model()
-    else:
-        return getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
-
 # We should check if user model is registered, since we're following on that
 # relation for EventCoordinator model, if not - register it to
 # avoid RegistrationError when registering models that refer to it.
-user_model = get_user_model_for_fields()
+user_model = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 def default_jobs_attachment_upload_to(instance, filename):
@@ -92,7 +85,7 @@ class JobCategory(TranslatedAutoSlugifyMixin,
     )
 
     supervisors = models.ManyToManyField(
-        get_user_model_for_fields(), verbose_name=_('supervisors'),
+        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), verbose_name=_('supervisors'),
         # FIXME: This is mis-named should be "job_categories"?
         related_name='job_opening_categories',
         help_text=_('Supervisors will be notified via email when a new '
