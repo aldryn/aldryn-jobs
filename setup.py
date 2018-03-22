@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
@@ -28,36 +27,25 @@ REQUIREMENTS = [
     'pytz',
     'cssutils',
     'html5lib<=0.9999999',
+    'Django>=1.8,<1.11',
 ]
-
-py26 = sys.version_info >= (2, 6, 5) and sys.version_info < (2, 7, 0)
-if py26:
-    REQUIREMENTS += [
-        'Django>1.5,<1.7',
-        'ordereddict',
-    ]
-else:
-    REQUIREMENTS += [
-        'Django>=1.6,<1.10',
-    ]
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Web Environment',
     'Framework :: Django',
-    'Framework :: Django :: 1.6',
-    'Framework :: Django :: 1.7',
     'Framework :: Django :: 1.8',
     'Framework :: Django :: 1.9',
+    'Framework :: Django :: 1.10',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2.6',
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
     'Topic :: Software Development :: Libraries :: Application Frameworks',

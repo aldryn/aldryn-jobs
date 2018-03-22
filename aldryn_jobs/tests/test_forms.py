@@ -1,4 +1,3 @@
-from ..cms_appconfig import JobsConfig
 from ..models import JobCategory
 from ..forms import JobCategoryAdminForm, JobOpeningAdminForm
 
@@ -50,7 +49,7 @@ class JobCategoryAdminFormTestCase(JobsBaseTestCase):
         self.assertIn('app_config', form.errors.keys())
 
     def test_form_valid_for_same_name_in_different_app_config(self):
-        other_config = JobsConfig.objects.create(namespace='other_config')
+        other_config = self.create_config(namespace='other_config')
         data = {
             'app_config': other_config.pk,
             'name': self.default_category_values['en']['name'],
@@ -67,7 +66,7 @@ class JobCategoryAdminFormTestCase(JobsBaseTestCase):
 
     def test_form_valid_for_same_slug_in_different_app_config(self):
         # depends on decision if we will remove uniqueness of slug per language
-        other_config = JobsConfig.objects.create(namespace='other_config')
+        other_config = self.create_config(namespace='other_config')
         data = {
             'name': 'different name',
             'slug': self.default_category_values['en']['slug'],
@@ -134,7 +133,7 @@ class JobOpeningAdminFormTestCase(JobsBaseTestCase):
     def test_form_valid_for_same_name_in_different_category_app_config(self):
         self.create_default_job_opening(translated=True)
         # prepare category with other app config
-        other_config = JobsConfig.objects.create(namespace='other_config')
+        other_config = self.create_config(namespace='other_config')
         other_category = JobCategory.objects.create(
             name='Other category', app_config=other_config)
 
@@ -155,7 +154,7 @@ class JobOpeningAdminFormTestCase(JobsBaseTestCase):
     def test_form_valid_for_same_slug_in_different_category(self):
         self.create_default_job_opening(translated=True)
         # depends on decision if we will remove uniqueness of slug per language
-        other_config = JobsConfig.objects.create(namespace='other_config')
+        other_config = self.create_config(namespace='other_config')
         other_category = JobCategory.objects.create(
             name='Other category', app_config=other_config)
 

@@ -148,14 +148,14 @@ class JobApplicationForm(forms.ModelForm):
         # additional actions while applying for the job
         try:
             self.send_confirmation_email()
-        except:
+        except:  # noqa: This is a 3rd-party app, so we don't know for sure which kinds of errors may be raised here
             # We're handling ANY exception here because we don't want to
             # prevent the form from ultimately getting saved here.
             logger.exception('Could not send a confirmation email!')
 
         try:
             self.send_staff_notifications()
-        except:
+        except:  # noqa: This is a 3rd-party app, so we don't know for sure which kinds of errors may be raised here
             # We're handling ANY exception here because we don't want to
             # prevent the form from ultimately getting saved here.
             logger.exception('Could not send a staff notifications!')
@@ -308,5 +308,6 @@ class JobListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
 
 class JobCategoriesListPluginForm(AppConfigPluginFormMixin, forms.ModelForm):
     model = JobCategoriesPlugin
+
 
 setup_config(JobsConfigForm, JobsConfig)

@@ -1,22 +1,8 @@
 # -*- coding: utf-8 -*-
-import sys
-
-from distutils.version import LooseVersion
-
-import cms
 
 from .base import JobsBaseTestCase
 
-if sys.version_info < (2, 7):
-    import unittest2 as unittest
-else:
-    import unittest
 
-# The CMS wizard system was introduced in 3.2.0
-CMS_3_2 = LooseVersion(cms.__version__) >= LooseVersion('3.2.0')
-
-
-@unittest.skipUnless(CMS_3_2, "No wizard support in CMS < 3.2")
 class TestJobsWizard(JobsBaseTestCase):
 
     def setUp(self):
@@ -33,7 +19,7 @@ class TestJobsWizard(JobsBaseTestCase):
         data = {
             'title': 'Ninja coder',
             'lead_in': 'Ninja coder wanted',
-            'content': '<p>Needs skills in Python/Django.</p>',
+            'job_opening_content': '<p>Needs skills in Python/Django.</p>',
             'is_active': True,
             'category': self.default_category.pk,
         }

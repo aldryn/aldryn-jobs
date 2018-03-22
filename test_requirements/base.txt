@@ -2,6 +2,8 @@ aldryn-apphook-reload>=0.2.3
 coverage>=3.7.1
 django-appconf
 djangocms-helper>=0.9.1
-django-filer==1.0.6
+django-filer>=1.1.0
 flake8
 tox
+
+django-polymorphic>1,<2  # Django-filer not that compatible with older versions. 2.0 requires django>=1.11

@@ -8,34 +8,37 @@ env:
   matrix:
     # Matrix-size reduction strategies:
     #   PY strategy: do not test 3.3 at all.
-    #   DB strategy: only with SQLite as we're not using any raw queries.
-    #   FE strategy: only test on Django/CMS combinations, but place tests on
-    #                different Python ENVs if possible.
+    #   FE strategy: only test on Django/CMS combinations, but place tests on different Python ENVs if possible.
     - TOXENV=flake8
-    - TOXENV=py35-dj19-sqlite-cms34
-    - TOXENV=py35-dj19-sqlite-cms33-fe FE=1
-    - TOXENV=py35-dj19-sqlite-cms32
-    - TOXENV=py34-dj19-sqlite-cms34
-    - TOXENV=py34-dj19-sqlite-cms33
-    - TOXENV=py34-dj19-sqlite-cms32
-    - TOXENV=py27-dj19-sqlite-cms34
-    - TOXENV=py27-dj19-sqlite-cms33
-    - TOXENV=py27-dj19-sqlite-cms32
-    - TOXENV=py35-dj18-sqlite-cms34
-    - TOXENV=py35-dj18-sqlite-cms33
-    - TOXENV=py35-dj18-sqlite-cms32
-    - TOXENV=py34-dj18-sqlite-cms34
-    - TOXENV=py34-dj18-sqlite-cms33
-    - TOXENV=py34-dj18-sqlite-cms32
-    - TOXENV=py27-dj18-sqlite-cms34
-    - TOXENV=py27-dj18-sqlite-cms33-fe FE=1
-    - TOXENV=py27-dj18-sqlite-cms32
-    - TOXENV=py34-dj17-sqlite-cms32
-    - TOXENV=py33-dj17-sqlite-cms32
-    - TOXENV=py27-dj17-sqlite-cms32
-    - TOXENV=py33-dj16-sqlite-cms32
-    - TOXENV=py27-dj16-sqlite-cms32
-    - TOXENV=py26-dj16-sqlite-cms32
+
+    - TOXENV=py35-dj110-cms35
+    - TOXENV=py35-dj110-cms34
+    - TOXENV=py34-dj110-cms35
+    - TOXENV=py34-dj110-cms34
+    - TOXENV=py27-dj110-cms35
+    - TOXENV=py27-dj110-cms34
+
+    - TOXENV=py35-dj19-cms34
+    - TOXENV=py35-dj19-cms33
+    - TOXENV=py35-dj19-cms32
+    - TOXENV=py34-dj19-cms34
+    - TOXENV=py34-dj19-cms33
+    - TOXENV=py34-dj19-cms32
+    - TOXENV=py27-dj19-cms34
+    - TOXENV=py27-dj19-cms33
+    - TOXENV=py27-dj19-cms32
+    # - TOXENV=py35-dj19-cms33-fe FE=1
+
+    - TOXENV=py35-dj18-cms34
+    - TOXENV=py35-dj18-cms33
+    - TOXENV=py35-dj18-cms32
+    - TOXENV=py34-dj18-cms34
+    - TOXENV=py34-dj18-cms33
+    - TOXENV=py34-dj18-cms32
+    - TOXENV=py27-dj18-cms34
+    - TOXENV=py27-dj18-cms33
+    - TOXENV=py27-dj18-cms32
+    # - TOXENV=py27-dj18-cms33-fe FE=1
 
 cache:
   directories:

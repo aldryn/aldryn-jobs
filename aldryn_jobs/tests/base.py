@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
-
-from datetime import datetime, timedelta
 from copy import deepcopy
+from datetime import datetime, timedelta
+import sys
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
-from django.test import TransactionTestCase
+from django.core.urlresolvers import clear_url_caches
 from django.utils.timezone import get_current_timezone
 from django.utils.translation import override
 
 from cms import api
-from cms.utils import get_cms_setting
+from cms.appresolver import clear_app_resolvers
+from cms.test_utils.testcases import CMSTestCase
+from cms.utils.conf import get_cms_setting
 
 from ..models import JobsConfig, JobCategory, JobOpening
 
@@ -24,7 +25,23 @@ def tz_datetime(*args, **kwargs):
     return datetime(tzinfo=get_current_timezone(), *args, **kwargs)
 
 
-class JobsBaseTestCase(TransactionTestCase):
+class CleanUpMixin(object):
+
+    def reload_urls(self):
+        clear_app_resolvers()
+        clear_url_caches()
+        url_modules = [
+            'cms.urls',
+            'aldryn_jobs.urls',
+            settings.ROOT_URLCONF
+        ]
+
+        for module in url_modules:
+            if module in sys.modules:
+                del sys.modules[module]
+
+
+class JobsBaseTestCase(CleanUpMixin, CMSTestCase):
 
     default_category_values = {
         'en': {
@@ -126,6 +143,8 @@ class JobsBaseTestCase(TransactionTestCase):
         self.super_user_password = 'super_pw'
         self.super_user = self.create_super_user(
             'super', self.super_user_password)
+
+        self.reload_urls()
 
     def create_root_page(self):
         root_page = api.create_page(
@@ -261,6 +280,11 @@ class JobsBaseTestCase(TransactionTestCase):
         with override('en'):
             job_opening = JobOpening.objects.create(**data)
         return job_opening
+
+    def create_config(self, **kwargs):
+        apphook = JobsConfig.objects.create(**kwargs)
+        self.reload_urls()
+        return apphook
 
     def prepare_data(self, replace_with=1, category=None, update_date=False):
         values = deepcopy(self.opening_values_raw['en'])

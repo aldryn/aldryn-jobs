@@ -5,7 +5,7 @@ from django.utils.timezone import now
 
 from cms import api
 
-from ..models import JobCategory, JobsConfig, JobOpening
+from ..models import JobCategory, JobOpening
 
 from .base import JobsBaseTestCase
 
@@ -131,9 +131,7 @@ class TestPluginFailuresWithDeletedAppHookMixin(object):
 
         response = self.client.get(page_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(
-            response,
-            'There is an error in plugin configuration: selected Job')
+        self.assertContains(response, 'There is an error in plugin configuration: selected Job')
 
 
 class TestJobCategoriesListPlugin(TestAppConfigPluginsMixin,
@@ -204,10 +202,8 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
     def setUp(self):
         super(TestJobListPlugin, self).setUp()
         self.job_opening = self.create_default_job_opening(translated=True)
-        self.plugin_en = self.create_plugin(self.plugin_page, 'en',
-            self.app_config, jobopenings=self.job_opening)
-        self.plugin_de = self.create_plugin(self.plugin_page, 'de',
-            self.app_config, jobopenings=self.job_opening)
+        self.plugin_en = self.create_plugin(self.plugin_page, 'en', self.app_config, jobopenings=self.job_opening)
+        self.plugin_de = self.create_plugin(self.plugin_page, 'de', self.app_config, jobopenings=self.job_opening)
 
     def create_plugin(self, page, language, app_config, jobopenings=None,
                       **plugin_params):
@@ -251,7 +247,7 @@ class TestJobListPlugin(TestAppConfigPluginsMixin,
         self.assertContains(response, default_opening_url)
 
     def test_list_plugin_doesnt_shows_job_openings_from_other_config(self):
-        new_config = JobsConfig.objects.create(namespace='different_namespace')
+        new_config = self.create_config(namespace='different_namespace')
         # prepare apphook
         self.create_page(
             title='new apphook', slug='new-apphook',
