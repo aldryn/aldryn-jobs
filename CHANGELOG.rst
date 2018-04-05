@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+3.0.0 (unreleased)
+------------------
+
+* Added django CMS 3.5 support
+* Dropped django CMS 3.2 and 3.3 support
+
+
 2.1.0 (2018-02-22)
 ------------------
 
