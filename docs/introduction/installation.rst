@@ -52,12 +52,6 @@ which requires some basic configuration to get you started.
 
 Edit your settings so that they conform to::
 
-    TEMPLATE_CONTEXT_PROCESSORS = [
-        ...
-        'aldryn_boilerplates.context_processors.boilerplate',
-        ...
-    ]
-
     STATICFILES_FINDERS = [
         'django.contrib.staticfiles.finders.FileSystemFinder',
         # important - place immediately before AppDirectoriesFinder
@@ -65,11 +59,24 @@ Edit your settings so that they conform to::
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     ]
 
-    TEMPLATE_LOADERS = [
-        'django.template.loaders.filesystem.Loader',
-        # important! place right before django.template.loaders.app_directories.Loader
-        'aldryn_boilerplates.template_loaders.AppDirectoriesLoader',
-        'django.template.loaders.app_directories.Loader',
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'OPTIONS': {
+                'context_processors': [
+                    ...
+                    'aldryn_boilerplates.context_processors.boilerplate',
+                    ...
+                ],
+                'loaders': [
+                    ...
+                    # important! place right before django.template.loaders.app_directories.Loader
+                    'aldryn_boilerplates.template_loaders.AppDirectoriesLoader',
+                    'django.template.loaders.app_directories.Loader',
+                    ...
+                ],
+            },
+        },
     ]
 
 Now set the name of the boilerplate you'll use in your project::

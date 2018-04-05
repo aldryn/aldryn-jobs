@@ -27,8 +27,8 @@ request, please review our
 Requirements
 ************
 
-* django CMS 3.2+
-* Django 1.8 - 1.10
+* django CMS 3.4+
+* Django 1.8 - 1.11
 
 
 .. |PyPI_Version| image:: http://img.shields.io/pypi/v/aldryn-jobs.svg

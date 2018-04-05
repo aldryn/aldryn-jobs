@@ -12,10 +12,9 @@ from cms.apphook_pool import apphook_pool
 class JobsApp(CMSConfigApp):
     name = _('Jobs')
     app_config = JobsConfig
-    urls = ['aldryn_jobs.urls']  # COMPAT: CMS3.2
 
     def get_urls(self, *args, **kwargs):
-        return self.urls
+        return ['aldryn_jobs.urls']
 
 
 apphook_pool.register(JobsApp)

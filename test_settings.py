@@ -9,6 +9,7 @@ HELPER_SETTINGS = {
     'CMS_PERMISSION': True,
     'TIME_ZONE': 'Europe/Zurich',
     'INSTALLED_APPS': [
+        'absolute',
         'aldryn_apphooks_config',
         # needed for tests, since we need to reload server after apphook has
         # been added to a page, otherwise we cannot get a correct url.
@@ -23,6 +24,7 @@ HELPER_SETTINGS = {
         'sortedm2m',
         'easy_thumbnails',
         'djangocms_text_ckeditor',
+        'emailit',
         'adminsortable2',
         'standard_form',
     ],
@@ -83,6 +85,7 @@ HELPER_SETTINGS = {
         'cms.middleware.page.CurrentPageMiddleware',
         'cms.middleware.toolbar.ToolbarMiddleware'
     ],
+    'EMAIL_BACKEND': 'django.core.mail.backends.console.EmailBackend',
 }
 
 

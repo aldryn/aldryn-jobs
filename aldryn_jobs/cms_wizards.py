@@ -123,17 +123,8 @@ class CreateJobOpeningForm(BaseFormMixin, TranslatableModelForm):
         # it to the PlaceholderField
         job_opening_content = clean_html(self.cleaned_data.get('job_opening_content', ''), False)
 
-        try:
-            content_plugin = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN')
-        except KeyError:
-            # COMPAT: CMS3.2
-            content_plugin = get_cms_setting('WIZARD_CONTENT_PLUGIN')
-
-        try:
-            content_field = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN_BODY')
-        except KeyError:
-            # COMPAT: CMS3.2
-            content_field = get_cms_setting('WIZARD_CONTENT_PLUGIN_BODY')
+        content_plugin = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN')
+        content_field = get_cms_setting('PAGE_WIZARD_CONTENT_PLUGIN_BODY')
 
         if job_opening_content and permissions.has_plugin_permission(
                 self.user, content_plugin, 'add'):

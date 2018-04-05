@@ -3,14 +3,14 @@ from setuptools import setup, find_packages
 from aldryn_jobs import __version__
 
 REQUIREMENTS = [
-    'aldryn-apphooks-config>=0.1.3',
+    'aldryn-apphooks-config>=0.4.0',
     'django-appdata>=0.1.4',
     'django-bootstrap3',
-    'django-cms>=3.2',
+    'django-cms>=3.4',
     'django-emailit',
     'django-parler',
     'django-standard-form',
-    'djangocms-text-ckeditor>= 1.0.10',
+    'djangocms-text-ckeditor>=1.0.10',
     'aldryn-boilerplates',
     'aldryn-common>=0.1.3',
     'aldryn-translation-tools>=0.2.1',
@@ -22,12 +22,11 @@ REQUIREMENTS = [
     'django-multiupload>=0.5.1',
     'django-sortedm2m>=1.2.2',
     'django-admin-sortable2>=0.5.2',
-    'unidecode',
     'lxml',
     'pytz',
     'cssutils',
     'html5lib<=0.9999999',
-    'Django>=1.8,<1.11',
+    'Django>=1.8,<2.0',
 ]
 
 CLASSIFIERS = [
@@ -37,12 +36,12 @@ CLASSIFIERS = [
     'Framework :: Django :: 1.8',
     'Framework :: Django :: 1.9',
     'Framework :: Django :: 1.10',
+    'Framework :: Django :: 1.11',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
