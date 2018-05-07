@@ -25,7 +25,6 @@ REQUIREMENTS = [
     'lxml',
     'pytz',
     'cssutils',
-    'html5lib<=0.9999999',
     'Django>=1.8,<2.0',
 ]
 
